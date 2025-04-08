@@ -39,11 +39,16 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-# pkgdown site
-docs/
-
 # translation temp files
 po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# secrets
+secrets.yaml
+
+# local data
+/local
+
+/.quarto/
