@@ -18,3 +18,98 @@ editor: source
 editor_options: 
   chunk_output_type: console
 ---
+
+## Libraries
+```{r warning=FALSE, messages=FALSE}
+library(here)
+library(tidyverse)
+library(ggmap)
+library(ggspatial)
+library(sf)
+library(terra)
+```
+
+
+## Custom Functions
+```{r}
+source(here("R/utilities.R"))
+source_dir(here("R"))
+```
+
+## Create Study ARea Grid
+```{r}
+center_coordinate <- c(-73.9857, 40.7484)  # New York City
+timezone_utc <- get_timezone_utc(center_coordinate)
+
+user_projection <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs"
+
+grid_raster <- create_spatraster_grid(center_coordinate, user_projection) # projected
+grid_raster_geo <- create_spatraster_grid_geo(center_coordinate) # no proj
+```
+
+
+## Location Map
+```{r}
+map_api <- yaml::read_yaml(here("local", "secrets.yaml"))
+register_stadiamaps(key = map_api$stadi_api)
+```
+
+```{r}
+map_plot <- map_grid(grid_raster)
+
+map_plot
+
+```
+
+Get CDS data:
+See [ecmwfr](https://github.com/bluegreen-labs/ecmwfr) and [code tool](https://cds.climate.copernicus.eu/datasets/derived-era5-single-levels-daily-statistics?tab=download)
+```{r message=FALSE}
+cds_api <- yaml::read_yaml(here("local", "secrets.yaml"))
+ecmwfr::wf_set_key(key = cds_api$copernicus_api)
+ecmwfr::wf_get_key()
+```
+
+
+
+Data
+```{r}
+grid_bbox <- st_bbox(grid_raster_geo)
+
+request <- list(
+  dataset_short_name = "derived-era5-single-levels-daily-statistics",
+  product_type = "reanalysis",
+  variable = c("10m_u_component_of_wind", "10m_v_component_of_wind"),
+  year = "2025",
+  month = "01",
+  day = "01",
+  daily_statistic = "daily_mean",
+  time_zone = timezone_utc, #"utc+00:00",
+  frequency = "1_hourly",
+  area = c(grid_bbox["ymax"], grid_bbox["xmin"], 
+           grid_bbox["ymin"], grid_bbox["xmax"]),
+  target = "TMPFILE"
+)
+
+
+wind <- ecmwfr::wf_request(
+ request  = request,
+ transfer = TRUE,
+ path     = here("local/data")
+ )
+
+unzip(wind, exdir = here("local/data"))
+
+wind_files <- list.files(path = here("local/data"),
+                            recursive = T, pattern= ".nc", 
+                         full.names=TRUE) 
+
+u10m_r <- rast(wind_files[1])
+plot(u10m_r)
+
+v10m_r <- rast(wind_files[2])
+plot(v10m_r)
+
+
+```
+
+

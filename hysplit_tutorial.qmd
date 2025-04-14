@@ -1,0 +1,224 @@
+---
+title: "HYSPLIT Tutorial"
+description: " "
+format:
+  html: 
+    df-print: kable
+    code-fold: show
+    code-summary: "Hide code"
+    code-overflow: wrap
+    toc-title: Page Contents
+    toc: true
+    toc-depth: 2
+    toc-location: right
+    number-sections: false
+    html-math-method: katex
+    smooth-scroll: true
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+## Libraries
+```{r}
+library(tidyverse)
+library(here)
+library(tidyverse)
+library(ggmap)
+library(ggspatial)
+library(sf)
+library(terra)
+
+library(splitr)
+# devtools::install_github("rich-iannone/splitr")
+```
+
+## Custom Functions
+```{r}
+source(here("R/utilities.R"))
+source_dir(here("R"))
+```
+
+## Create Study ARea Grid
+```{r}
+source_origin <- c(-88.7904, 33.4555)  # Miss State Univ
+timezone_utc <- get_timezone_utc(source_origin)
+
+user_projection <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs"
+
+grid_raster <- create_spatraster_grid(source_origin, user_projection) # projected
+grid_raster_geo <- create_spatraster_grid_geo(source_origin) # no proj
+```
+
+
+## Location Map
+```{r}
+map_api <- yaml::read_yaml(here("local", "secrets.yaml"))
+register_stadiamaps(key = map_api$stadi_api)
+```
+
+```{r}
+map_plot <- map_grid(grid_raster)
+map_plot
+```
+
+## Dispersion Model
+
+### Parameters
+
+
+```{r}
+calculate_half_life <- function(viability_days, viability_threshold) {
+  # viability_days: total time (units = days) after which the fraction viable is viability_threshold
+  # viability_threshold: the fraction of the virus that remains viable at viability_days
+  
+  # Using the exponential decay model:
+  # f(t) = exp(-lambda * t) with lambda = ln(2) / half_life.
+  half_life <- (viability_days * log(2)) / (-log(viability_threshold))
+  return(half_life)
+}
+
+virus_viability <- 3 #days until virus is non viable
+viability_threshold <- 0.5 # 5% maybe viable after the above period
+virus_hl <- calculate_half_life(3, 0.05)
+virus_hl
+
+
+```
+
+### Initiate Model
+```{r}
+dispersion_msu <- create_dispersion_model()
+```
+
+### Add Points Source
+```{r}
+dispersion_msu <- dispersion_msu %>%
+  add_source(
+    name = "pathogen", 
+    lon = source_origin[1], # long
+    lat = source_origin[2], # lat
+    height = 5, # height above ground
+    rate = 72.08, # particle emission rate
+    pdiam = 2.5, # particle diameter,micrometers
+    density = 1.5, # particle density in units of g/cm3
+    shape_factor = 0.6, # shape/friction, 0-1
+    release_start = lubridate::ymd_hm("2020-02-16 10:00"),
+    release_end = lubridate::ymd_hm("2020-02-17 19:00")
+  )
+
+```
+  
+### Dispersion Parameters  
+```{r}
+dispersion_msu <- dispersion_msu %>%
+  add_dispersion_params(
+    start_time = lubridate::ymd_hm("2020-02-16 10:00"),
+    end_time = lubridate::ymd_hm("2020-02-17 19:00"), 
+    direction = "forward", 
+    #met_type = "gdas1",
+    met_type = "nam12",
+    met_dir = here("local/nam12"),
+    #exec_dir = here("local/traj/out"),
+    clean_up= FALSE
+  ) 
+  
+  
+```
+
+### Run Model
+```{r}
+dispersion_msu <- dispersion_msu %>%
+  run_model()
+
+```
+
+Explore object
+```{r}
+class(dispersion_msu)
+str(dispersion_msu)
+```
+
+```{r}
+plume_table <- dispersion_msu$disp_df
+
+dim(plume_table)
+length(unique(plume_table$particle_i))
+
+head(plume_table)
+tail(plume_table)
+
+range(plume_table$hour)
+range(plume_table$height)
+```
+
+## Plot Dispersion
+base **splitr** plot
+```{r}
+plot_dispersion(plume_table)
+```
+
+```{r}
+
+ggplot(plume_table, aes(lon, lat)) +
+  geom_line(data=plume_table,
+            aes(lon, lat, group=particle_i, col=hour))
+  
+
+
+
+```
+
+### Three Hours
+```{r}
+
+dispersion_pulse <- create_dispersion_model() %>%
+  add_source(
+    name = "pathogen3", 
+    lon = source_origin[1], # long
+    lat = source_origin[2], # lat
+    height = 5, # height above ground (m)
+    rate = 100,                     # Emission rate: total of 100,000 particles over the duration
+    pdiam = 2.5,                      # Particle diameter in µm
+    density = 1.5,                  # Particle density (assumed value; adjust units as required)
+    shape_factor = 0.9,               # Assuming near spherical particles
+    ddep_vel = 0.01,                # Dry deposition velocity (m/s) FMD
+    #ddep_mw = 1,                    # Dry deposition mass weighting factor (default value)
+    #ddep_a_ratio = 1,               # Dry deposition area ratio (default)
+    #ddep_d_ratio = 1,               # Dry deposition diameter ratio (default)
+    #ddep_hl_coeff = 0.35,           # Dry deposition half-life coefficient (hr⁻¹)
+    #wdep_hl_coeff = 0.35,           # Wet deposition half-life coefficient (hr⁻¹)
+    #wdep_in_cloud = FALSE,          # Wet deposition in cloud (assumed off)
+    wdep_below_cloud = 0.00005,       # Wet deposition below cloud (FMD)
+    rad_decay = virus_hl,               # Radiative decay rate (hr⁻¹)
+    #resuspension = 0,                # Resuspension factor (assumed zero)
+    release_start = ymd_hm("2020-02-16 10:00"),
+    release_end = ymd_hm("2020-02-16 10:00") + hours(1) # pulse
+  ) %>%
+   add_dispersion_params(
+    start_time = ymd_hm("2020-02-16 10:00"),
+    end_time = ymd_hm("2020-02-16 10:00") + hours(24), # 24hr sim
+    direction = "forward", 
+    model_height = 15000,                 # Domain extent in meters (50 km downwind)
+    met_type = "gdas1",
+    # met_type = "nam12",
+    #met_dir = here("local/nam12"),
+    #exec_dir = here("local/traj/out"),
+    clean_up= FALSE
+  ) %>%
+  run_model()
+```
+```{r}
+plot_dispersion(dispersion_pulse$disp_df)
+```
+
+```{r}
+
+ggplot(dispersion_msu_3hr$disp_df, aes(lon, lat)) +
+  geom_line(data=plume_table,
+            aes(lon, lat, group=particle_i, col=hour))
+  
+
+
+
+```
