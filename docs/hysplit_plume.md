@@ -359,3 +359,7 @@ knitr::include_graphics(here("assets/plume_animation.gif"))
 </details>
 
 ![](assets/plume_animation.gif)
+
+``` markdown
+![](assets/plume_table.png)
+```

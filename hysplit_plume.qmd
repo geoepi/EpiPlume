@@ -176,3 +176,7 @@ anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 ```{r eval=TRUE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
 knitr::include_graphics(here("assets/plume_animation.gif"))
 ```
+
+```markdown
+![](assets/plume_table.png)
+```
