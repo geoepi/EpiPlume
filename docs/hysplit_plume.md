@@ -353,11 +353,9 @@ anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 <summary>Hide code</summary>
 
 ``` r
-knitr::include_graphics("assets/plume_animation.gif")
+knitr::include_graphics(here("assets/plume_animation.gif"))
 ```
 
 </details>
-
-![](assets/plume_animation.gif)
 
 ![](assets/plume_animation.gif)

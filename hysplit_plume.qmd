@@ -174,7 +174,5 @@ anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 ```
 
 ```{r eval=TRUE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
-knitr::include_graphics("assets/plume_animation.gif")
+knitr::include_graphics(here("assets/plume_animation.gif"))
 ```
-
-![](assets/plume_animation.gif) 
