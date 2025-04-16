@@ -1,0 +1,206 @@
+---
+title: "Dispersian Trajectories"
+description: "Trajectories: NOAA HYSPLIT and the splitR package "
+date: "2025-04-13"
+categories: [R, HPAI]
+format:
+  gfm:
+   toc: true
+   toc-depth: 2
+   code-fold: show
+   code-summary: "Hide code"
+   preview-mode: raw
+editor: source
+editor_options:  
+  chunk_output_type: console
+---
+
+## Libraries
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+library(ggmap)
+library(ggspatial)
+library(sf)
+library(terra)
+library(pals)
+
+library(splitr)
+# devtools::install_github("rich-iannone/splitr")
+```
+
+## Custom Functions
+```{r}
+source(here("R/utilities.R"))
+source_dir(here("R"))
+```
+
+## Timeout Duration  
+To limit meteorological data download times.
+```{r}
+getOption("timeout")
+options(timeout=10000)
+```
+
+## Create Study Area Grid  
+Choosing an arbitrary geographic point.  It will serve as the emission point source location and be used to define study area extent.  
+```{r}
+source_origin <- c(-88.7904, 33.4555)  # Miss State Univ
+timezone_utc <- get_timezone_utc(source_origin)
+
+user_projection <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs"
+
+grid_raster <- create_spatraster_grid(source_origin, user_projection) # projected
+grid_raster_geo <- create_spatraster_grid_geo(source_origin) # no proj
+```
+
+
+## Location Map
+Register my Stadia Maps API to pull background images.  
+```{r}
+map_api <- yaml::read_yaml(here("local", "secrets.yaml"))
+register_stadiamaps(key = map_api$stadi_api)
+```
+    
+Vicinity around source.    
+```{r}
+map_plot <- map_grid(grid_raster)
+map_plot
+```
+
+### Three Hours
+```{r}
+
+dispersion_pulse <- create_dispersion_model() %>%
+  add_source(
+    name = "pathogen3", 
+    lon = source_origin[1], # long
+    lat = source_origin[2], # lat
+    height = 5, # height above ground (m)
+    rate = 100,                     # Emission rate: total of 100,000 particles over the duration
+    pdiam = 2.5,                      # Particle diameter in µm
+    density = 1.5,                  # Particle density (assumed value; adjust units as required)
+    shape_factor = 0.9,               # Assuming near spherical particles
+    ddep_vel = 0.01,                # Dry deposition velocity (m/s) FMD
+    #ddep_mw = 1,                    # Dry deposition mass weighting factor (default value)
+    #ddep_a_ratio = 1,               # Dry deposition area ratio (default)
+    #ddep_d_ratio = 1,               # Dry deposition diameter ratio (default)
+    #ddep_hl_coeff = 0.35,           # Dry deposition half-life coefficient (hr⁻¹)
+    #wdep_hl_coeff = 0.35,           # Wet deposition half-life coefficient (hr⁻¹)
+    #wdep_in_cloud = FALSE,          # Wet deposition in cloud (assumed off)
+    wdep_below_cloud = 0.00005,       # Wet deposition below cloud (FMD)
+    rad_decay = virus_hl,               # Radiative decay rate (hr⁻¹)
+    #resuspension = 0,                # Resuspension factor (assumed zero)
+    release_start = ymd_hm("2020-02-16 10:00"),
+    release_end = ymd_hm("2020-02-16 10:00") + hours(1) # pulse
+  ) %>%
+   add_dispersion_params(
+    start_time = ymd_hm("2020-02-16 10:00"),
+    end_time = ymd_hm("2020-02-16 10:00") + hours(24), # 24hr sim
+    direction = "forward", 
+    model_height = 15000,                 # Domain extent in meters (50 km downwind)
+    met_type = "gdas1",
+    # met_type = "nam12",
+    met_dir = here("local/gdas1"),
+    exec_dir = here::here("local/out"),
+    clean_up= FALSE
+  ) %>%
+  run_model()
+```
+```{r}
+plot_dispersion(dispersion_pulse$disp_df)
+```
+
+```{r}
+map_plot2 <- map_grid2(grid_raster, dispersion_pulse$disp_df, group_col = "particle_i", vector_type = "point")
+map_plot2
+```
+
+```{r}
+
+ggplot(dispersion_pulse$disp_df, aes(lon, lat)) +
+  geom_line(data=dispersion_pulse$disp_df,
+            aes(lon, lat, group=particle_i, col=hour))
+
+ggplot(dispersion_pulse$disp_df, aes(hour, height)) +
+  geom_line(data=dispersion_pulse$disp_df,
+            aes(hour, height, group=particle_i, col=particle_i)) +
+  theme(
+    legend.position = "none"
+  )
+  
+
+
+
+```
+
+
+
+## Trajectory Model
+```{r}
+trajectory_model <-
+  create_trajectory_model() %>%
+  add_trajectory_params(
+    traj_name= "traj_1",
+    lon = source_origin[1], # long
+    lat = source_origin[2], # lat
+    height = 5, # height above ground (m)
+    duration = 24,
+    days = "2020-02-16",
+    daily_hours = c(0, 6, 12, 18),
+    model_height = 15000,
+    direction = "forward",
+    extended_met = TRUE,
+    met_type = "nam12",
+    met_dir = here("local/traj"),
+    exec_dir = here("local/traj")
+  ) %>%
+  add_trajectory_params(
+    traj_name= "traj_2",
+    lon = source_origin[1], # long
+    lat = source_origin[2], # lat
+    height = 5, # height above ground (m)
+    duration = 24,
+    days = "2020-02-16",
+    daily_hours = c(0, 6, 12, 18),
+    model_height = 25000,
+    direction = "forward",
+    extended_met = TRUE,
+    met_type = "nam12",
+    met_dir = here("local/traj"),
+    exec_dir = here("local/traj")
+  ) %>%
+  run_model()
+
+```
+```{r}
+traj_out <- trajectory_model$traj_df
+
+trajectory_plot(traj_out )
+
+dim(traj_out) 
+names(traj_out)
+
+ggplot(traj_out, aes(lon, lat)) +
+  geom_line(data=traj_out,
+            aes(lon, lat, group=run, col=run)) +
+  geom_point()
+
+```
+
+```{r}
+traj_sf <- st_as_sf(traj_out, coords = c("lon", "lat"), crs = 4326)
+
+# Group by 'run' and convert each group of points to a LINESTRING
+traj_lines <- traj_sf %>%
+  group_by(run) %>%
+  summarize(do_union = FALSE) %>%  # keeps separate groups without dissolving boundaries
+  st_cast("LINESTRING")
+
+map_plot2 <- map_grid2(grid_raster, traj_out, group_col = "run", vector_type = "line", line_size = 2)
+map_plot2
+
+
+
+
+```
