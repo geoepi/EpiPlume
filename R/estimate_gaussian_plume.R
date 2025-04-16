@@ -99,7 +99,7 @@ stability_class <- function(stability = "D") {
 
 
 # GaussianPlume
-estimate_gaussian_plum <- function(Q, H, u, sigma = stability_class("D")) {
+estimate_gaussian_plume <- function(Q, H, u, sigma = stability_class("D")) {
   # Q: emission rate (g/s)
   # H: source height (m)
   # u: wind speed (m/s)

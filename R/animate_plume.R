@@ -1,3 +1,6 @@
+# work in progress, see animate_plume_simple() for now.
+# The stadia maps are too heavy for longer/bigger plume runs
+
 animate_plume <- function(raster_grid, traj_data, group_col = NULL, 
                           buffer_prop = 0.1, point_size = 0.5) {
   require(ggmap)
@@ -8,10 +11,8 @@ animate_plume <- function(raster_grid, traj_data, group_col = NULL,
   require(dplyr)
   require(gganimate)
   
-  # Get extent from raster_grid
-  e <- ext(raster_grid)  # order: xmin, xmax, ymin, ymax
+  e <- ext(raster_grid)
   
-  # Create a polygon from the extent
   corners <- matrix(c(e[1], e[3],
                       e[2], e[3],
                       e[2], e[4],
@@ -21,10 +22,8 @@ animate_plume <- function(raster_grid, traj_data, group_col = NULL,
   grid_polygon <- st_polygon(list(corners))
   grid_sf <- st_sfc(grid_polygon, crs = crs(raster_grid, proj = TRUE))
   
-  # Transform grid polygon to WGS84 (EPSG:4326)
   grid_sf_wgs84 <- st_transform(grid_sf, crs = 4326)
   
-  # Get bounding box from the grid polygon
   grid_bbox <- st_bbox(grid_sf_wgs84)
   combined_bbox <- c(
     left   = as.numeric(grid_bbox["xmin"]),
@@ -33,25 +32,22 @@ animate_plume <- function(raster_grid, traj_data, group_col = NULL,
     top    = as.numeric(grid_bbox["ymax"])
   )
   
-  # Process trajectory data: convert to an sf object using lon and lat.
   traj_sf <- st_as_sf(traj_data, coords = c("lon", "lat"), crs = 4326)
   
-  # Optional: reduce the number of points so that each group appears only once per hour.
-  # If group_col is provided, group by both hour and group_col and keep only the last point.
   if (!is.null(group_col)) {
     traj_sf <- traj_sf %>%
       group_by(hour, !!sym(group_col)) %>%
-      slice_tail(n = 1) %>%  # keep only the last point per group per hour
+      slice_tail(n = 1) %>%  # last point per group per hour
       ungroup()
   } else {
-    # If no grouping column, simply keep one point per hour (e.g., the last observation).
+
     traj_sf <- traj_sf %>%
       group_by(hour) %>%
       slice_tail(n = 1) %>%
       ungroup()
   }
   
-  # Update combined_bbox to include trajectory points.
+  # reassess extent due to new data
   traj_bbox <- st_bbox(traj_sf)
   combined_bbox <- c(
     left   = min(combined_bbox["left"], as.numeric(traj_bbox["xmin"])),
@@ -60,7 +56,6 @@ animate_plume <- function(raster_grid, traj_data, group_col = NULL,
     top    = max(combined_bbox["top"], as.numeric(traj_bbox["ymax"]))
   )
   
-  # Buffer bounding box.
   buffer_x <- buffer_prop * (combined_bbox["right"] - combined_bbox["left"])
   buffer_y <- buffer_prop * (combined_bbox["top"] - combined_bbox["bottom"])
   
@@ -73,11 +68,9 @@ animate_plume <- function(raster_grid, traj_data, group_col = NULL,
   bbox_buffered <- structure(as.numeric(bbox_buffered), 
                              names = c("left", "bottom", "right", "top"))
   
-  # Download basemap.
   basemap <- get_map(location = bbox_buffered, source = "stadia", 
                      maptype = "stamen_toner_lite", color = "bw")
   
-  # If group_col provided, set up color aesthetic; otherwise, no color mapping.
   if (!is.null(group_col)) {
     traj_sf[[group_col]] <- as.factor(traj_sf[[group_col]])
     color_aes <- aes(color = .data[[group_col]])
@@ -85,7 +78,6 @@ animate_plume <- function(raster_grid, traj_data, group_col = NULL,
     color_aes <- NULL
   }
   
-  # Build the base ggplot with the basemap and grid outline.
   p <- ggmap(basemap) +
     geom_sf(data = grid_sf_wgs84, fill = NA, color = "red", size = 1, inherit.aes = FALSE) +
     theme_classic() +
@@ -102,7 +94,7 @@ animate_plume <- function(raster_grid, traj_data, group_col = NULL,
     annotation_scale(location = "tl", width_hint = 0.4) +
     ggtitle("Study Area")
   
-  # Overlay the trajectory points (which are now summarized) and animate based on hour.
+  # update the trajectory points
   p <- p + 
     geom_sf(data = traj_sf, mapping = color_aes, inherit.aes = FALSE,
             size = point_size, shape = 19, fill = "white") +

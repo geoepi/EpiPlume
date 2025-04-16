@@ -32,7 +32,8 @@ source(here("R/utilities.R"))
 source_dir(here("R"))
 ```
 
-## Create Study ARea Grid
+## Create Study Area Grid  
+Choosing an arbitrary geographic point.  It will serve as the emission point source location and be used to define study area extent.  
 ```{r}
 center_coordinate <- c(-88.7904, 33.4555)  # Miss State Univ, center of study area
 source_vect <- vect(matrix(center_coordinate, ncol = 2), type = "points", crs = "EPSG:4326")
@@ -50,7 +51,8 @@ source_vect <- project(source_vect, user_projection)
 ```
 
 
-## Location Map  
+## Location Map 
+Register Stadia Maps API to pull background images.
 ```{r}
 # register my API
 map_api <- yaml::read_yaml(here("local", "secrets.yaml"))
@@ -62,7 +64,31 @@ map_plot <- map_grid(grid_raster)
 map_plot
 ```
 
-## Organize Data  
+
+## Gaussian Plume
+The Gaussian plume model in by *estimate_gaussian_plume()*  uses the standard equation for continuous emissions from a point source in a steady-state wind field, assuming Gaussian distribution of concentrations in the horizontal and vertical directions.  
+  
+**Math notation:**    
+ 
+\[
+C(x, y, z) = \frac{Q}{2\pi u \sigma_y \sigma_z} \exp\left(-\frac{y^2}{2\sigma_y^2}\right) \left[ \exp\left(-\frac{(z - H)^2}{2\sigma_z^2}\right) + \exp\left(-\frac{(z + H)^2}{2\sigma_z^2}\right) \right]
+\]
+  
+**Where:**
+- \(C(x, y, z)\) is the concentration at point \((x, y, z)\),
+- \(Q\) is the emission rate (g/s),
+- \(u\) is the wind speed (m/s),
+- \(\sigma_y(x)\) and \(\sigma_z(x)\) are the standard deviations of the concentration distribution in the lateral and vertical directions, respectively (based on downwind distance \(x\) and atmospheric stability class),
+- \(H\) is the effective stack height (m),
+- \(x\) is the downwind distance,
+- \(y\) is the crosswind distance,
+- \(z\) is the height above ground.
+
+The \(y\) and \(z\) bits correspond to `f_y` and `g1`, `g2` in *estimate_gaussian_plume()*, see the [code HERE]().
+
+
+
+### Organize Data  
 Organizing location data to predict and visualize particle concentrations across study area.  
 ```{r}
 # source farm
@@ -101,7 +127,7 @@ See, [NOAA page HERE](https://www.ready.noaa.gov/READYpgclass.php)
    
 ## Create Plume Function 
 ```{r}
-plume_model <- estimate_gaussian_plum(Q, H, u, sigma = stability_class("F"))
+plume_model <- estimate_gaussian_plume(Q, H, u, sigma = stability_class("F"))
 ```
 
 ## Apply Plume Function
