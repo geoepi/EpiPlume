@@ -26,79 +26,14 @@ Gaussian Plume Model
 
 ``` r
 library(here)
-```
-
-</details>
-
-    here() starts at D:/Github/EpiPlume
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(tidyverse)
-```
-
-</details>
-
-    ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ✔ forcats   1.0.0     ✔ stringr   1.5.1
-    ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-    ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-    ✔ purrr     1.0.2     
-
-    ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ✖ dplyr::filter() masks stats::filter()
-    ✖ dplyr::lag()    masks stats::lag()
-    ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(ggmap)
-```
-
-</details>
-
-    ℹ Google's Terms of Service: <https://mapsplatform.google.com>
-      Stadia Maps' Terms of Service: <https://stadiamaps.com/terms-of-service/>
-      OpenStreetMap's Tile Usage Policy: <https://operations.osmfoundation.org/policies/tiles/>
-    ℹ Please cite ggmap if you use it! Use `citation("ggmap")` for details.
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(ggspatial)
 library(sf)
-```
-
-</details>
-
-    Linking to GEOS 3.12.2, GDAL 3.9.3, PROJ 9.4.1; sf_use_s2() is TRUE
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(terra)
 ```
 
 </details>
-
-    terra 1.7.83
-
-    Attaching package: 'terra'
-
-    The following object is masked from 'package:ggmap':
-
-        inset
-
-    The following object is masked from 'package:tidyr':
-
-        extract
 
 ## Custom Functions
 
@@ -201,15 +136,16 @@ concentrations in the horizontal and vertical directions.
 
 **Math notation:**
 
-\[ C(x, y, z) = (-) \]
+$$ C(x, y, z) = \frac{Q}{2\pi u \sigma_y \sigma_z} \exp\left(-\frac{y^2}{2\sigma_y^2}\right) \left[ \exp\left(-\frac{(z - H)^2}{2\sigma_z^2}\right) + \exp\left(-\frac{(z + H)^2}{2\sigma_z^2}\right) \right] $$
 
-**Where:** - (C(x, y, z)) is the concentration at point ((x, y, z)), -
-(Q) is the emission rate (g/s), - (u) is the wind speed (m/s), -
-(\_y(x)) and (\_z(x)) are the standard deviations of the concentration
-distribution in the lateral and vertical directions, respectively (based
-on downwind distance (x) and atmospheric stability class), - (H) is the
-effective stack height (m), - (x) is the downwind distance, - (y) is the
-crosswind distance, - (z) is the height above ground.
+**Where:**  
+- $(C_{(x, y, z))}$ is the concentration at point $(x, y, z)$, - $Q$ is
+the emission rate (g/s), - $u$ is the wind speed (m/s), - $\sigma_y(x)$
+and $\sigma_z(x)$ are the standard deviations of the concentration
+distribution in the lateral and vertical directions, respectively based
+on downwind distance x and atmospheric stability class (see below), -
+$H$ is the effective stack height (m), - $x$ is the downwind distance, -
+$y$ is the crosswind distance, - $z$ is the height above ground.
 
 The (y) and (z) bits correspond to `f_y` and `g1`, `g2` in
 *estimate_gaussian_plume()*, see the [code HERE]().
