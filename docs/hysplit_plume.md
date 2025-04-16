@@ -343,23 +343,18 @@ Animated plot.
 
 animated_plume <- animate_plume_simple(plume_table, group_col = "particle_i", point_size = 0.5)
 animated_plume
+```
 
+</details>
+
+![](hysplit_plume_files/figure-commonmark/unnamed-chunk-16-1.gif)
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 # save
 anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 ```
 
 </details>
-<details open>
-<summary>Hide code</summary>
-
-``` r
-knitr::include_graphics(here("assets/plume_animation.gif"))
-```
-
-</details>
-
-![](assets/plume_animation.gif)
-
-``` markdown
-![](assets/plume_table.png)
-```

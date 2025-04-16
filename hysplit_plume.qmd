@@ -163,20 +163,14 @@ plume_plot
 ```
   
 Animated plot.  
-```{r eval=FALSE}
+```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
 # animated_plume <- animate_plume(grid_raster, plume_table, group_col = "particle_i")
 
 animated_plume <- animate_plume_simple(plume_table, group_col = "particle_i", point_size = 0.5)
 animated_plume
+```
 
+```{r eval=FALSE}
 # save
 anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
-```
-
-```{r eval=TRUE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
-knitr::include_graphics(here("assets/plume_animation.gif"))
-```
-
-```markdown
-![](assets/plume_table.png)
 ```
