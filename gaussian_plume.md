@@ -139,16 +139,21 @@ concentrations in the horizontal and vertical directions.
 $$ C(x, y, z) = \frac{Q}{2\pi u \sigma_y \sigma_z} \exp\left(-\frac{y^2}{2\sigma_y^2}\right) \left[ \exp\left(-\frac{(z - H)^2}{2\sigma_z^2}\right) + \exp\left(-\frac{(z + H)^2}{2\sigma_z^2}\right) \right] $$
 
 **Where:**  
-- $(C_{(x, y, z))}$ is the concentration at point $(x, y, z)$, - $Q$ is
-the emission rate (g/s), - $u$ is the wind speed (m/s), - $\sigma_y(x)$
-and $\sigma_z(x)$ are the standard deviations of the concentration
-distribution in the lateral and vertical directions, respectively based
-on downwind distance x and atmospheric stability class (see below), -
-$H$ is the effective stack height (m), - $x$ is the downwind distance, -
-$y$ is the crosswind distance, - $z$ is the height above ground.
+- $(C_{(x, y, z))}$ is the concentration at point $(x, y, z)$,  
+- $Q$ is the emission rate (g/s),  
+- $u$ is the wind speed (m/s),  
+- $\sigma_y(x)$ and $\sigma_z(x)$ are the standard deviations of the
+concentration distribution in the lateral and vertical directions,
+respectively based on downwind distance x and atmospheric stability
+class (see below),  
+- $H$ is the effective stack height (m),  
+- $x$ is the downwind distance,  
+- $y$ is the crosswind distance,  
+- $z$ is the height above ground.
 
 The (y) and (z) bits correspond to `f_y` and `g1`, `g2` in
-*estimate_gaussian_plume()*, see the [code HERE]().
+*estimate_gaussian_plume()*, see the [code
+HERE](https://github.com/JMHumphreys/EpiPlume/blob/1b6859697f16ce61aa75c48ba26bf6686e9e00f2/R/estimate_gaussian_plume.R#L130-L132).
 
 ### Organize Data
 
