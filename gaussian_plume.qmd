@@ -3,6 +3,7 @@ title: "Gaussian Plume Model"
 description: "Simple steady state model for instaneous emission distribution."
 date: "2025-04-13"
 categories: [R, HPAI]
+output-dir: docs
 format:
   gfm:
    toc: true

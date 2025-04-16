@@ -1,0 +1,12 @@
+project:
+  output-dir: docs
+
+execute-dir: project
+
+format:
+  gfm:
+    toc: true
+    toc-depth: 2
+    code-fold: show
+    code-summary: "Hide code"
+    preview-mode: raw
