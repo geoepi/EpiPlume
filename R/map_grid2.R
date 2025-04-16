@@ -102,8 +102,8 @@ map_grid2 <- function(raster_grid, traj_data = NULL,
           axis.title.y = element_text(size = 22, face = "bold"),
           axis.text.x = element_text(size = 10, face = "bold"),
           axis.text.y = element_text(size = 10, face = "bold"),
-          legend.direction = "vertical",
-          legend.position = "none",
+          legend.direction = "horizontal",
+          legend.position = "bottom",
           strip.text = element_blank(), 
           strip.background = element_blank(),
           legend.key.size = unit(2, "line"),
@@ -111,7 +111,7 @@ map_grid2 <- function(raster_grid, traj_data = NULL,
           legend.text = element_text(size = 16, face = "bold"),
           legend.title = element_text(size = 16, face = "bold"),
           plot.title = element_text(size = 24, face = "bold")) +
-    labs(title = " ", x = "Longitude", y = "Latitude") +
+    labs(title = " ", x = "Longitude", y = "Latitude", col = "Model Run") +
     annotation_scale(location = "tl", width_hint = 0.4) +
     ggtitle("Study Area")
   
