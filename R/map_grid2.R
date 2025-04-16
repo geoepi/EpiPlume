@@ -9,10 +9,10 @@ map_grid2 <- function(raster_grid, traj_data = NULL,
   require(ggplot2)
   require(dplyr)
   
-  # get extent from the input
+  # get extent
   e <- ext(raster_grid)
   
-  # polygon from the extent coordinates
+  # polygon from the extent
   corners <- matrix(c(e[1], e[3],
                       e[2], e[3],
                       e[2], e[4],
@@ -71,12 +71,12 @@ map_grid2 <- function(raster_grid, traj_data = NULL,
       }
       
     } else {
-      # if no grouping column, plot all points as a single group.
+      
       traj_points <- traj_sf
     }
   }
   
-  #### a buffer the combined bounding box ####
+  # buffer bounding box
   
   buffer_x <- buffer_prop * (combined_bbox["right"] - combined_bbox["left"])
   buffer_y <- buffer_prop * (combined_bbox["top"] - combined_bbox["bottom"])
@@ -90,12 +90,11 @@ map_grid2 <- function(raster_grid, traj_data = NULL,
   
   bbox_buffered <- structure(as.numeric(bbox_buffered), names = c("left", "bottom", "right", "top"))
   
-  #### the basemap using the buffered bounding box ####
+  #### basemap
   basemap <- get_map(location = bbox_buffered, source = "stadia", maptype = "stamen_toner_lite", color = "bw")
   
   
   p <- ggmap(basemap) +
-    # grid
     geom_sf(data = grid_sf_wgs84, fill = NA, color = "red", size = 1, inherit.aes = FALSE) +
     theme_classic() +
     theme(plot.margin = unit(c(2,8,5,8), "mm"),
@@ -116,7 +115,7 @@ map_grid2 <- function(raster_grid, traj_data = NULL,
     annotation_scale(location = "tl", width_hint = 0.4) +
     ggtitle("Study Area")
   
-  #### trajectories, if provided ####
+  # trajectories, if provided
   
   if (!is.null(traj_data)) {
     if (!is.null(traj_lines)) {

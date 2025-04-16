@@ -1,21 +1,17 @@
 ---
-title: "Plume Notes"
-description: "Gaussian Steady State"
+title: "Gaussian Plume Model"
+description: "Simple steady state model for instaneous emission distribution."
+date: "2025-04-13"
+categories: [R, HPAI]
 format:
-  html: 
-    df-print: kable
-    code-fold: show
-    code-summary: "Hide code"
-    code-overflow: wrap
-    toc-title: Page Contents
-    toc: true
-    toc-depth: 2
-    toc-location: right
-    number-sections: false
-    html-math-method: katex
-    smooth-scroll: true
+  gfm:
+   toc: true
+   toc-depth: 2
+   code-fold: show
+   code-summary: "Hide code"
+   preview-mode: raw
 editor: source
-editor_options: 
+editor_options:  
   chunk_output_type: console
 ---
 
@@ -38,78 +34,124 @@ source_dir(here("R"))
 
 ## Create Study ARea Grid
 ```{r}
-center_coordinate <- c(-73.9857, 40.7484)  # New York City
-timezone_utc <- get_timezone_utc(center_coordinate)
+center_coordinate <- c(-88.7904, 33.4555)  # Miss State Univ, center of study area
+source_vect <- vect(matrix(center_coordinate, ncol = 2), type = "points", crs = "EPSG:4326")
+timezone_utc <- get_timezone_utc(center_coordinate); timezone_utc
 
+# desired projection
 user_projection <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs"
 
-grid_raster <- create_spatraster_grid(center_coordinate, user_projection) # projected
-grid_raster_geo <- create_spatraster_grid_geo(center_coordinate) # no proj
+# create grids
+grid_raster <- create_spatraster_grid(center_coordinate, user_projection, extent_km = 25) # projected
+grid_raster_geo <- create_spatraster_grid_geo(center_coordinate) # no proj version
+
+# project source/center point
+source_vect <- project(source_vect, user_projection)
 ```
 
 
-## Location Map
+## Location Map  
 ```{r}
+# register my API
 map_api <- yaml::read_yaml(here("local", "secrets.yaml"))
 register_stadiamaps(key = map_api$stadi_api)
 ```
 
-```{r}
+```{r fig.width=10, fig.height=10}
 map_plot <- map_grid(grid_raster)
-
 map_plot
-
 ```
 
-Get CDS data:
-See [ecmwfr](https://github.com/bluegreen-labs/ecmwfr) and [code tool](https://cds.climate.copernicus.eu/datasets/derived-era5-single-levels-daily-statistics?tab=download)
-```{r message=FALSE}
-cds_api <- yaml::read_yaml(here("local", "secrets.yaml"))
-ecmwfr::wf_set_key(key = cds_api$copernicus_api)
-ecmwfr::wf_get_key()
-```
-
-
-
-Data
+## Organize Data  
+Organizing location data to predict and visualize particle concentrations across study area.  
 ```{r}
-grid_bbox <- st_bbox(grid_raster_geo)
+# source farm
+source_coords <- crds(source_vect)
 
-request <- list(
-  dataset_short_name = "derived-era5-single-levels-daily-statistics",
-  product_type = "reanalysis",
-  variable = c("10m_u_component_of_wind", "10m_v_component_of_wind"),
-  year = "2025",
-  month = "01",
-  day = "01",
-  daily_statistic = "daily_mean",
-  time_zone = timezone_utc, #"utc+00:00",
-  frequency = "1_hourly",
-  area = c(grid_bbox["ymax"], grid_bbox["xmin"], 
-           grid_bbox["ymin"], grid_bbox["xmax"]),
-  target = "TMPFILE"
-)
+# cell coordinates
+all_cells <- 1:ncell(grid_raster)
+xy <- as.data.frame(xyFromCell(grid_raster, all_cells))
 
+# relative coordinates with respect to source (assuming wind from west to east)
+xy$x_rel <- xy$x - source_coords[1]
+xy$y_rel <- xy$y - source_coords[2]
 
-wind <- ecmwfr::wf_request(
- request  = request,
- transfer = TRUE,
- path     = here("local/data")
- )
-
-unzip(wind, exdir = here("local/data"))
-
-wind_files <- list.files(path = here("local/data"),
-                            recursive = T, pattern= ".nc", 
-                         full.names=TRUE) 
-
-u10m_r <- rast(wind_files[1])
-plot(u10m_r)
-
-v10m_r <- rast(wind_files[2])
-plot(v10m_r)
-
-
+# assume all receptors are at 1.8 m height
+receptors <- data.frame(x = xy$x_rel, y = xy$y_rel, z = rep(1.8, nrow(xy)))
 ```
 
 
+## Plume Parameters  
+```{r}
+# poultry house dimensions 13m x 152 m = 1976 x 3m tall = 5928 m3
+# average exhaust 3.10 m3/h
+# PM_2.5 0.149 mg/m3
+
+Q <- 100   # Emission rate (g/s)
+H <- 10   # Source height (m)
+u <- 3    # Wind speed (m/s)
+```
+
+## Pasquill Stability Classes  
+See, [NOAA page HERE](https://www.ready.noaa.gov/READYpgclass.php)  
+   
+- A, B, and C are considered unstable conditions, with A being very unstable, producing high dispersion due to strong vertical mixing).  
+- D represents neutral conditions—typically found under overcast skies or in urban areas where there is little convective activity.  
+- E and F are stable conditions, with F being the most stable, with little vertical mixing (plume remains more confined).   
+   
+## Create Plume Function 
+```{r}
+plume_model <- estimate_gaussian_plum(Q, H, u, sigma = stability_class("F"))
+```
+
+## Apply Plume Function
+```{r}
+downwind_idx <- receptors$x > 0 # behind source (assuming wind W -> E)
+
+# concentrations vector
+concentrations <- numeric(nrow(receptors))
+concentrations[!downwind_idx] <- 0
+concentrations[downwind_idx] <- plume_model(receptors[downwind_idx, ])
+
+# assign concentrations to grid
+concentration_raster <- setValues(grid_raster, concentrations)
+```
+
+
+## Plot Results
+Convert to dataframea.  Setting zero concentrations to NA
+```{r}
+df <- as.data.frame(concentration_raster, xy = TRUE)
+df$grid[df$grid == 0] = NA
+
+source_df <- data.frame(x = source_coords[,1], y = source_coords[,2])
+```
+
+
+Basic grid view
+```{r fig.width=10, fig.height=10}
+ggplot() +
+  geom_raster(data = df, aes(x = x, y = y, fill = grid)) +
+  scale_fill_gradientn(
+    colors = rev(pals::cubehelix(30)[1:26]),
+    na.value = "white",
+    limits = c(0, max(df$grid, na.rm = TRUE)),
+    name = "Concentration (g/m3)"
+  ) +
+  geom_point(data = source_df,
+             aes(x = x, y = y),
+             color = "blue", size = 3) +
+  coord_equal() +
+  labs(title = "Plume Dispersion",
+       x = "Easting (m)",
+       y = "Northing (m)") +
+  theme_minimal()
+```
+
+Overlay on map
+```{r fig.width=10, fig.height=10}
+map_plot_plume <- map_grid(grid_raster, 
+                           concentration_raster = concentration_raster, 
+                           map_type = "stamen_toner_lite")
+map_plot_plume
+```

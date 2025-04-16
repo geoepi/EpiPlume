@@ -1,3 +1,5 @@
+# relabels PDFs to author_year format
+
 rename_pdfs <- function(folder_path) {
 
   require(fs)

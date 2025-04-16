@@ -1,21 +1,17 @@
 ---
-title: "HYSPLIT Tutorial"
-description: " "
+title: "Dispersian Trajectories and Plumes"
+description: "NOAA HYSPLIT and splitR package "
+date: "2025-04-13"
+categories: [R, HPAI]
 format:
-  html: 
-    df-print: kable
-    code-fold: show
-    code-summary: "Hide code"
-    code-overflow: wrap
-    toc-title: Page Contents
-    toc: true
-    toc-depth: 2
-    toc-location: right
-    number-sections: false
-    html-math-method: katex
-    smooth-scroll: true
+  gfm:
+   toc: true
+   toc-depth: 2
+   code-fold: show
+   code-summary: "Hide code"
+   preview-mode: raw
 editor: source
-editor_options: 
+editor_options:  
   chunk_output_type: console
 ---
 
@@ -27,6 +23,7 @@ library(ggmap)
 library(ggspatial)
 library(sf)
 library(terra)
+library(pals)
 
 library(splitr)
 # devtools::install_github("rich-iannone/splitr")
@@ -38,13 +35,14 @@ source(here("R/utilities.R"))
 source_dir(here("R"))
 ```
 
-## Timeout Duration
+## Timeout Duration  
+For download times
 ```{r}
 getOption("timeout")
 options(timeout=10000)
 ```
 
-## Create Study ARea Grid
+## Create Study Area Grid
 ```{r}
 source_origin <- c(-88.7904, 33.4555)  # Miss State Univ
 timezone_utc <- get_timezone_utc(source_origin)
@@ -69,16 +67,13 @@ map_plot
 
 ## Dispersion Model
 
-### Parameters
-
-
+### Parameters  
+Pathogen half life estimation.  Not clear that **splitR**is using this parameter.  Could always be handled in post processing.
 ```{r}
-virus_viability <- 3 #days until virus is non viable
-viability_threshold <- 0.5 # 5% maybe viable after the above virus_viability period
-virus_hl <- calculate_half_life(3, 0.05)
-virus_hl
-
-
+virus_viability <- 3 # days until virus is non viable
+viability_threshold <- 0.05 # this % maybe viable after the above virus_viability period
+virus_hl <- calculate_half_life(virus_viability, viability_threshold)
+virus_hl # daily reduction in virus viability
 ```
 
 ### Initiate Model
@@ -86,20 +81,22 @@ virus_hl
 dispersion_msu <- create_dispersion_model()
 ```
 
-### Add Points Source
+### Add Points Source  
+Poultry house PM tables here [Bist et al, 2022](https://www.mdpi.com/2076-3417/12/22/11323)
 ```{r}
 dispersion_msu <- dispersion_msu %>%
   add_source(
     name = "pathogen", 
-    lon = source_origin[1], # long
-    lat = source_origin[2], # lat
+    lon = source_origin[1],
+    lat = source_origin[2],
     height = 5, # height above ground
-    rate = 72.08, # particle emission rate
+    rate = 100, # particle emission rate
     pdiam = 2.5, # particle diameter,micrometers
     density = 1.5, # particle density in units of g/cm3
-    shape_factor = 0.6, # shape/friction, 0-1
-    release_start = lubridate::ymd_hm("2020-02-16 10:00"),
-    release_end = lubridate::ymd_hm("2020-02-17 19:00")
+    shape_factor = 0.6, # shape/friction, 0-1 (smoothness, 1.0 is spherical)
+    rad_decay = virus_hl, # pathogen viabaility
+    release_start = ymd_hm("2020-02-16 10:00"),
+    release_end = ymd_hm("2020-02-16 10:00") + hours(24)
   )
 
 ```
@@ -108,32 +105,32 @@ dispersion_msu <- dispersion_msu %>%
 ```{r}
 dispersion_msu <- dispersion_msu %>%
   add_dispersion_params(
-    start_time = lubridate::ymd_hm("2020-02-16 10:00"),
-    end_time = lubridate::ymd_hm("2020-02-17 19:00"), 
+    start_time = ymd_hm("2020-02-16 10:00"),
+    end_time = ymd_hm("2020-02-16 10:00") + hours(24), 
     direction = "forward", 
     #met_type = "gdas1",
-    met_type = "nam12",
-    met_dir = here("local/nam12"),
-    #exec_dir = here("local/traj/out"),
+    met_type = "nam12", # highest res in splitR
+    met_dir = here("local/nam12"), # previously downloaded meteorological data
+    exec_dir = here("local/nam12"), # outputs
     clean_up= FALSE
   ) 
-  
-  
 ```
 
 ### Run Model
-```{r}
+```{r eval=FALSE}
 dispersion_msu <- dispersion_msu %>%
   run_model()
 
+# save
+saveRDS(dispersion_msu, here("local/nam12/dispersion_msu.rds"))
 ```
-
-Explore object
 ```{r}
+# load saved run
+dispersion_msu <- readRDS(here("local/nam12/dispersion_msu.rds"))
 class(dispersion_msu)
-str(dispersion_msu)
 ```
 
+## Results Table
 ```{r}
 plume_table <- dispersion_msu$disp_df
 
@@ -141,7 +138,6 @@ dim(plume_table)
 length(unique(plume_table$particle_i))
 
 head(plume_table)
-tail(plume_table)
 
 range(plume_table$hour)
 range(plume_table$height)
@@ -151,6 +147,20 @@ range(plume_table$height)
 base **splitr** plot
 ```{r}
 plot_dispersion(plume_table)
+```
+
+Custom static plot
+```{r fig.height=10, fig.width=10}
+plume_plot <- map_grid2(grid_raster, plume_table, group_col = "particle_i", vector_type = "point")
+plume_plot
+```
+
+```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+# animated_plume <- animate_plume(grid_raster, plume_table, group_col = "particle_i")
+
+animated_plume <- animate_plume_simple(plume_table, group_col = "particle_i", point_size = 0.5)
+
+animated_plume
 ```
 
 ```{r}
