@@ -145,12 +145,12 @@ plume_table <- dispersion_msu$disp_df
 dim(plume_table)
 length(unique(plume_table$particle_i))
 
-gt(plume_table)
+gt(head(plume_table))
 ```
 
 ## Plot Dispersion
 The base **splitr** plot. Interactive when locally run.    
-```{r eval=FALSE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+```{r eval=TRUE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
 # not run, too big
 plot_dispersion(plume_table)
 ```
@@ -173,6 +173,6 @@ animated_plume
 anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 ```
 
-```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+```{r eval=TRUE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
 knitr::include_graphics("assets/plume_animation.gif")
 ```
