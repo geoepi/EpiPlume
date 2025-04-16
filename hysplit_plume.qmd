@@ -155,16 +155,23 @@ plot_dispersion(plume_table)
 ```
 
 Custom static plot for quick viewing. Work in progress... 
-```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+```{r eval=FALSE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+# not rub
 plume_plot <- map_grid2(grid_raster, plume_table, group_col = "particle_i", vector_type = "point")
 plume_plot
 ```
   
 Animated plot.  
-```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+```{r eval=FALSE}
 # animated_plume <- animate_plume(grid_raster, plume_table, group_col = "particle_i")
 
 animated_plume <- animate_plume_simple(plume_table, group_col = "particle_i", point_size = 0.5)
-
 animated_plume
+
+# save
+anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
+```
+
+```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+knitr::include_graphics("assets/plume_animation.gif")
 ```
