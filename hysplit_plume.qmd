@@ -145,9 +145,7 @@ plume_table <- dispersion_msu$disp_df
 dim(plume_table)
 length(unique(plume_table$particle_i))
 
-# gt(head(plume_table))
-gt_tbl <- gt(head(plume_table))
-cat(gt::as_raw_html(gt_tbl))
+head(plume_table) # sample
 ```
 
 ## Plot Dispersion
@@ -178,4 +176,5 @@ anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 ```{r eval=TRUE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
 knitr::include_graphics("assets/plume_animation.gif")
 ```
+
 ![](assets/plume_animation.gif) 
