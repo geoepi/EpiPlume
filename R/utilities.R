@@ -42,3 +42,11 @@ get_gamma_params <- function(mean, range) {
   
   return(list(shape = alpha, scale = beta))
 }
+
+rescale_raster <- function(r, new_min = 5, new_max = 95) {
+  rng <- global(r, fun = c("min","max"), na.rm = TRUE)
+  old_min <- rng[1, "min"]
+  old_max <- rng[1, "max"]
+  if (old_max == old_min) stop("Zero variance in raster")
+  (r - old_min) / (old_max - old_min) * (new_max - new_min) + new_min
+}
