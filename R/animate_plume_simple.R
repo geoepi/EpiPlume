@@ -1,48 +1,56 @@
-animate_plume_simple <- function(traj_data, group_col = NULL, point_size = 0.5, source_loc=source_loc) {
+animate_plume_simple <- function(
+    traj_data,
+    group_col  = NULL,
+    point_size = 0.5,
+    source_loc,                # c(lon, lat)
+    fps        = 2,            # frames per second
+    width      = 800,          # px
+    height     = 600,          # px
+    renderer   = gifski_renderer(loop = FALSE)
+) {
+  
   require(ggplot2)
   require(dplyr)
   require(gganimate)
   
-  # uses the 'hour' column
+  # check for hour
   if (!"hour" %in% names(traj_data)) {
-    stop("traj_data must include an 'hour' column indicating the time step for each point.")
+    stop("traj_data must include an 'hour' column.")
   }
   
-
+  #thin to last point per group/hour
   if (!is.null(group_col)) {
     traj_data[[group_col]] <- as.factor(traj_data[[group_col]])
-
     traj_data <- traj_data %>%
-      group_by(hour, !!sym(group_col)) %>%
+      group_by(hour, .data[[group_col]]) %>%
       slice_tail(n = 1) %>%
       ungroup()
   } else {
-
     traj_data <- traj_data %>%
       group_by(hour) %>%
       slice_tail(n = 1) %>%
       ungroup()
   }
   
-  # to plot the source location
-  source_loc <- as.data.frame(
-    cbind(
-      x = source_origin[1],
-      y = source_origin[2]
-      )
-    )
+  # source location
+  source_df <- data.frame(
+    lon = source_loc[1],
+    lat = source_loc[2]
+  )
   
-  # base ggplot (no background)
-  p <- ggplot(traj_data, aes(x = lon, y = lat)) + 
-    geom_point(aes(color = if(!is.null(group_col)) .data[[group_col]] else NULL),
+  # plot with transition
+  p <- ggplot(traj_data, aes(x = lon, y = lat)) +
+    geom_point(aes(color = if (!is.null(group_col)) .data[[group_col]] else NULL),
                size = point_size) +
-    geom_point(data=source_loc, aes(x, y),
-                 size = 5, shape= 17, col="black") +
+    geom_point(data = source_df, aes(lon, lat),
+               size = 5, shape = 17) +
     coord_equal() +
-    theme_classic() +
-    labs(title = "Post Emission: Hour {frame_time}",
-         x = "Longitude", y = "Latitude") +
     theme_minimal() +
+    labs(
+      title = 'Post Emission: Hour {frame_time}',
+      x     = "Longitude",
+      y     = "Latitude"
+    ) +
     theme(
       plot.margin    = unit(c(0.25, 0.25, 0.25, 0.25), "cm"),
       legend.position = "none",
@@ -56,5 +64,16 @@ animate_plume_simple <- function(traj_data, group_col = NULL, point_size = 0.5, 
     transition_time(hour) +
     ease_aes('linear')
   
-  return(p)
+  # animate
+  nframes <- length(unique(traj_data$hour))
+  anim <- animate(
+    p,
+    nframes  = nframes,
+    fps      = fps,
+    width    = width,
+    height   = height,
+    renderer = renderer
+  )
+  
+  return(anim)
 }

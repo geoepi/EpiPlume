@@ -1,40 +1,42 @@
-run_trajectory_model <- function(config_file = "demo_2025-04-21") {
-  
+run_trajectory_model <- function(
+    traj_name,
+    lon, lat,
+    height,
+    duration,
+    days,
+    daily_hours,
+    model_height,
+    direction,
+    extended_met,
+    vert_motion,
+    met_type,
+    met_dir,
+    exec_dir,
+    clean_up
+) {
   require(splitr)
   
-  # read configuration
-  cfg <- yaml::read_yaml(here("config", paste0(config_file, ".yaml")))
-
-  # setup HYSPLIT using splitr
-  trajectory_model <-
-    create_trajectory_model() %>%
+  # build model
+  m <- create_trajectory_model() %>%
     add_trajectory_params(
-      traj_name= cfg$trajectory$traj_name,
-      lon = cfg$domain$source_origin[1],
-      lat = cfg$domain$source_origin[2],
-      height = cfg$trajectory$traj_height,
-      duration = cfg$trajectory$traj_duration,
-      days = cfg$trajectory$days,
-      daily_hours = cfg$trajectory$daily_hours,
-      model_height = cfg$trajectory$model_height,
-      direction = cfg$trajectory$traj_direction,
-      extended_met = cfg$trajectory$extended_met,
-      vert_motion = cfg$trajectory$vert_motion,
-      met_type = cfg$trajectory$traj_met_type,
-      met_dir = here(cfg$trajectory$traj_climate),
-      exec_dir = here(cfg$trajectory$traj_outputs),
-      clean_up = cfg$trajectory$traj_clean_up
-    ) 
+      traj_name    = traj_name,
+      lon          = lon,
+      lat          = lat,
+      height       = height,
+      duration     = duration,
+      days         = days,
+      daily_hours  = daily_hours,
+      model_height = model_height,
+      direction    = direction,
+      extended_met = extended_met,
+      vert_motion  = vert_motion,
+      met_type     = met_type,
+      met_dir      = met_dir,
+      exec_dir     = exec_dir,
+      clean_up     = clean_up
+    )
   
-  time_taken <- system.time({
-    trajectory_model <- trajectory_model %>% run_model()
-  })
-  
-  message(cfg$trajectory$traj_name, " elapsed time: ", round(time_taken["elapsed"], 2), " secs")
-  
-  # save
-  model_name <- paste0(cfg$trajectory$traj_name, "_model.rds")
-  saveRDS(trajectory_model, here(cfg$trajectory$traj_outputs, model_name))
-  message(model_name, " saved here: /", file.path(cfg$trajectory$traj_outputs, model_name))
-  
+  tm <- system.time({ m <- m %>% run_model() })
+  message(traj_name, " elapsed time: ", round(tm["elapsed"], 2), " secs")
+  return(m)
 }
