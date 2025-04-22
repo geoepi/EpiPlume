@@ -1,6 +1,8 @@
 # History files
 .Rhistory
 .Rapp.history
+.Rproj.user/
+.Rprofile
 
 # Session Data files
 .RData
@@ -51,4 +53,14 @@ secrets.yaml
 # local data
 /local
 
+# quarto
 /.quarto/
+
+# renv
+/renv/library/
+/renv/python/
+/renv/cache/
+renv/staging/
+
+
+
