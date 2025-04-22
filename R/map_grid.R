@@ -1,4 +1,4 @@
-map_grid <- function(raster_grid, concentration_raster = NULL, map_type = "stamen_terrain") {
+map_grid <- function(raster_grid, source_loc = NULL, concentration_raster = NULL, map_type = "stamen_terrain") {
   
   # "stamen_terrain"
   # "stamen_toner_lite"
@@ -80,6 +80,41 @@ map_grid <- function(raster_grid, concentration_raster = NULL, map_type = "stame
                            na.value = "white",
                            name = "Concentration (g/m3)",
                            limits = c(0, max(df_conc[[conc_col]], na.rm = TRUE)))
+  }
+  
+  # add SpatVector points, if provided
+  if (!is.null(source_loc)) {
+    
+    source_sf       <- st_as_sf(source_loc)
+    source_sf_wgs84 <- st_transform(source_sf, 4326)
+    
+    if ("farm" %in% names(source_sf_wgs84)) {
+      p <- p +
+        geom_sf(
+          data        = source_sf_wgs84,
+          aes(shape = farm),
+          fill        = "yellow",
+          color       = "red",
+          size        = 3,
+          stroke      = 1,
+          inherit.aes = FALSE
+        ) +
+        scale_shape_manual(
+          name   = "Farm type",
+          values = c(source = 24, sim = 21)
+        )
+    } else {
+      p <- p +
+        geom_sf(
+          data        = source_sf_wgs84,
+          shape       = 21,
+          fill        = "yellow",
+          color       = "red",
+          size        = 3,
+          stroke      = 1,
+          inherit.aes = FALSE
+        )
+    }
   }
   
   return(p)

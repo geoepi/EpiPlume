@@ -1,0 +1,91 @@
+# ─────────────────────────────────────────
+# DOMAIN / GRID DEFINITION / SOURCE
+# ─────────────────────────────────────────
+domain:
+  source_origin: [-89.031407, 32.494830] # unprojected geographic coordinates for emission source
+  extent_km: 30 # target extent of square raster grid defining study area in km
+  res_m: 250 # target raster cell resolution in meters
+  sim_farms: 20 # number of random farms to generate, set to NULL to toggle off
+
+# ─────────────────────────────────────────
+# POULTRY HOUSE PARAMETERS
+# ───────────────────────────────────────── 
+poultry:
+  flock_size: 10000 # birds
+  house_vol: 19000 # house volume, m3
+  Q_m3_h: 30000 # hourly airflow/ventilation rate (range 30-120k)
+
+# ─────────────────────────────────────────
+# VIRUS PARAMETERS
+# ───────────────────────────────────────── 
+virus:
+  viability_hours: 3 # hours of virus viability in aerosol or oxygen exposed (used in halflife calculation)
+  viability_threshold: 0.05 # fraction (%) of virus remaining viable after elpase of viability_hours
+  qV: 160000 # ball park EID50/ bird-day1
+
+# ─────────────────────────────────────────
+# SEIR EPI PARAMETERS
+# ───────────────────────────────────────── 
+seir:
+  beta: 1.5 # daily rate
+  sigma: 2 # latent periods
+  gamma: 4 # days infectious
+  Ei: 0 # initial exposed
+  Ii: 1 # initial infectious
+  Ri: 0 # initial recovered
+  Vi: 0 # initial virus volume in air (EID50 units)
+  sim_days: 30 # days to simulate in SEIR (will be in hour-timesteps)
+
+# ─────────────────────────────────────────
+# TRAJECTORY PARAMETERS
+# ───────────────────────────────────────── 
+trajectory:
+  traj_name: "traj_1" # label for trajectory files
+  traj_climate: "local/demo_run/climate" # climate input needed for HYSPLIT
+  traj_outputs: "local/demo_run/traj" # HYSPLIT outputs for directories (will be populated during run)
+  traj_height: 5 # height of source emissions (meters)
+  traj_duration: 24 # duration of trajectory tracking (hours)
+  days: "2020-02-16" # date to start trajectory simulation (YYYY-MM-DD)
+  daily_hours: [0, 6, 12, 18] # what hours during the day should parcel trajectories be emitted/tracked
+  model_height: 5000 # maximum altitude (meters)
+  vert_motion: 0 # estimated from input data
+  traj_direction: "forward" # forward in time simulation, or retrospective backwards
+  extended_met: TRUE # return all meterological variables (all trajectories and time steps)
+  traj_met_type: "reanalysis" # climate data to use
+  traj_clean_up: FALSE # do not remove intermediate files
+
+# ─────────────────────────────────────────
+# PLUME‑DISPERSION PARAMETERS
+# ─────────────────────────────────────────
+plume:
+  plume_name: "plume_1" # label for plume files
+  plume_climate: "local/demo_run/climate" # climate input needed for HYSPLIT
+  plume_outputs: "local/demo_run/plume" # HYSPLIT outputs for plume dispersion (will be populated during run)
+  plume_height: 5 # height of source emissions (meters)
+  rate: 100 # particle emission rate
+  pdiam: 2.5 # particle diameter
+  density: 1.5 # particle density g/cm3
+  shape_factor: 0.9 # particle shape rough (0.0) to smooth (1.0)
+  release_start: "2020-02-16 10:00" # release start time
+  release_end: "2020-02-17 11:00" # release end time
+  start_time: "2020-02-16 10:00" # disersion start time
+  end_time: "2020-02-17 10:00" # dispersian end time 
+  plume_direction: "forward" # forward in time simulation, or retrospective backwards
+  plume_met_type: "reanalysis" # climate data to use
+  ddep_vel: NULL # dry deposition velocity in units of m/s
+  ddep_mw: NULL # molecular weight in units of g/mol
+  ddep_a_ratio: NULL # dry deposition A ratio
+  ddep_d_ratio: NULL # dry deposition D ratio
+  ddep_hl_coeff: NULL # Henry's Law value associated with dry deposition
+  wdep_hl_coeff: NULL #Henry's Law value associated with wet deposition
+  wdep_in_cloud: NULL # In-cloud wet deposition rate in units of L/L
+  wdep_below_cloud: NULL # below cloud wet deposition rate in units of 1/s
+  rad_decay: NULL # rate of radioactive decay, in units of days
+  resuspension: NULL # pollutant resuspension factor in units of 1/m
+  plume_clean_up: FALSE # do not remove intermediate files
+
+# ─────────────────────────────────────────
+# OUTPUTS & REPORTS
+# ─────────────────────────────────────────
+output: 
+   output_reports: "local/demo_run/reports" # figures, tables, and other pipeline outputs
