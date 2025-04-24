@@ -66,7 +66,7 @@ animate_plume_simple <- function(
   
   # animate
   nframes <- length(unique(traj_data$hour))
-  anim <- animate(
+  anim <- gganimate::animate(
     p,
     nframes  = nframes,
     fps      = fps,

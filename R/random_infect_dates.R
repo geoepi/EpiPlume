@@ -1,4 +1,4 @@
-random_infect_dates <- function(year, month, fast_detect = 7, slow_detect = 20) {
+random_infect_dates <- function(year, month, fast_detect = 7, slow_detect = 20, seed=123) {
 
   stopifnot(is.numeric(year), length(year) == 1,
             is.numeric(month), length(month) == 1,
@@ -16,6 +16,8 @@ random_infect_dates <- function(year, month, fast_detect = 7, slow_detect = 20) 
   
   # infection date. Between 7 nad 20 days to detect
   inf_date <- round(runif(1, fast_detect, slow_detect), 0)
+  
+  set.seed(seed)
   release_date = sample(candidates, 1)
   infection_date = release_date - days(inf_date)
   

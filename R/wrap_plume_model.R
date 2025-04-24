@@ -46,7 +46,7 @@ wrap_plume_model <- function(
     fname <- paste0(final_args$plume_name, "_model.rds")
     out_path <- file.path(final_args$exec_dir, fname)
     saveRDS(plume_model, out_path)
-    message("Saved plume model to: ", out_path)
+    message("Saved plume model as: ", fname)
   }
   
   invisible(plume_model)
