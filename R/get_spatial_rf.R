@@ -1,5 +1,5 @@
 get_spatial_rf <- function(model = model.0,
-                           field_sp = sp_indices$field.sp,
+                           field_sp = sp_indices_dens$field.sp,
                            raster_template = study_area$grid,
                            mesh = mesh.dom
 ){

@@ -46,7 +46,7 @@ plot_ode_shed_dynamics <- function(out_df, date_axis = FALSE) {
       legend.title     = element_text(size = 16, face = "bold"),
       axis.title.x     = element_text(size = 20, face = "bold"),
       axis.title.y     = element_text(size = 20, face = "bold"),
-      axis.text.x      = element_text(size = 16, face = "bold"),
+      axis.text.x      = element_text(size = 12, face = "bold"),
       axis.text.y      = element_text(size = 18, face = "bold"),
       plot.title       = element_text(size = 22, face = "bold")
     )

@@ -1,6 +1,8 @@
 replicate_data_timesteps <- function(
     grid_raster = study_area$grid,
     farm_locs = study_area$farm_locs,
+    concen_data = conc_melt,
+    scale_concentration = 1e6,
     plume_model = plume_model,
     mesh = mesh.dom,
     max_hour = 6 # max timesteps to model
@@ -23,7 +25,8 @@ replicate_data_timesteps <- function(
     mutate(set = "particle",
            name = paste0("p_", particle_i),
            farm = NA,
-           flock = NA) %>%
+           flock = NA,
+           concen = NA) %>%
     select(-particle_i)
   
   # mesh nodes
@@ -37,12 +40,23 @@ replicate_data_timesteps <- function(
            name = paste0("n_",1:dim(dd)[1]),
            farm = NA,
            flock = NA,
-           height = 0)
+           height = 0,
+           concen = NA)
   
   # farm locations
   farms_df <- as.data.frame(study_area$farm_locs, geom = "XY") %>%
     mutate(set = "farm",
-           height = 5)
+           height = 5,
+           concen = NA)
+  
+  # concentration data
+  concen_df <- concen_data %>%
+    mutate(set = "concen",
+           height = 0,
+           flock = 0,
+           farm = NA,
+           name = "concen",
+           concen = concen*scale_concentration)
   
   # copy data for each timestep
   t_steps <- min(max(ceiling(particle_df$hour)), max_hour) # time steps in plume
@@ -52,15 +66,18 @@ replicate_data_timesteps <- function(
   for(i in 1:t_steps){
     
     tmp_particle <- particle_df %>%
-      filter(hour == i)
+      filter(hour == i) # particles
     
     tmp_node <- dd %>%
-      mutate(hour = i)
+      mutate(hour = i) # nodes
     
     tmp_farm <- farms_df %>%
-      mutate(hour = i)
+      mutate(hour = i) # farms
     
-    comb_data <- rbind(comb_data, tmp_particle, tmp_node, tmp_farm)
+    tmp_con <- concen_df %>%
+      filter(hour == i) # concentration
+    
+    comb_data <- rbind(comb_data, tmp_particle, tmp_node, tmp_farm, tmp_con)
   }
   
   # remove any points outside study area
