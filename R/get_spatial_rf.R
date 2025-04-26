@@ -1,5 +1,5 @@
 get_spatial_rf <- function(model = model.0,
-                           field_sp = sp_indices_dens$field.sp,
+                           field_sp = sp_indices_dens$field.sp.1,
                            raster_template = study_area$grid,
                            mesh = mesh.dom
 ){
@@ -18,8 +18,8 @@ get_spatial_rf <- function(model = model.0,
                          loc = cbind(grid_coords[,"x"], 
                                      grid_coords[,"y"]))
   
-  mrf_pf <- cbind(model$summary.random$field.sp$mean, 
-                  field_sp$field.sp.group)
+  mrf_pf <- cbind(model$summary.random$field.sp.1$mean, 
+                  field_sp$field.sp.1.group)
   
   mrf_pf_v <- list()
   mrf_pf_v  <- split(mrf_pf[,1], mrf_pf[,2])

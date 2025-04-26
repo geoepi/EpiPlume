@@ -1,4 +1,4 @@
-plot_latent_stack <- function(rast_stack=rast_stack,
+plot_prob_stack <- function(rast_stack=rast_stack,
                               farm_locs = study_area$farm_locs,
                               save_name = NULL,
                               save_dir = here("assets")){
@@ -7,12 +7,10 @@ plot_latent_stack <- function(rast_stack=rast_stack,
   
   df_long <- pivot_longer(
     df,
-    cols = -c(x, y),
-    names_to = "hour_layer",
-    values_to = "hour_value"
+    cols       = -c(x, y),
+    names_to   = "hour_layer",
+    values_to  = "hour_value"
   )
-  
-  # df_long$hour_value[df_long$hour_value < 0] <- 0
   
   sf_farms <- st_as_sf(farm_locs)
   
@@ -21,13 +19,11 @@ plot_latent_stack <- function(rast_stack=rast_stack,
     facet_wrap(~ hour_layer, ncol = 3) +
     coord_equal(expand = FALSE) +
     #scale_fill_viridis_c(option = "turbo", na.value = "transparent") +
-    scale_fill_gradient2(
-      low = pals::coolwarm(1000)[1], 
-      mid = pals::coolwarm(1000)[500],
-      high = pals::coolwarm(1000)[1000],
-      midpoint = 0,
+    scale_fill_gradientn(
+      colors = rev(pals::cubehelix(30)[1:26]),
       na.value = "white",
-      name     = "Density"
+      limits = c(0, 1),
+      name = "Density"
     ) +
     theme_minimal() +
     theme(

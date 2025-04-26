@@ -1,33 +1,37 @@
-plot_latent_stack <- function(rast_stack=rast_stack,
-                              farm_locs = study_area$farm_locs,
-                              save_name = NULL,
-                              save_dir = here("assets")){
+plot_conc_stack <- function(rast_stack=particle_conc,
+                            farm_locs = study_area$farm_locs,
+                            save_name = NULL,
+                            save_dir = here("assets")){
   
   df <- as.data.frame(rast_stack, xy = TRUE)
   
   df_long <- pivot_longer(
     df,
-    cols = -c(x, y),
-    names_to = "hour_layer",
-    values_to = "hour_value"
+    cols       = -c(x, y),
+    names_to   = "hour_layer",
+    values_to  = "hour_value"
   )
-  
-  # df_long$hour_value[df_long$hour_value < 0] <- 0
   
   sf_farms <- st_as_sf(farm_locs)
   
-  ggp <- ggplot(df_long, aes(x = x, y = y, fill = hour_value)) +
+  max_x <- max(df_long$hour_value, na.rm=T)
+  min_x <- min(df_long$hour_value, na.rm=T)
+  
+  df_long$hour_value[df_long$hour_value < min_x] <- NA
+  
+  df_long$hour_value_log <- log(df_long$hour_value/1e6))
+  
+  ggp <- ggplot(df_long, aes(x = x, y = y, fill = hour_value_log)) +
     geom_raster() +
     facet_wrap(~ hour_layer, ncol = 3) +
     coord_equal(expand = FALSE) +
     #scale_fill_viridis_c(option = "turbo", na.value = "transparent") +
-    scale_fill_gradient2(
-      low = pals::coolwarm(1000)[1], 
-      mid = pals::coolwarm(1000)[500],
-      high = pals::coolwarm(1000)[1000],
-      midpoint = 0,
+    scale_fill_gradientn(
+      #colors = pals::kovesi.rainbow(100),
+      colors = rev(pals::parula(100)),
       na.value = "white",
-      name     = "Density"
+      #limits = c(0, max_x),
+      name = "Concentration"
     ) +
     theme_minimal() +
     theme(
@@ -46,13 +50,13 @@ plot_latent_stack <- function(rast_stack=rast_stack,
       plot.title     = element_text(size = 22, face = "bold", hjust = 0.5)
     ) +
     labs(fill = "Hour",
-         title = "Relative Particle Density",
+         title = " ",
          x = "Easting", y = "Northing") +
     geom_sf(
       data        = sf_farms,
       aes(shape = farm),
-      fill        = "yellow",
-      color       = "red",
+      fill        = "gray50",
+      color       = "black",
       size        = 3,
       stroke      = 1,
       inherit.aes = FALSE
