@@ -19,7 +19,7 @@ plot_conc_stack <- function(rast_stack=particle_conc,
   
   df_long$hour_value[df_long$hour_value < min_x] <- NA
   
-  df_long$hour_value_log <- log(df_long$hour_value/1e6))
+  df_long$hour_value_log <- log((df_long$hour_value/1e6))
   
   ggp <- ggplot(df_long, aes(x = x, y = y, fill = hour_value_log)) +
     geom_raster() +
