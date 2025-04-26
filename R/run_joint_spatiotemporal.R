@@ -11,7 +11,8 @@ run_spatiotemporal <- function(field.sp.1 = sp_indices_dens$field.sp.1,
   cont_g <- list(model = "ar1", hyper = rho_pc)
   
   beta_prior <- list(prior = 'gaussian', param = c(0,1))
-  pcgprior <- list(prior = 'pc.gamma', param = 1)
+  #pcgprior <- list(prior = 'pc.gamma', param = c(2, 0.01))
+  pcgprior <- list(prior = 'pc.prec', param = c(2, 0.01))
   cff <- list(list(), list(hyper = list(prec = pcgprior)))
   
   #hc1 = list(theta = list(prior = "normal", param = c(0, 10)))
@@ -30,18 +31,21 @@ run_spatiotemporal <- function(field.sp.1 = sp_indices_dens$field.sp.1,
       hyper = list(beta = beta_prior),
       fixed=FALSE)
   
+  return_quants = c(0.025, 0.25, 0.5, 0.75, 0.975) 
+  
   model.0 <- inla(formula.1,
                   #num.threads = 12,
                   data = inla.stack.data(est.stk),
                   family = c("binomial","gamma"),
                   control.family = cff,
                   verbose = verbose,
+                  quantiles = return_quants,
                   control.fixed = list(prec = 1, prec.intercept=1),
                   control.predictor = list(
                                   A = inla.stack.A(est.stk), 
                             compute = TRUE,
                                link = link), 
-                  #control.mode = list(restart = TRUE, theta = theta_1),
+                  # control.mode = list(restart = TRUE, theta = theta_1),
                   control.inla = list(strategy="adaptive",
                                       int.strategy = "eb"),
                   control.compute=list(dic = FALSE, cpo = FALSE, waic = FALSE)) 

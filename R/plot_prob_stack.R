@@ -20,10 +20,10 @@ plot_prob_stack <- function(rast_stack=rast_stack,
     coord_equal(expand = FALSE) +
     #scale_fill_viridis_c(option = "turbo", na.value = "transparent") +
     scale_fill_gradientn(
-      colors = rev(pals::cubehelix(30)[1:26]),
+      colors = rev(pals::cubehelix(30)[1:28]),
       na.value = "white",
       limits = c(0, 1),
-      name = "Density"
+      name = "Probability"
     ) +
     theme_minimal() +
     theme(
@@ -42,7 +42,7 @@ plot_prob_stack <- function(rast_stack=rast_stack,
       plot.title     = element_text(size = 22, face = "bold", hjust = 0.5)
     ) +
     labs(fill = "Hour",
-         title = "Relative Particle Density",
+         title = "Particle Probabilty",
          x = "Easting", y = "Northing") +
     geom_sf(
       data        = sf_farms,

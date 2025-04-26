@@ -1,11 +1,11 @@
 replicate_data_timesteps <- function(
-    grid_raster = study_area$grid,
-    farm_locs = study_area$farm_locs,
-    concen_data = conc_melt,
-    scale_concentration = 1e6,
-    plume_model = plume_model,
-    mesh = mesh.dom,
-    max_hour = 6 # max timesteps to model
+        grid_raster = study_area$grid,
+        farm_locs = study_area$farm_locs,
+        concen_data = conc_melt,
+        scale_concentration = 1e6,
+        plume_model = plume_model,
+        mesh = mesh.dom,
+        max_hour = 6 # max timesteps to model
 ) {
   
   # plume particles
