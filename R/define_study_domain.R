@@ -29,7 +29,7 @@ define_study_domain <- function(
   # simulate farms (if requested)
   farm_locs <- NULL
   if (!is.null(sim_farms) && is.numeric(sim_farms)) {
-    chik_dens <- rast(here("local/nlcd/GLW4-2020.D-DA.CHK.tif"))
+    chik_dens <- rast(here("assets/GLW4-2020.D-DA.CHK.tif")) #Gridded Livestock of the World - chicken
     chik_dens <- project(chik_dens, grid_raster, method = "near")
     chik_dens <- crop(chik_dens, grid_raster)
     chik_dens <- resample(chik_dens, grid_raster, method = "near")

@@ -24,7 +24,7 @@ plot_latent_stack <- function(rast_stack=rast_stack,
       colors = rev(pals::cubehelix(100)[2:100]),
       na.value = "white",
       #limits = c(0, max_x),
-      name = "Concentration"
+      name = "SRF"
     ) +
    # scale_fill_gradient2(
    #   low = pals::coolwarm(1000)[1], 
@@ -51,7 +51,7 @@ plot_latent_stack <- function(rast_stack=rast_stack,
       plot.title     = element_text(size = 22, face = "bold", hjust = 0.5)
     ) +
     labs(fill = "Hour",
-         title = "Particle Field Density",
+         title = "Random Field Density",
          x = "Easting", y = "Northing") +
     geom_sf(
       data        = sf_farms,
