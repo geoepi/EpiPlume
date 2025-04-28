@@ -1,7 +1,13 @@
-map_grid2 <- function(raster_grid, traj_data = NULL, 
-                     group_col = NULL, vector_type = NULL, 
-                     buffer_prop = 0.1, point_size=0.5, line_size = 1) {
-  
+map_grid2 <- function(
+    raster_grid,
+    traj_data     = NULL,
+    group_col     = NULL,
+    vector_type   = NULL,
+    buffer_prop   = 0.1,
+    point_size    = 0.5,
+    line_size     = 1,
+    grid_cut      = FALSE
+) {
   require(ggmap)
   require(ggspatial)
   require(sf)
@@ -9,123 +15,150 @@ map_grid2 <- function(raster_grid, traj_data = NULL,
   require(ggplot2)
   require(dplyr)
   
-  # get extent
+  # grid polygon
   e <- ext(raster_grid)
+  corners <- matrix(c(
+    e[1], e[3],
+    e[2], e[3],
+    e[2], e[4],
+    e[1], e[4],
+    e[1], e[3]
+  ), ncol = 2, byrow = TRUE)
   
-  # polygon from the extent
-  corners <- matrix(c(e[1], e[3],
-                      e[2], e[3],
-                      e[2], e[4],
-                      e[1], e[4],
-                      e[1], e[3]), 
-                    ncol = 2, byrow = TRUE)
+  grid_poly     <- st_polygon(list(corners))
   
-  grid_polygon <- st_polygon(list(corners))
-  grid_sf <- st_sfc(grid_polygon, crs = crs(raster_grid, proj = TRUE))
+  grid_sf_wgs84 <- st_sfc(
+    grid_poly,
+    crs = crs(raster_grid, proj = TRUE)
+  ) %>%
+    st_transform(crs = 4326) %>%
+    st_sf(geometry = .)
   
-  # transform the grid polygon to WGS84 (EPSG:4326)
-  grid_sf_wgs84 <- st_transform(grid_sf, crs = 4326)
-  
-  # grid bounding box
-  grid_bbox <- st_bbox(grid_sf_wgs84)
-  combined_bbox <- c(
-    left   = as.numeric(grid_bbox["xmin"]),
-    bottom = as.numeric(grid_bbox["ymin"]),
-    right  = as.numeric(grid_bbox["xmax"]),
-    top    = as.numeric(grid_bbox["ymax"])
-  )
-  
+  # trajectory obhjects
   traj_points <- NULL
-  traj_lines <- NULL
-  
+  traj_lines  <- NULL
   if (!is.null(traj_data)) {
-
-    traj_sf <- st_as_sf(traj_data, coords = c("lon", "lat"), crs = 4326)
-    
-    traj_bbox <- st_bbox(traj_sf)
-    combined_bbox <- c(
-      left   = min(combined_bbox["left"], as.numeric(traj_bbox["xmin"])),
-      bottom = min(combined_bbox["bottom"], as.numeric(traj_bbox["ymin"])),
-      right  = max(combined_bbox["right"], as.numeric(traj_bbox["xmax"])),
-      top    = max(combined_bbox["top"], as.numeric(traj_bbox["ymax"]))
+    traj_sf <- st_as_sf(
+      traj_data,
+      coords = c("lon", "lat"),
+      crs    = 4326
     )
     
     if (!is.null(group_col)) {
-      # if group_col, vector_type must be provided as "line" or "point"
-      if (is.null(vector_type) || !(vector_type %in% c("line", "point"))) {
-        stop('When group_col is provided, vector_type must be specified as "line" or "point".')
+      if (is.null(vector_type) || !vector_type %in% c("line", "point")) {
+        stop('When group_col is provided, vector_type must be "line" or "point"')
       }
-      
-      # convert the grouping column to a factor for coloring
       traj_sf[[group_col]] <- as.factor(traj_sf[[group_col]])
-      
       if (vector_type == "line") {
-        # group the data by group_col, then convert each group into a LINESTRING.
-        traj_lines <- traj_sf %>% 
-          group_by(!!sym(group_col)) %>% 
-          summarize(do_union = FALSE, .groups = "drop") %>% 
+        traj_lines <- traj_sf %>%
+          group_by(!!sym(group_col)) %>%
+          summarize(
+            geometry = st_combine(geometry),
+            .groups  = "drop"
+          ) %>%
           st_cast("LINESTRING")
-      } else if (vector_type == "point") {
-
+      } else {
         traj_points <- traj_sf
       }
-      
     } else {
-      
       traj_points <- traj_sf
+    }
+    
+    # cropping to grid polygon
+    if (grid_cut) {
+      if (!is.null(traj_points)) {
+        traj_points <- st_intersection(traj_points, grid_sf_wgs84)
+      }
+      if (!is.null(traj_lines)) {
+        traj_lines <- st_intersection(traj_lines, grid_sf_wgs84)
+      }
     }
   }
   
-  # buffer bounding box
+  # bounding box for basemap
+  grid_bbox <- st_bbox(grid_sf_wgs84)
+  if (grid_cut) {
+    combined_bbox <- grid_bbox
+  } else {
+    combined_bbox <- grid_bbox
+    if (!is.null(traj_data)) {
+      traj_bbox <- st_bbox(traj_sf)
+      combined_bbox["xmin"] <- min(combined_bbox["xmin"], traj_bbox["xmin"])
+      combined_bbox["ymin"] <- min(combined_bbox["ymin"], traj_bbox["ymin"])
+      combined_bbox["xmax"] <- max(combined_bbox["xmax"], traj_bbox["xmax"])
+      combined_bbox["ymax"] <- max(combined_bbox["ymax"], traj_bbox["ymax"])
+    }
+  }
+  # small buffer
+  buf_x <- if (grid_cut) 0 else buffer_prop * (combined_bbox["xmax"] - combined_bbox["xmin"])
+  buf_y <- if (grid_cut) 0 else buffer_prop * (combined_bbox["ymax"] - combined_bbox["ymin"])
+  bb_buf <- c(
+    combined_bbox["xmin"] - buf_x,
+    combined_bbox["ymin"] - buf_y,
+    combined_bbox["xmax"] + buf_x,
+    combined_bbox["ymax"] + buf_y
+  )
+  names(bb_buf) <- c("left", "bottom", "right", "top")
   
-  buffer_x <- buffer_prop * (combined_bbox["right"] - combined_bbox["left"])
-  buffer_y <- buffer_prop * (combined_bbox["top"] - combined_bbox["bottom"])
-  
-  bbox_buffered <- c(
-    left   = as.numeric(combined_bbox["left"]) - buffer_x,
-    bottom = as.numeric(combined_bbox["bottom"]) - buffer_y,
-    right  = as.numeric(combined_bbox["right"]) + buffer_x,
-    top    = as.numeric(combined_bbox["top"]) + buffer_y
+  basemap <- get_map(
+    location = bb_buf,
+    source   = "stadia",
+    maptype  = "stamen_toner_lite",
+    color    = "bw"
   )
   
-  bbox_buffered <- structure(as.numeric(bbox_buffered), names = c("left", "bottom", "right", "top"))
-  
-  #### basemap
-  basemap <- get_map(location = bbox_buffered, source = "stadia", maptype = "stamen_toner_lite", color = "bw")
-  
-  
+  # build plot
   p <- ggmap(basemap) +
-    geom_sf(data = grid_sf_wgs84, fill = NA, color = "red", size = 1, inherit.aes = FALSE) +
+    geom_sf(
+      data        = grid_sf_wgs84,
+      fill        = NA,
+      color       = "red",
+      linewidth   = 1,
+      inherit.aes = FALSE
+    ) +
     theme_classic() +
-    theme(plot.margin = unit(c(2,8,5,8), "mm"),
-          axis.title.x = element_text(size = 22, face = "bold"),
-          axis.title.y = element_text(size = 22, face = "bold"),
-          axis.text.x = element_text(size = 10, face = "bold"),
-          axis.text.y = element_text(size = 10, face = "bold"),
-          legend.direction = "horizontal",
-          legend.position = "none",
-          strip.text = element_blank(), 
-          strip.background = element_blank(),
-          legend.key.size = unit(2, "line"),
-          legend.key.width = unit(3, "line"),
-          legend.text = element_text(size = 16, face = "bold"),
-          legend.title = element_text(size = 16, face = "bold"),
-          plot.title = element_text(size = 24, face = "bold")) +
-    labs(title = " ", x = "Longitude", y = "Latitude", col = "Model Run") +
-    annotation_scale(location = "tl", width_hint = 0.4) +
-    ggtitle("Study Area")
+    theme(
+      plot.margin      = unit(c(2,8,5,8), "mm"),
+      axis.title       = element_text(size = 22, face = "bold"),
+      axis.text        = element_text(size = 10, face = "bold"),
+      legend.direction = "horizontal",
+      legend.position  = "none",
+      strip.text       = element_blank(),
+      legend.key.size  = unit(2, "line"),
+      legend.key.width = unit(3, "line"),
+      legend.text      = element_text(size = 16, face = "bold"),
+      legend.title     = element_text(size = 16, face = "bold"),
+      plot.title       = element_text(size = 24, face = "bold")
+    ) +
+    labs(
+      title = "Study Area",
+      x     = "Longitude",
+      y     = "Latitude",
+      col   = "Model Run"
+    ) +
+    annotation_scale(location = "tl", width_hint = 0.4)
   
-  # trajectories, if provided
-  
+  # add trajectories
   if (!is.null(traj_data)) {
     if (!is.null(traj_lines)) {
-      p <- p + geom_sf(data = traj_lines, aes(color = .data[[group_col]]),
-                       inherit.aes = FALSE, linewidth = line_size)
+      p <- p +
+        geom_sf(
+          data       = traj_lines,
+          aes(color   = .data[[group_col]]),
+          inherit.aes = FALSE,
+          linewidth   = line_size
+        )
     }
     if (!is.null(traj_points)) {
-      p <- p + geom_sf(data = traj_points, 
-                       aes(color = if(!is.null(group_col)) .data[[group_col]] else NULL),
-                       inherit.aes = FALSE, size = point_size, shape = 19, fill = "white")
+      p <- p +
+        geom_sf(
+          data        = traj_points,
+          aes(color    = if (!is.null(group_col)) .data[[group_col]] else NULL),
+          inherit.aes = FALSE,
+          size         = point_size,
+          shape        = 19,
+          fill         = "white"
+        )
     }
   }
   

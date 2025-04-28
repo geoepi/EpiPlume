@@ -1,4 +1,4 @@
-plot_ode_shed_dynamics <- function(out_df, date_axis = FALSE) {
+plot_ode_shed_dynamics <- function(out_df, date_axis = FALSE, vline = NULL, vline_text = NULL) {
   
   require(patchwork)
   require(reshape2)
@@ -74,6 +74,38 @@ plot_ode_shed_dynamics <- function(out_df, date_axis = FALSE) {
     base_theme +
     theme(legend.position = "none") +
     scale_x
+  
+  if (!is.null(vline)) {
+    if (date_axis) {
+      vline <- as.POSIXct(vline, tz = "UTC")
+    }
+    p1 <- p1 +
+      geom_vline(xintercept = vline,
+                 linetype     = "dotdash",
+                 linewidth    = 1,
+                 colour       = "black") +
+      annotate("text",
+               x           = vline,
+               y           = Inf,
+               label       = vline_text,
+               angle       = 90,
+               vjust       = -0.5,
+               hjust       = 1.1,
+               size        = 5)
+    p2 <- p2 +
+      geom_vline(xintercept = vline,
+                 linetype     = "dotdash",
+                 linewidth    = 1,
+                 colour       = "black") +
+      annotate("text",
+               x           = vline,
+               y           = Inf,
+               label       = vline_text,
+               angle       = 90,
+               vjust       = -0.5,
+               hjust       = 1.1,
+               size        = 5)
+  }
   
   # combine
   combined <- p1 / p2

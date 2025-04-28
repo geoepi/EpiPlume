@@ -28,7 +28,7 @@ virus:
 # ───────────────────────────────────────── 
 seir:
   beta: 1.5 # daily rate
-  sigma: 2 # latent periods
+  sigma: 2 # latent period
   gamma: 4 # days infectious
   Ei: 0 # initial exposed
   Ii: 1 # initial infectious
@@ -44,12 +44,12 @@ trajectory:
   traj_climate: "local/demo_run/climate" # climate input needed for HYSPLIT
   traj_outputs: "local/demo_run/traj" # HYSPLIT outputs for directories (will be populated during run)
   traj_height: 5 # height of source emissions (meters)
-  traj_duration: 24 # duration of trajectory tracking (hours)
+  traj_duration: 6 # duration of trajectory tracking (hours)
   days: "2020-02-16" # date to start trajectory simulation (YYYY-MM-DD)
   daily_hours: [0, 6, 12, 18] # what hours during the day should parcel trajectories be emitted/tracked
   model_height: 5000 # maximum altitude (meters)
   vert_motion: 0 # estimated from input data
-  traj_direction: "forward" # forward in time simulation, or retrospective backwards
+  traj_direction: "backward" # backward in time simulation
   extended_met: TRUE # return all meterological variables (all trajectories and time steps)
   traj_met_type: "reanalysis" # climate data to use
   traj_clean_up: FALSE # do not remove intermediate files

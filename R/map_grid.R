@@ -78,7 +78,7 @@ map_grid <- function(raster_grid, source_loc = NULL, concentration_raster = NULL
       geom_tile(data = df_conc, aes(x = x, y = y, fill = !!as.name(conc_col)), alpha = 0.6) +
       scale_fill_gradientn(colors = rev(pals::cubehelix(30)[1:26]),
                            na.value = "white",
-                           name = "Concentration (g/m3)",
+                           name = "Particles/m3",
                            limits = c(0, max(df_conc[[conc_col]], na.rm = TRUE)))
   }
   
