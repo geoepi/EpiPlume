@@ -10,6 +10,7 @@ format:
    code-fold: show
    code-summary: "Hide code"
    preview-mode: raw
+   prefer-html: true
 editor: source
 editor_options:  
   chunk_output_type: console
@@ -162,11 +163,13 @@ plume_plot <- map_grid2(grid_raster, plume_table, group_col = "particle_i", vect
 plume_plot
 ```
   
-Animated plot.  
-```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+Animated plot (doesn't render for static version)  
+```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE, eval=FALSE}
 # animated_plume <- animate_plume(grid_raster, plume_table, group_col = "particle_i")
 
-animated_plume <- animate_plume_simple(plume_table, group_col = "particle_i", point_size = 0.5)
+animated_plume <- animate_plume_simple(plume_table, 
+                                       source_loc = c(source_origin[1], source_origin[2]),
+                                       group_col = "particle_i", point_size = 0.5)
 animated_plume
 ```
 
@@ -174,3 +177,5 @@ animated_plume
 # save
 anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 ```
+
+

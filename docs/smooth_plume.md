@@ -1,22 +1,43 @@
----
-title: "Spatiotemporal Smoothing and other assortative explorations"
-description: " "
-date: "2025-04-19"
-categories: [R, HPAI]
-format:
-  gfm:
-   toc: true
-   toc-depth: 2
-   code-fold: show
-   code-summary: "Hide code"
-   preview-mode: raw
-editor: source
-editor_options:  
-  chunk_output_type: console
----
+Spatiotemporal Smoothing and other assortative explorations
+================
+4/19/25
+
+- <a href="#libraries" id="toc-libraries">Libraries</a>
+- <a href="#custom-functions" id="toc-custom-functions">Custom
+  Functions</a>
+- <a href="#create-study-area-grid" id="toc-create-study-area-grid">Create
+  Study Area Grid</a>
+- <a href="#location-map" id="toc-location-map">Location Map</a>
+- <a href="#dispersion-model" id="toc-dispersion-model">Dispersion
+  Model</a>
+- <a href="#trajectory-model" id="toc-trajectory-model">Trajectory
+  Model</a>
+- <a href="#plume-map" id="toc-plume-map">Plume Map</a>
+- <a href="#get-landcover" id="toc-get-landcover">Get Landcover</a>
+- <a href="#get-chicken-density" id="toc-get-chicken-density">Get Chicken
+  Density</a>
+- <a href="#random-farm-locations" id="toc-random-farm-locations">Random
+  Farm Locations</a>
+- <a href="#farm-exposure-time" id="toc-farm-exposure-time">Farm Exposure
+  Time</a>
+- <a href="#spatiotemporal-anaysis"
+  id="toc-spatiotemporal-anaysis">SpatioTemporal Anaysis</a>
+- <a href="#get-nodes" id="toc-get-nodes">Get Nodes</a>
+- <a href="#replicate-timesteps" id="toc-replicate-timesteps">Replicate
+  Timesteps</a>
+- <a href="#field-index" id="toc-field-index">Field Index</a>
+- <a href="#data-stack" id="toc-data-stack">Data Stack</a>
+- <a href="#formula" id="toc-formula">Formula</a>
+- <a href="#run-model" id="toc-run-model">Run Model</a>
+- <a href="#spatial-fields" id="toc-spatial-fields">Spatial Fields</a>
+- <a href="#plume-density" id="toc-plume-density">Plume Density</a>
 
 ## Libraries
-```{r warning=FALSE, message=FALSE}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 library(tidyverse)
 library(here)
 library(ggmap)
@@ -31,19 +52,42 @@ library(splitr)
 # devtools::install_github("rich-iannone/splitr")
 ```
 
+</details>
+
 ## Custom Functions
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 source(here("R/utilities.R"))
 source_dir(here("R"))
 ```
 
-## Create Study Area Grid  
-Choosing an arbitrary geographic point.  It will serve as the emission point source location and be used to define study area extent.  
-```{r}
+</details>
+
+## Create Study Area Grid
+
+Choosing an arbitrary geographic point. It will serve as the emission
+point source location and be used to define study area extent.
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 source_origin <- c(-89.031407, 32.494830)  # Newton County, Mississippi
 source_vect <- vect(matrix(source_origin , ncol = 2), type = "points", crs = "EPSG:4326")
 timezone_utc <- get_timezone_utc(source_origin)
+```
 
+</details>
+
+    Loading required package: lutz
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 user_projection <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs"
 
 grid_raster <- create_spatraster_grid(source_origin, user_projection, extent_km = 50) # projected
@@ -51,23 +95,55 @@ grid_raster_geo <- create_spatraster_grid_geo(source_origin) # no proj
 source_vect <- project(source_vect, user_projection)
 ```
 
+</details>
 
 ## Location Map
-Register Stadia Maps API to pull background images.  
-```{r}
+
+Register Stadia Maps API to pull background images.
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 map_api <- yaml::read_yaml(here("local", "secrets.yaml"))
 register_stadiamaps(key = map_api$stadi_api)
 ```
-    
-Vicinity around source.    
-```{r fig.height=10, fig.width=10}
+
+</details>
+
+Vicinity around source.
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 map_plot <- map_grid(grid_raster)
+```
+
+</details>
+
+    ℹ © Stadia Maps © Stamen Design © OpenMapTiles © OpenStreetMap contributors.
+
+    Coordinate system already present. Adding new coordinate system, which will
+    replace the existing one.
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 map_plot
 ```
 
+</details>
+
+![](smooth_plume_files/figure-commonmark/unnamed-chunk-5-1.png)
 
 ## Dispersion Model
-```{r eval=FALSE}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 sim_dispersion <- create_dispersion_model() %>%
   add_source(
     name = "plume_1", 
@@ -95,7 +171,12 @@ sim_dispersion <- create_dispersion_model() %>%
 # save
 saveRDS(sim_dispersion, here("local/plume/sim_dispersion.rds"))
 ```
-```{r}
+
+</details>
+<details open>
+<summary>Hide code</summary>
+
+``` r
 # load saved run
 sim_dispersion <- readRDS(here("local/plume/sim_dispersion.rds"))
 
@@ -103,8 +184,24 @@ plume_table <- sim_dispersion$disp_df
 head(plume_table)
 ```
 
+</details>
+
+    # A tibble: 6 × 5
+      particle_i  hour   lat   lon height
+      <chr>      <int> <dbl> <dbl>  <dbl>
+    1 00001          1  32.5 -89.1     24
+    2 00002          1  32.5 -89.1     88
+    3 00003          1  32.5 -89.1      9
+    4 00004          1  32.5 -89.1     12
+    5 00005          1  32.5 -89.1     11
+    6 00006          1  32.5 -89.1     26
+
 ## Trajectory Model
-```{r eval=FALSE}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 trajectory_model <-
   create_trajectory_model() %>%
   add_trajectory_params(
@@ -128,7 +225,12 @@ trajectory_model <-
 # save
 saveRDS(trajectory_model, here("local/traj/trajectory_model.rds"))
 ```
-```{r}
+
+</details>
+<details open>
+<summary>Hide code</summary>
+
+``` r
 # load saved run
 trajectory_model <- readRDS(here("local/traj/trajectory_model.rds"))
 
@@ -136,29 +238,97 @@ traj_table <- trajectory_model$traj_df
 head(traj_table)
 ```
 
+</details>
+
+    # A tibble: 6 × 21
+        run receptor hour_along traj_dt               lat   lon height
+      <int>    <int>      <int> <dttm>              <dbl> <dbl>  <dbl>
+    1     1        1          0 2020-02-16 00:00:00  32.5 -89.0    5  
+    2     1        1          1 2020-02-16 01:00:00  32.6 -89.1    4.4
+    3     1        1          2 2020-02-16 02:00:00  32.6 -89.1    4.2
+    4     1        1          3 2020-02-16 03:00:00  32.7 -89.1    4.3
+    5     1        1          4 2020-02-16 04:00:00  32.7 -89.1    4.9
+    6     1        1          5 2020-02-16 05:00:00  32.8 -89.1    5.9
+    # ℹ 14 more variables: traj_dt_i <dttm>, lat_i <dbl>, lon_i <dbl>,
+    #   height_i <dbl>, pressure <dbl>, theta <dbl>, air_temp <dbl>,
+    #   rainfall <dbl>, mixdepth <dbl>, rh <dbl>, sp_humidity <dbl>,
+    #   h2o_mixrate <dbl>, terr_msl <dbl>, sun_flux <dbl>
 
 ### Plume Plots
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 plume_plot <- map_grid2(grid_raster, sim_dispersion$disp_df, group_col = "particle_i", vector_type = "point")
+```
+
+</details>
+
+    ℹ © Stadia Maps © Stamen Design © OpenMapTiles © OpenStreetMap contributors.
+
+    Coordinate system already present. Adding new coordinate system, which will
+    replace the existing one.
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 plume_plot
 ```
 
-(Animation doesn't render in static version of markdown)
-```{r eval=FALSE}
+</details>
+
+![](smooth_plume_files/figure-commonmark/unnamed-chunk-10-1.png)
+
+(Animation doesn’t render in static version of markdown)
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 animated_plume <- animate_plume_simple(sim_dispersion$disp_df, group_col = "particle_i", point_size = 0.5)
 animated_plume
 ```
 
+</details>
+
 ### Trajectory Plots
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 traj_plot <- map_grid2(grid_raster, trajectory_model$traj_df, group_col = "run", 
                        vector_type = "line", line_size = 2)
+```
+
+</details>
+
+    ℹ © Stadia Maps © Stamen Design © OpenMapTiles © OpenStreetMap contributors.
+
+    Coordinate system already present. Adding new coordinate system, which will
+    replace the existing one.
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 traj_plot
 ```
 
+</details>
+
+![](smooth_plume_files/figure-commonmark/unnamed-chunk-12-1.png)
+
 ## Plume Map
+
 Mapping post emission hour.
-```{r eval=TRUE}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 particle_locs <- vect(
   plume_table,
   geom = c("lon","lat"),
@@ -171,8 +341,14 @@ particle_locs <- project(
 )
 ```
 
+</details>
+
 Rasterize
-```{r eval=FALSE}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 hour_min_r <- rasterize(
   x         = particle_locs,
   y         = grid_raster,
@@ -199,15 +375,29 @@ hour_smooth <- terra::focal(
 # save
 writeRaster(hour_smooth, here("local/plume/hour_smooth.tif"), overwrite = TRUE)
 ```
-```{r}
+
+</details>
+<details open>
+<summary>Hide code</summary>
+
+``` r
 hour_smooth <- rast(here("local/plume/hour_smooth.tif"))
 plot(hour_smooth)
 ```
 
+</details>
+
+![](smooth_plume_files/figure-commonmark/unnamed-chunk-15-1.png)
 
 ## Get Landcover
-Source: [USGS MLRC](https://www.usgs.gov/centers/eros/science/data-access)
-```{r}
+
+Source: [USGS
+MLRC](https://www.usgs.gov/centers/eros/science/data-access)
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 nlcd <- rast(here("local/nlcd/Annual_NLCD_LndCov_2023_CU_C1V0.tif")) # NLCD 2023
 
 nlcd <- project(
@@ -223,19 +413,68 @@ nlcd <- resample(
   y      = grid_raster,
   method = "near"
 )
-
 ```
 
+</details>
+
 ### NLCD Classification
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 nlcd_table <- read_csv(here("local/nlcd/nlcd_classes.csv"))
+```
+
+</details>
+
+    Rows: 16 Columns: 2
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: ","
+    chr (1): Description
+    dbl (1): Class
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 nlcd_table
 ```
 
+</details>
 
-## Get Chicken Density 
-Source: [Livestock of the World](https://www.fao.org/livestock-systems/global-distributions/en/)
-```{r}
+    # A tibble: 16 × 2
+       Class Description                 
+       <dbl> <chr>                       
+     1    11 Open Water                  
+     2    12 Perennial Ice/Snow          
+     3    21 Devloped Open Space         
+     4    22 Developed Low Intensity     
+     5    23 Developed Medium Intensity  
+     6    24 Developed High Intensity    
+     7    31 Barren                      
+     8    41 DeciduousForest             
+     9    42 Evergreen Forest            
+    10    43 Mixed Forest                
+    11    52 Shrub/Scrub                 
+    12    71 Grassland Herbaceous        
+    13    81 Pasture/Hay                 
+    14    82 Cultivated Crops            
+    15    90 Woody Wetlands              
+    16    95 Emergent Herbaceous Wetlands
+
+## Get Chicken Density
+
+Source: [Livestock of the
+World](https://www.fao.org/livestock-systems/global-distributions/en/)
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 chik_dens <- rast(here("assets/GLW4-2020.D-DA.CHK.tif"))
 
 chik_dens <- project(
@@ -254,12 +493,18 @@ chik_dens <- resample(
 
 # density to probability range
 farm_prob <- rescale_raster(chik_dens, new_min = 5, new_max = 95)
-
 ```
 
-## Random Farm Locations 
+</details>
+
+## Random Farm Locations
+
 Using chicken density to weight random assignment of farm locations.
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 farms_n <- 20
 
 set.seed(123)
@@ -283,9 +528,16 @@ plot(farm_locs, pch = 20, cex=2, col = "red", add=T)
 plot(source_vect, pch = 2, cex=4, col= "green", add=T)
 ```
 
+</details>
+
+![](smooth_plume_files/figure-commonmark/unnamed-chunk-19-1.png)
 
 ## Farm Exposure Time
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 farm_locs$exposed_hour <- extract(hour_smooth, farm_locs)[,2]
 farm_locs$exposed_hour[is.na(farm_locs$exposed_hour)] = 0
 
@@ -293,10 +545,18 @@ farm_locs$exposed_hour[is.na(farm_locs$exposed_hour)] = 0
 range(farm_locs$exposed_hour)
 ```
 
+</details>
+
+    [1] 0.000000 7.014517
+
 ## SpatioTemporal Anaysis
-Creating continuous surface from plume estimation
-### Mesh
-```{r message=FALSE, warning=FALSE}
+
+Creating continuous surface from plume estimation \### Mesh
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 library(raster)
 select <- dplyr::select
 
@@ -317,13 +577,28 @@ mesh.dom <- inla.mesh.2d(boundary = dom_bnds,
 mesh.dom$n
 ```
 
-```{r fig.width=8, fig.height=8}
+</details>
+
+    [1] 6974
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 plot(mesh.dom)
 plot(points_sp, col="red", cex=3, shape= 1, add=T)
 ```
 
+</details>
+
+![](smooth_plume_files/figure-commonmark/unnamed-chunk-22-1.png)
+
 ## Get Nodes
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 dd = as.data.frame(cbind(mesh.dom$loc[,1], 
                          mesh.dom$loc[,2]))
 
@@ -332,9 +607,16 @@ names(dd) = c("x", "y")
 dd$set <- "node"
 ```
 
-## Replicate Timesteps  
+</details>
+
+## Replicate Timesteps
+
 Copy mesh nodes for each timestep
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 particle_df <- as.data.frame(particle_locs)
 particle_df <- cbind(particle_df , crds(particle_locs)) %>%
   mutate(set = "particle") %>%
@@ -356,16 +638,52 @@ for(i in 1:t_steps){
 }
   
 dim(comb_data)
+```
+
+</details>
+
+    [1] 75952     4
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 range(comb_data$hour)
+```
+
+</details>
+
+    [1] 1 8
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 unique(comb_data$set)
 ```
 
+</details>
+
+    [1] "particle" "node"    
 
 ## Field Index
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 k <- length(unique(comb_data$hour))
 k # knots
+```
 
+</details>
+
+    [1] 8
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 locs <- cbind(comb_data$x, comb_data$y)
 
 # Match locations in data frame to locations in mesh
@@ -384,9 +702,14 @@ Field.pf <- inla.spde.make.index("Field.pf",
                                n.group=k)
 ```
 
+</details>
 
 ## Data Stack
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 est.lst <- list(c(Field.pf,
                  list(intercept1 = 1)), 
                  list(x_tmp = comb_data[,"x"],
@@ -402,9 +725,14 @@ est.stk <- inla.stack(data = list(Y = comb_data$Y),
                                tag = "est.0")
 ```
 
+</details>
 
 ## Formula
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 pcprior_1 <- list(prec = list(prior="pc.prec", param = c(1, 0.01))) 
 rho_pc <- list(rho = list(prior = "pc.cor1", param = c(0, 0.9))) 
 cont_g <- list(model = "ar1", hyper = rho_pc)
@@ -418,11 +746,16 @@ Formula.1 <- Y ~ -1 + intercept1 +
                         model=spde0,
                         group = Field.pf.group,
                         control.group=ctr.g)
-                 
 ```
 
+</details>
+
 ## Run Model
-```{r eval=FALSE}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 # theta_1 <- c(5.929494, 3.129386, 0.397794)
 
 Model.0 <- inla(Formula.1,
@@ -444,15 +777,27 @@ Model.0 <- inla(Formula.1,
 saveRDS(Model.0, here("local/plume/model0.rds"))
 ```
 
+</details>
+
 load prior run
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 Model.0 <- readRDS(here("local/plume/model0.rds"))
 ```
+
+</details>
 
 ## Spatial Fields
 
 Create a dense point grid
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 blank.r <- grid_raster
 blank.r[!is.na(blank.r)] <- 0
 
@@ -464,15 +809,27 @@ grid_coords <- grid_pnts %>%
   as.data.frame() 
 ```
 
+</details>
+
 Associate dense points to mesh.
-```{r}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 Ap <- inla.spde.make.A(mesh.dom, 
                        loc = cbind(grid_coords[,"x"], 
                                    grid_coords[,"y"]))
 ```
 
+</details>
+
 Extract model estimates and rasterize
-```{r eval=FALSE}
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 mrf_pf <- cbind(Model.0$summary.random$Field.pf$mean, 
                 Field.pf$Field.pf.group)
 
@@ -498,8 +855,14 @@ hour_stack <- rast(rst_list)
 hour_stack
 ```
 
-## Plume Density  
-```{r eval=FALSE}
+</details>
+
+## Plume Density
+
+<details open>
+<summary>Hide code</summary>
+
+``` r
 df <- as.data.frame(hour_stack, xy = TRUE)
 
 df_long <- pivot_longer(
@@ -571,11 +934,9 @@ ggsave(
   device = "png",
   bg = "white"
 )
-
 ```
 
-![Smoothed Plume](https://github.com/geoepi/EpiPlume/blob/main/assets/plume_density.png)
+</details>
 
-
-
-
+![Smoothed
+Plume](https://github.com/geoepi/EpiPlume/blob/main/assets/plume_density.png)

@@ -1,10 +1,10 @@
 project:
   type: website
   output-dir: docs
-  render:
-    - index.qmd
-    - simulate_outbreak.qmd
-    - trace_emission_source.qmd
+  #render:
+    #- index.qmd
+    #- simulate_outbreak.qmd
+    #- trace_emission_source.qmd
 
 execute-dir:
  fig-path: assets/

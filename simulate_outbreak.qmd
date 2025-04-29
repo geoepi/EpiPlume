@@ -263,6 +263,10 @@ animate_disp <- animate_plume_simple(traj_data = plume_model$disp_df,
 
 animate_disp
 ```
+```{r echo=FALSE}
+# save
+anim_save(here("assets/plume_animation2.gif"), animation = animate_disp)
+```
 
 ## Calculate Concentration  
 The *calculate_particle_concentration()* utilizes HYSPLIT estimated particles to calculate the particles per m3 hour.  Limiting analysis to first 6 hours, beyond that time the plume is outside the study area.
