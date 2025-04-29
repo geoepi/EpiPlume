@@ -39,7 +39,7 @@ pre {
 ## Overview
 This script provides a conceptual workflow that *backtraces* or verifies the source farm that instigated secondary outbreaks at other farms through atmospheric dispersion of virus.  That is, the script looks at data from a secondary outbreak and attempts to determine what source farm emitted the virus that seeded virus introduction.  This script moves *backward* in time to identify the source of a pathogenic plume.      
   
-The companion and preceding script for this analysis is available here, Simulated Outbreak.  That analysis moves *forward* in time to model what farms could have been subject to pathogen invasion after plume emission from a source farm. This preliminary script provides a more intuitive overview than the current one which requires a hindsight perspective.  
+The companion and preceding script for this analysis is available here, [Simulated Outbreak](https://geoepi.github.io/EpiPlume/simulate_outbreak.html).  That analysis moves *forward* in time to model what farms could have been subject to pathogen invasion after plume emission from a source farm. This preliminary script provides a more intuitive overview than the current one which requires a hindsight perspective.  
   
   
 ## Preliminary Setup

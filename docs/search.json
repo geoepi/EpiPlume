@@ -4,7 +4,7 @@
     "href": "simulate_outbreak.html",
     "title": "Simulate Airborne Virus Introduction and Outbreak",
     "section": "",
-    "text": "This script provides a conceptual workflow that simulates farm locations, performes atmospheric dispersion modeling from a source farm (aka, plume modeling), analyizes the plume results in a spatial temporal model, and then identifies the simulated farms most vulnerable to airborne virus introduction. The results from this forward simulation are analysed in a second script BACKTRACE in an attempt to identify the soirce farms using only the information from the secondarily infected farms simulated here."
+    "text": "This script provides a conceptual workflow that simulates farm locations, performes atmospheric dispersion modeling from a source farm (aka, plume modeling), analyizes the plume results in a spatial temporal model, and then identifies the simulated farms most vulnerable to airborne virus introduction. The results from this forward simulation are analysed in a second script, available here, in an attempt to identify the soirce farms using only the information from the secondarily infected farms simulated here."
   },
   {
     "objectID": "simulate_outbreak.html#preliminary-setup",
@@ -102,7 +102,7 @@
     "href": "simulate_outbreak.html#closing",
     "title": "Simulate Airborne Virus Introduction and Outbreak",
     "section": "Closing",
-    "text": "Closing\nThis script simualted a pathogen plume from a source farm location followed secondary outbreaks at other farms downwind. Next, the results here are analysed in the script HERE to determine if that outbreak can be traced back to the orginal source farm. ```"
+    "text": "Closing\nThis script simualted a pathogen plume from a source farm location followed secondary outbreaks at other farms downwind. Next, the results here are analysed in the script linked here to determine if that outbreak can be traced back to the orginal source farm. ```"
   },
   {
     "objectID": "trace_emission_source.html",
@@ -159,5 +159,12 @@
     "title": "Identify and Trace Plume Emission Source",
     "section": "Receptor Return",
     "text": "Receptor Return\nHaving narrowed possible trajectory dates and times that could have produced the infecting plume, reverse plumes are simulated from the secondary outbreak farm (receptor) to the original source (nackwards in time).\nExecute plume model runs in a loop.\n\n\nHide code\npossible_datetimes <- possible_dates %>%\n  mutate(date = as.Date(traj_dt)) %>%\n  group_by(date) %>%\n  summarise(start = min(traj_dt)) %>%\n  as.data.frame()\n\nfor(i in 1:unique(possible_datetimes$start)){\n  \n  plume_name <- paste0(\"plume_\", i)\n  \n  plume_model <- wrap_plume_model(cfg, # configuration file\n                                plume_name = plume_name, # name/label\n                                lon = outbreak_farm_meta$x, # secondary outbreak farm\n                                lat = outbreak_farm_meta$y, # secondary outbreak farm\n                                direction = \"backward\", # from receptor back in time\n                                release_start = possible_datetimes$start[i], # release from source farm\n                                release_end = possible_datetimes$start[i] - hours(1), # reverse time\n                                start_time = possible_datetimes$start[i], # dispersion time same as emission\n                                end_time = possible_datetimes$start[i] - hours(24) # dispersion end\n                                )\n  \n  \n  \n}\n\n# copy to OSF\nosf_upload(osf_project_demo, path = here(\"local/demo_run/plume/plume_1_model.rds\"))\nosf_upload(osf_project_demo, path = here(\"local/demo_run/plume/plume_2_model.rds\"))\nosf_upload(osf_project_demo, path = here(\"local/demo_run/plume/plume_3_model.rds\"))\n\n\nDownload from OSF\n\n\nHide code\nosf_id <- osf_project_demo %>%\n  osf_ls_files() %>%\n  filter(name == \"plume_1_model.rds\" | \n         name == \"plume_2_model.rds\" |\n         name == \"plume_3_model.rds\")\n\nosf_download(osf_id,\n             path = here(\"local/temp\"),\n             conflicts = \"overwrite\")\n\n\nRead plume models\n\n\nHide code\nplume_1 <- readRDS(here(\"local/temp/plume_1_model.rds\"))\nplume_2 <- readRDS(here(\"local/temp/plume_2_model.rds\"))\nplume_3 <- readRDS(here(\"local/temp/plume_3_model.rds\"))\n\n\n\nPlume 1 simulated dispersion\n\n\nHide code\nmap_grid3(study_area$grid, plume_1$disp_df, group_col = \"particle_i\", vector_type = \"point\", source_loc = farm_points_wgs84, grid_cut = TRUE)\n\n\n\n\n\n\n\nPlume 2 simulated dispersion\n\n\nHide code\nmap_grid3(study_area$grid, plume_2$disp_df, group_col = \"particle_i\", vector_type = \"point\", source_loc = farm_points_wgs84, grid_cut = TRUE)\n\n\n\n\n\n\n\nPlume 3 simulated dispersion\n\n\nHide code\nmap_grid3(study_area$grid, plume_3$disp_df, group_col = \"particle_i\", vector_type = \"point\", source_loc = farm_points_wgs84, grid_cut = TRUE)"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "HPAI Plume Modeling",
+    "section": "",
+    "text": "Under Active Development\n\n\n\nThe tabs across the top of this webpage can be navigated to view various exploratory analyses examining airborne pathogen dispersal. The code, data, and analyses on this site have not been verified or validated and are subject to change."
   }
 ]
