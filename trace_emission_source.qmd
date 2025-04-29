@@ -13,7 +13,8 @@ format:
     toc: true
     toc-depth: 3
     toc-location: right
-    number-sections: false
+    number-sections: true
+    number-depth: 2
     html-math-method: katex
     smooth-scroll: true
 editor: source
@@ -37,7 +38,7 @@ pre {
 
 
 ## Overview
-This script provides a conceptual workflow that *backtraces* or verifies the source farm that instigated secondary outbreaks at other farms through atmospheric dispersion of virus.  That is, the script looks at data from a secondary outbreak and attempts to determine what source farm emitted the virus that seeded virus introduction.  This script moves *backward* in time to identify the source of a pathogenic plume.      
+This script provides a conceptual workflow that *back traces* or verifies the source farm that instigated secondary outbreaks at other farms through atmospheric dispersion of virus.  That is, the script looks at data from a secondary outbreak and attempts to determine what source farm emitted the virus that seeded virus introduction.  This script moves *backward* in time to identify the source of a pathogenic plume.      
   
 The companion and preceding script for this analysis is available here, [Simulated Outbreak](https://geoepi.github.io/EpiPlume/simulate_outbreak.html).  That analysis moves *forward* in time to model what farms could have been subject to pathogen invasion after plume emission from a source farm. This preliminary script provides a more intuitive overview than the current one which requires a hindsight perspective.  
   
@@ -45,7 +46,7 @@ The companion and preceding script for this analysis is available here, [Simulat
 ## Preliminary Setup
 
 ### Libraries
-This workflow uses the **renv** package for package versioning and environmental management.  The `renv.lock` file is included to facilitate package installain. See, *renv::restore()*.
+This workflow uses the **renv** package for package version and environmental management.  The `renv.lock` file is included to facilitate package installation. See, *renv::restore()*.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(patchwork)
@@ -90,7 +91,7 @@ register_stadiamaps(key = authentications$stadi_api)
 ```
   
 ### OSF Link
-Models and data generated from this script are stored at the *Open Science Framework (OSF)* for remote access.  See, this **OSF Project:** https://osf.io/98hmt/  
+Models and data generated from this script are stored at the *Open Science Framework (OSF)* for remote access.  See, this [**OSF Project:**](https://osf.io/98hmt/)  
 ```{r}
 osf_auth(authentications$osf_token) # for write/admin privileges
 
@@ -165,7 +166,7 @@ map_grid(study_area$grid, source_loc = farm_points)
 ```
 
 ## Trajectory Models
-A [HYSPLIT](https://www.ready.noaa.gov/HYSPLIT.php) model is constructed assuming the secondary outbreak location was a *receptor* of the plume from an unknown source.  The [**splitR** package](https://github.com/rich-iannone/splitr) is used to call a HYSPLIT exceutable from R.
+A [HYSPLIT](https://www.ready.noaa.gov/HYSPLIT.php) model is constructed assuming the secondary outbreak location was a *receptor* of the plume from an unknown source.  The [**splitR** package](https://github.com/rich-iannone/splitr) is used to call a HYSPLIT executable from R.
    
 Time limit to download meteorological data.
 ```{r}
@@ -249,7 +250,7 @@ map_grid3(study_area$grid, traj_model$traj_df, group_col = "run", vector_type = 
 A couple basic steps to compare distances between the source farm and possible trajectories from the secondary outbreak farm.
 
 ### Measure distances
-The *measure_proximty()* function measures distances for both the trajectory lines and point outputs.  
+The *measure_proximity()* function measures distances for both the trajectory lines and point outputs.  
 ```{r}
 traj_dists <- measure_proximty(
   target_location = c(orig_source_meta$x, orig_source_meta$y), # suspected source farm
@@ -319,7 +320,7 @@ map_grid3(study_area$grid, possible_dates, group_col = "run", vector_type = "lin
 
 
 ## Receptor Return
-Having narrowed possible trajectory dates and times that could have produced the infecting plume, reverse plumes are simulated from the secondary outbreak farm (receptor) to the original source (nackwards in time).
+Having narrowed possible trajectory dates and times that could have produced the infecting plume, reverse plumes are simulated from the secondary outbreak farm (receptor) to the original source (backwards in time).
   
   
 Execute plume model runs in a loop.

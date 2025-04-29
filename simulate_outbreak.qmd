@@ -13,7 +13,8 @@ format:
     toc: true
     toc-depth: 3
     toc-location: right
-    number-sections: false
+    number-sections: true
+    number-depth: 2
     html-math-method: katex
     smooth-scroll: true
 editor: source
@@ -36,13 +37,13 @@ pre {
 ```
 
 ## Overview
-This script provides a conceptual workflow that simulates farm locations, performes atmospheric dispersion modeling from a source farm (aka, *plume* modeling), analyizes the plume results in a spatial temporal model, and then identifies the simulated farms most vulnerable to airborne virus introduction.  The results from this *forward* simulation are analysed in a second script, [available here](https://geoepi.github.io/EpiPlume/trace_emission_source.html), in an attempt to identify the soirce farms using only the information from the secondarily infected farms simulated here.  
+This script provides a conceptual workflow that simulates farm locations, performs atmospheric dispersion modeling from a source farm (aka, *plume* modeling), analyzes the plume results in a spatial temporal model, and then identifies the simulated farms most vulnerable to airborne virus introduction.  The results from this *forward* simulation are analysed in a second script, [available here](https://geoepi.github.io/EpiPlume/trace_emission_source.html), in an attempt to identify the source farms using only the information from the secondarily infected farms simulated here.  
   
 
 ## Preliminary Setup
 
 ### Libraries
-This workflow uses the **renv** package for package versioning and environmental management.  The `renv.lock` file is included to facilitate package installain. See, *renv::restore()*.
+This workflow uses the **renv** package for package version and environmental management.  The `renv.lock` file is included to facilitate package installation. See, *renv::restore()*.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(patchwork)
@@ -88,7 +89,7 @@ register_stadiamaps(key = authentications$stadi_api)
 ```
   
 ### OSF Link
-Models and data generated from this script are stored at the *Open Science Framwork (OSF)* for remote access.  See, this **OSF Project:** https://osf.io/98hmt/  
+Models and data generated from this script are stored at the *Open Science Framework (OSF)* for remote access.  See, this [**OSF Project:**](https://osf.io/98hmt/) 
 ```{r}
 osf_auth(authentications$osf_token) # for write/admin privileges
 
@@ -105,7 +106,7 @@ cfg <- yaml::read_yaml(here("config", "demo_2025-04-21.yaml"))
 ```
   
 ## Create Study Area
-From a given lat-long, the *define_study_domain()* function constructs a surronding square grid at a specified extent and resolution to define a study area.  The function optionally generates a specified number of simulated farms.  The farms are randomly assigned within the study, based on chicken density estimated in the Gridded Livestock of the World Database [(source)](https://www.fao.org/land-water/land/land-governance/land-resources-planning-toolbox/category/details/fr/c/1236449/). The more chickens at a location, the higher the probability that a random famr be placed there. The random farms are assigned a random flock size based on a possible range specified in the config file.     
+From a given lat-long, the *define_study_domain()* function constructs a surrounding square grid at a specified extent and resolution to define a study area.  The function optionally generates a specified number of simulated farms.  The farms are randomly assigned within the study, based on chicken density estimated in the Gridded Livestock of the World Database [(source)](https://www.fao.org/land-water/land/land-governance/land-resources-planning-toolbox/category/details/fr/c/1236449/). The more chickens at a location, the higher the probability that a random farm be placed there. The random farms are assigned a random flock size based on a possible range specified in the config file.     
 ```{r}
 study_area_args <- c(
   cfg$domain, # from config
@@ -127,7 +128,7 @@ range(study_area$farm_locs$flock)
 ```
 
 ### flock size at source farm
-For the demo, the centermost farm used in defining the study area is considered the source of pathogen emission. The flock size is need for that location to estimate emission.   
+For the demo, the center most farm used in defining the study area is considered the source of pathogen emission. The flock size is need for that location to estimate emission.   
 ```{r}
 source_flock_n <- values(study_area$farm_locs) %>%
   filter(farm == "source") %>%
@@ -137,7 +138,7 @@ source_flock_n
 ```
  
 ### Plot Study Area
-THe source is the centermost triangle, other farms are shown as circles.
+The source is the center most triangle, other farms are shown as circles.
 ```{r warning=FALSE, message=FALSE, fig.width=8, fig.height=8}
 #| label: fig-domian
 #| fig-cap: "Study area for analysis with simulated farms as indicated in legend."
@@ -203,7 +204,7 @@ plot_ode_shed_dynamics(seir_out, date_axis = TRUE, vline = sim_dates$release_dat
 
 
 ## Plume Dispersion  
-A [HYSPLIT](https://www.ready.noaa.gov/HYSPLIT.php) model is constructed based on the simulated outbreak and source farm emission dynamics.  The [**splitR** package](https://github.com/rich-iannone/splitr) is used to call a HYSPLIT exceutable from R.
+A [HYSPLIT](https://www.ready.noaa.gov/HYSPLIT.php) model is constructed based on the simulated outbreak and source farm emission dynamics.  The [**splitR** package](https://github.com/rich-iannone/splitr) is used to call a HYSPLIT executable from R.
 ```{r}
 arbitrary_hour <- 12 # noon
 simulated_realease_dt <- ymd_hm(paste0(sim_dates$release_date, " ", sprintf("%02d:00", arbitrary_hour)))
@@ -264,7 +265,7 @@ animate_disp
 ```
 
 ## Calculate Concentration  
-The *calculate_particle_concentration()* utilizes HYSPLIT estimated partcles to calculate the particles per m3 hour.  Limiting analysis to first 6 hours, beyond that time the plume is outside the study area.
+The *calculate_particle_concentration()* utilizes HYSPLIT estimated particles to calculate the particles per m3 hour.  Limiting analysis to first 6 hours, beyond that time the plume is outside the study area.
 ```{r message=FALSE, warning=FALSE}
 concentration_lst <- calculate_particle_concentration(plume_table=plume_model$disp_df, 
                                                       raster_grid = study_area$grid,
@@ -273,7 +274,7 @@ concentration_lst <- calculate_particle_concentration(plume_table=plume_model$di
 ```
 
 ### View Concentration
-Viweing the first hour only.
+Viewing the first hour only.
 ```{r fig.width=10, fig.height=10}
 check_hour <- 1
 
@@ -397,7 +398,7 @@ sp_indices_dens <- project_to_mesh(comb_data = comb_data_in,
 
 
 ## Organize Data  
-Organizing all model inputs as *list()* objects.  This is needed because data within and between model tiers are different dimensions (i.e., won't fit in a common dataframe).  
+Organizing all model inputs as *list()* objects.  This is needed because data within and between model tiers are different dimensions (i.e., won't fit in a common data frame).  
   
 ### Individual particles  
 Organize tier 1 data for individual particles.  
@@ -570,7 +571,7 @@ farm_intro_probs$plot
 Filtering to simulated farms with at least a 50/% chance of particle occurrence.
 ```{r}
 exposed_farms <- farm_intro_probs$table %>%
-  filter(med >= 0.5 & name != "source_farm") # 50% chnace or higher
+  filter(med >= 0.5 & name != "source_farm") # 50% chance or higher
 
 exposed_farms
 ```
@@ -578,7 +579,7 @@ exposed_farms
 
 
 ## Secondary Outbreak
-Given the high probability of particle introduction at a farm another than the *source_farm*, approximate how an outbreak might unfold based on that farm's flock size, timeline of introdtcon, and other charcateristics.
+Given the high probability of particle introduction at a farm another than the *source_farm*, approximate how an outbreak might unfold based on that farm's flock size, timeline of introduction, and other characteristics.
   
 ### SEIR model for secondary ourbreak  
 ```{r message=FALSE, warning=FALSE}
@@ -638,6 +639,6 @@ osf_upload(osf_project_demo, path = here("local/assets/demo_outbreak_sim_2025-04
 
 
 ## Closing  
-This script simualted a pathogen plume from a source farm location followed secondary outbreaks at other farms downwind.  Next, the results here are analysed in the [script linked here](https://geoepi.github.io/EpiPlume/trace_emission_source.html) to determine if that outbreak can be traced back to the orginal source farm.
+This script simulated a pathogen plume from a source farm location followed secondary outbreaks at other farms downwind.  Next, the results here are analysed in the [script linked here](https://geoepi.github.io/EpiPlume/trace_emission_source.html) to determine if that outbreak can be traced back to the original source farm.
 ```
 

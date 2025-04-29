@@ -169,10 +169,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="https://geoepi.github.io/">
- <span class="menu-text">GeoEpi</span></a>
-  </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/geoepi/EpiPlume"><i class="bi bi-github" role="img">
 </i> 
@@ -193,8 +189,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">Page Contents</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#preliminary-setup" id="toc-preliminary-setup" class="nav-link" data-scroll-target="#preliminary-setup">Preliminary Setup</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="toc-section-number">1</span>  Overview</a></li>
+  <li><a href="#preliminary-setup" id="toc-preliminary-setup" class="nav-link" data-scroll-target="#preliminary-setup"><span class="toc-section-number">2</span>  Preliminary Setup</a>
   <ul class="collapse">
   <li><a href="#libraries" id="toc-libraries" class="nav-link" data-scroll-target="#libraries">Libraries</a></li>
   <li><a href="#core-functions" id="toc-core-functions" class="nav-link" data-scroll-target="#core-functions">Core Functions</a></li>
@@ -202,28 +198,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#api-registration" id="toc-api-registration" class="nav-link" data-scroll-target="#api-registration">API Registration</a></li>
   <li><a href="#osf-link" id="toc-osf-link" class="nav-link" data-scroll-target="#osf-link">OSF Link</a></li>
   </ul></li>
-  <li><a href="#read-configuration-parameters" id="toc-read-configuration-parameters" class="nav-link" data-scroll-target="#read-configuration-parameters">Read Configuration Parameters</a></li>
-  <li><a href="#simulated-outbreak" id="toc-simulated-outbreak" class="nav-link" data-scroll-target="#simulated-outbreak">Simulated Outbreak</a>
+  <li><a href="#read-configuration-parameters" id="toc-read-configuration-parameters" class="nav-link" data-scroll-target="#read-configuration-parameters"><span class="toc-section-number">3</span>  Read Configuration Parameters</a></li>
+  <li><a href="#simulated-outbreak" id="toc-simulated-outbreak" class="nav-link" data-scroll-target="#simulated-outbreak"><span class="toc-section-number">4</span>  Simulated Outbreak</a>
   <ul class="collapse">
   <li><a href="#convert-to-points" id="toc-convert-to-points" class="nav-link" data-scroll-target="#convert-to-points">Convert to Points</a></li>
   </ul></li>
-  <li><a href="#create-study-area" id="toc-create-study-area" class="nav-link" data-scroll-target="#create-study-area">Create Study Area</a>
+  <li><a href="#create-study-area" id="toc-create-study-area" class="nav-link" data-scroll-target="#create-study-area"><span class="toc-section-number">5</span>  Create Study Area</a>
   <ul class="collapse">
   <li><a href="#plot-study-area" id="toc-plot-study-area" class="nav-link" data-scroll-target="#plot-study-area">Plot study area</a></li>
   </ul></li>
-  <li><a href="#trajectory-models" id="toc-trajectory-models" class="nav-link" data-scroll-target="#trajectory-models">Trajectory Models</a>
+  <li><a href="#trajectory-models" id="toc-trajectory-models" class="nav-link" data-scroll-target="#trajectory-models"><span class="toc-section-number">6</span>  Trajectory Models</a>
   <ul class="collapse">
   <li><a href="#date-determination" id="toc-date-determination" class="nav-link" data-scroll-target="#date-determination">Date Determination</a></li>
   <li><a href="#run-trajectory-model" id="toc-run-trajectory-model" class="nav-link" data-scroll-target="#run-trajectory-model">Run Trajectory Model</a></li>
   <li><a href="#plot-hindcast-trajectories" id="toc-plot-hindcast-trajectories" class="nav-link" data-scroll-target="#plot-hindcast-trajectories">Plot hindcast trajectories</a></li>
   </ul></li>
-  <li><a href="#spatial-analysis" id="toc-spatial-analysis" class="nav-link" data-scroll-target="#spatial-analysis">Spatial Analysis</a>
+  <li><a href="#spatial-analysis" id="toc-spatial-analysis" class="nav-link" data-scroll-target="#spatial-analysis"><span class="toc-section-number">7</span>  Spatial Analysis</a>
   <ul class="collapse">
   <li><a href="#measure-distances" id="toc-measure-distances" class="nav-link" data-scroll-target="#measure-distances">Measure distances</a></li>
   <li><a href="#inverse-distance-decay" id="toc-inverse-distance-decay" class="nav-link" data-scroll-target="#inverse-distance-decay">Inverse Distance Decay</a></li>
   <li><a href="#score-and-subset" id="toc-score-and-subset" class="nav-link" data-scroll-target="#score-and-subset">Score and Subset</a></li>
   </ul></li>
-  <li><a href="#receptor-return" id="toc-receptor-return" class="nav-link" data-scroll-target="#receptor-return">Receptor Return</a>
+  <li><a href="#receptor-return" id="toc-receptor-return" class="nav-link" data-scroll-target="#receptor-return"><span class="toc-section-number">8</span>  Receptor Return</a>
   <ul class="collapse">
   <li><a href="#plume-1-simulated-dispersion" id="toc-plume-1-simulated-dispersion" class="nav-link" data-scroll-target="#plume-1-simulated-dispersion">Plume 1 simulated dispersion</a></li>
   <li><a href="#plume-2-simulated-dispersion" id="toc-plume-2-simulated-dispersion" class="nav-link" data-scroll-target="#plume-2-simulated-dispersion">Plume 2 simulated dispersion</a></li>
@@ -275,16 +271,16 @@ pre {
   font-size: 11pt
 }
 </style>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>This script provides a conceptual workflow that <em>backtraces</em> or verifies the source farm that instigated secondary outbreaks at other farms through atmospheric dispersion of virus. That is, the script looks at data from a secondary outbreak and attempts to determine what source farm emitted the virus that seeded virus introduction. This script moves <em>backward</em> in time to identify the source of a pathogenic plume.</p>
+<section id="overview" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="overview"><span class="header-section-number">1</span> Overview</h2>
+<p>This script provides a conceptual workflow that <em>back traces</em> or verifies the source farm that instigated secondary outbreaks at other farms through atmospheric dispersion of virus. That is, the script looks at data from a secondary outbreak and attempts to determine what source farm emitted the virus that seeded virus introduction. This script moves <em>backward</em> in time to identify the source of a pathogenic plume.</p>
 <p>The companion and preceding script for this analysis is available here, <a href="https://geoepi.github.io/EpiPlume/simulate_outbreak.html">Simulated Outbreak</a>. That analysis moves <em>forward</em> in time to model what farms could have been subject to pathogen invasion after plume emission from a source farm. This preliminary script provides a more intuitive overview than the current one which requires a hindsight perspective.</p>
 </section>
-<section id="preliminary-setup" class="level2">
-<h2 class="anchored" data-anchor-id="preliminary-setup">Preliminary Setup</h2>
+<section id="preliminary-setup" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="preliminary-setup"><span class="header-section-number">2</span> Preliminary Setup</h2>
 <section id="libraries" class="level3">
 <h3 class="anchored" data-anchor-id="libraries">Libraries</h3>
-<p>This workflow uses the <strong>renv</strong> package for package versioning and environmental management. The <code>renv.lock</code> file is included to facilitate package installain. See, <em>renv::restore()</em>.</p>
+<p>This workflow uses the <strong>renv</strong> package for package version and environmental management. The <code>renv.lock</code> file is included to facilitate package installation. See, <em>renv::restore()</em>.</p>
 <div class="cell">
 
 </div>
@@ -322,7 +318,7 @@ pre {
 </section>
 <section id="osf-link" class="level3">
 <h3 class="anchored" data-anchor-id="osf-link">OSF Link</h3>
-<p>Models and data generated from this script are stored at the <em>Open Science Framework (OSF)</em> for remote access. See, this <strong>OSF Project:</strong> https://osf.io/98hmt/</p>
+<p>Models and data generated from this script are stored at the <em>Open Science Framework (OSF)</em> for remote access. See, this <a href="https://osf.io/98hmt/"><strong>OSF Project:</strong></a></p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
@@ -343,8 +339,8 @@ pre {
 </div>
 </section>
 </section>
-<section id="read-configuration-parameters" class="level2">
-<h2 class="anchored" data-anchor-id="read-configuration-parameters">Read Configuration Parameters</h2>
+<section id="read-configuration-parameters" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="read-configuration-parameters"><span class="header-section-number">3</span> Read Configuration Parameters</h2>
 <p>Parameters for epidemiological and spatial analyses are recorded in configuration files. Loading the demonstration config file, which can be viewed here: <a href="https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml">Demo Configuration Parameters</a>.</p>
 <div class="cell">
 <details open="">
@@ -353,8 +349,8 @@ pre {
 </details>
 </div>
 </section>
-<section id="simulated-outbreak" class="level2">
-<h2 class="anchored" data-anchor-id="simulated-outbreak">Simulated Outbreak</h2>
+<section id="simulated-outbreak" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="simulated-outbreak"><span class="header-section-number">4</span> Simulated Outbreak</h2>
 <p>Downloading and reading the data frame resulting from forward simulation in the Simulated Outbreak script. This file has the coordinates and outbreak detection date for the secondarily infected farms (only one in this demo run) and source farm.</p>
 <div class="cell">
 <details open="">
@@ -428,8 +424,8 @@ pre {
 </div>
 </section>
 </section>
-<section id="create-study-area" class="level2">
-<h2 class="anchored" data-anchor-id="create-study-area">Create Study Area</h2>
+<section id="create-study-area" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="create-study-area"><span class="header-section-number">5</span> Create Study Area</h2>
 <p>Defining a study area extent (raster grid) with the secondary outbreak farm at center. The original source farm is also depicted as reference. The <em>define_study_domain()</em> identifies the appropriate UTM and returns projected objects.</p>
 <div class="cell">
 <details open="">
@@ -462,9 +458,9 @@ pre {
 </div>
 </section>
 </section>
-<section id="trajectory-models" class="level2">
-<h2 class="anchored" data-anchor-id="trajectory-models">Trajectory Models</h2>
-<p>A <a href="https://www.ready.noaa.gov/HYSPLIT.php">HYSPLIT</a> model is constructed assuming the secondary outbreak location was a <em>receptor</em> of the plume from an unknown source. The <a href="https://github.com/rich-iannone/splitr"><strong>splitR</strong> package</a> is used to call a HYSPLIT exceutable from R.</p>
+<section id="trajectory-models" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="trajectory-models"><span class="header-section-number">6</span> Trajectory Models</h2>
+<p>A <a href="https://www.ready.noaa.gov/HYSPLIT.php">HYSPLIT</a> model is constructed assuming the secondary outbreak location was a <em>receptor</em> of the plume from an unknown source. The <a href="https://github.com/rich-iannone/splitr"><strong>splitR</strong> package</a> is used to call a HYSPLIT executable from R.</p>
 <p>Time limit to download meteorological data.</p>
 <div class="cell">
 <details open="">
@@ -579,12 +575,12 @@ pre {
 </div>
 </section>
 </section>
-<section id="spatial-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="spatial-analysis">Spatial Analysis</h2>
+<section id="spatial-analysis" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="spatial-analysis"><span class="header-section-number">7</span> Spatial Analysis</h2>
 <p>A couple basic steps to compare distances between the source farm and possible trajectories from the secondary outbreak farm.</p>
 <section id="measure-distances" class="level3">
 <h3 class="anchored" data-anchor-id="measure-distances">Measure distances</h3>
-<p>The <em>measure_proximty()</em> function measures distances for both the trajectory lines and point outputs.</p>
+<p>The <em>measure_proximity()</em> function measures distances for both the trajectory lines and point outputs.</p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
@@ -627,6 +623,10 @@ where:<br>
 <pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 ℹ Please use `linewidth` instead.</code></pre>
 </div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in geom_hline(yintercept = weight_target, linetype = "dashed", color =
+"black", : Ignoring unknown parameters: `linewdith`</code></pre>
+</div>
 <div class="cell-output-display">
 <p><img src="trace_emission_source_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="768"></p>
 </div>
@@ -638,39 +638,39 @@ where:<br>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>traj_dists<span class="sc">$</span>traj_lines<span class="sc">$</span>score <span class="ot">&lt;-</span> <span class="fu">calculate_inverse_distance_weight</span>(traj_dists<span class="sc">$</span>traj_lines<span class="sc">$</span>distance_m, </span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="at">lambda =</span> lambda_value) <span class="co"># score distances</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>traj_dists<span class="sc">$</span>traj_lines<span class="sc">$</span>score <span class="ot">&lt;-</span> <span class="fu">calculate_inverse_distance_weight</span>(traj_dists<span class="sc">$</span>traj_lines<span class="sc">$</span>distance_m, </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="at">lambda =</span> lambda_value) <span class="co"># score distances</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Select trajectories with at least a 90% probability.</p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>closest_traj_line <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(traj_dists<span class="sc">$</span>traj_lines) <span class="sc">%&gt;%</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(score <span class="sc">&gt;=</span> <span class="fl">0.9</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(score)) <span class="sc">%&gt;%</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(run, distance_m, score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>closest_traj_line <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(traj_dists<span class="sc">$</span>traj_lines) <span class="sc">%&gt;%</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(score <span class="sc">&gt;=</span> <span class="fl">0.9</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(score)) <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(run, distance_m, score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Filter trajectory data to possible distances.</p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>runs_50 <span class="ot">&lt;-</span> <span class="fu">unique</span>(closest_traj_line<span class="sc">$</span>run)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">vect</span>(traj_dists<span class="sc">$</span>traj_point)</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">project</span>(possible_dates, <span class="st">"EPSG:4326"</span> )</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(possible_dates,</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>                                <span class="at">geom=</span><span class="st">"xy"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">lon =</span> x, <span class="at">lat =</span> y) <span class="sc">%&gt;%</span></span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(run <span class="sc">%in%</span> runs_50)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>runs_50 <span class="ot">&lt;-</span> <span class="fu">unique</span>(closest_traj_line<span class="sc">$</span>run)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">vect</span>(traj_dists<span class="sc">$</span>traj_point)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">project</span>(possible_dates, <span class="st">"EPSG:4326"</span> )</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(possible_dates,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>                                <span class="at">geom=</span><span class="st">"xy"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">lon =</span> x, <span class="at">lat =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(run <span class="sc">%in%</span> runs_50)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>The above reduced 72 possible trajectories to 1970-01-07, 1970-01-11, 1970-01-16, 1970-01-17 probable ones. Show here:</p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, possible_dates, <span class="at">group_col =</span> <span class="st">"run"</span>, <span class="at">vector_type =</span> <span class="st">"line"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, possible_dates, <span class="at">group_col =</span> <span class="st">"run"</span>, <span class="at">vector_type =</span> <span class="st">"line"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="trace_emission_source_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="960"></p>
@@ -678,66 +678,66 @@ where:<br>
 </div>
 </section>
 </section>
-<section id="receptor-return" class="level2">
-<h2 class="anchored" data-anchor-id="receptor-return">Receptor Return</h2>
-<p>Having narrowed possible trajectory dates and times that could have produced the infecting plume, reverse plumes are simulated from the secondary outbreak farm (receptor) to the original source (nackwards in time).</p>
+<section id="receptor-return" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="receptor-return"><span class="header-section-number">8</span> Receptor Return</h2>
+<p>Having narrowed possible trajectory dates and times that could have produced the infecting plume, reverse plumes are simulated from the secondary outbreak farm (receptor) to the original source (backwards in time).</p>
 <p>Execute plume model runs in a loop.</p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>possible_datetimes <span class="ot">&lt;-</span> possible_dates <span class="sc">%&gt;%</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">as.Date</span>(traj_dt)) <span class="sc">%&gt;%</span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">%&gt;%</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">start =</span> <span class="fu">min</span>(traj_dt)) <span class="sc">%&gt;%</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">unique</span>(possible_datetimes<span class="sc">$</span>start)){</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  plume_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"plume_"</span>, i)</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  plume_model <span class="ot">&lt;-</span> <span class="fu">wrap_plume_model</span>(cfg, <span class="co"># configuration file</span></span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>                                <span class="at">plume_name =</span> plume_name, <span class="co"># name/label</span></span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>                                <span class="at">lon =</span> outbreak_farm_meta<span class="sc">$</span>x, <span class="co"># secondary outbreak farm</span></span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>                                <span class="at">lat =</span> outbreak_farm_meta<span class="sc">$</span>y, <span class="co"># secondary outbreak farm</span></span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>                                <span class="at">direction =</span> <span class="st">"backward"</span>, <span class="co"># from receptor back in time</span></span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>                                <span class="at">release_start =</span> possible_datetimes<span class="sc">$</span>start[i], <span class="co"># release from source farm</span></span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>                                <span class="at">release_end =</span> possible_datetimes<span class="sc">$</span>start[i] <span class="sc">-</span> <span class="fu">hours</span>(<span class="dv">1</span>), <span class="co"># reverse time</span></span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>                                <span class="at">start_time =</span> possible_datetimes<span class="sc">$</span>start[i], <span class="co"># dispersion time same as emission</span></span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>                                <span class="at">end_time =</span> possible_datetimes<span class="sc">$</span>start[i] <span class="sc">-</span> <span class="fu">hours</span>(<span class="dv">24</span>) <span class="co"># dispersion end</span></span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>                                )</span>
-<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a><span class="co"># copy to OSF</span></span>
-<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_1_model.rds"</span>))</span>
-<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_2_model.rds"</span>))</span>
-<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_3_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>possible_datetimes <span class="ot">&lt;-</span> possible_dates <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">as.Date</span>(traj_dt)) <span class="sc">%&gt;%</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">%&gt;%</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">start =</span> <span class="fu">min</span>(traj_dt)) <span class="sc">%&gt;%</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">unique</span>(possible_datetimes<span class="sc">$</span>start)){</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  plume_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"plume_"</span>, i)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  plume_model <span class="ot">&lt;-</span> <span class="fu">wrap_plume_model</span>(cfg, <span class="co"># configuration file</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>                                <span class="at">plume_name =</span> plume_name, <span class="co"># name/label</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>                                <span class="at">lon =</span> outbreak_farm_meta<span class="sc">$</span>x, <span class="co"># secondary outbreak farm</span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>                                <span class="at">lat =</span> outbreak_farm_meta<span class="sc">$</span>y, <span class="co"># secondary outbreak farm</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>                                <span class="at">direction =</span> <span class="st">"backward"</span>, <span class="co"># from receptor back in time</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>                                <span class="at">release_start =</span> possible_datetimes<span class="sc">$</span>start[i], <span class="co"># release from source farm</span></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>                                <span class="at">release_end =</span> possible_datetimes<span class="sc">$</span>start[i] <span class="sc">-</span> <span class="fu">hours</span>(<span class="dv">1</span>), <span class="co"># reverse time</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>                                <span class="at">start_time =</span> possible_datetimes<span class="sc">$</span>start[i], <span class="co"># dispersion time same as emission</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>                                <span class="at">end_time =</span> possible_datetimes<span class="sc">$</span>start[i] <span class="sc">-</span> <span class="fu">hours</span>(<span class="dv">24</span>) <span class="co"># dispersion end</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>                                )</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a><span class="co"># copy to OSF</span></span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_1_model.rds"</span>))</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_2_model.rds"</span>))</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_3_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Download from OSF</p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>osf_id <span class="ot">&lt;-</span> osf_project_demo <span class="sc">%&gt;%</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">osf_ls_files</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"plume_1_model.rds"</span> <span class="sc">|</span> </span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>         name <span class="sc">==</span> <span class="st">"plume_2_model.rds"</span> <span class="sc">|</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>         name <span class="sc">==</span> <span class="st">"plume_3_model.rds"</span>)</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_download</span>(osf_id,</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/temp"</span>),</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">conflicts =</span> <span class="st">"overwrite"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>osf_id <span class="ot">&lt;-</span> osf_project_demo <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">osf_ls_files</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"plume_1_model.rds"</span> <span class="sc">|</span> </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>         name <span class="sc">==</span> <span class="st">"plume_2_model.rds"</span> <span class="sc">|</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>         name <span class="sc">==</span> <span class="st">"plume_3_model.rds"</span>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_download</span>(osf_id,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/temp"</span>),</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">conflicts =</span> <span class="st">"overwrite"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Read plume models</p>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>plume_1 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_1_model.rds"</span>))</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>plume_2 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_2_model.rds"</span>))</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>plume_3 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_3_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>plume_1 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_1_model.rds"</span>))</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>plume_2 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_2_model.rds"</span>))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>plume_3 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_3_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="plume-1-simulated-dispersion" class="level3">
@@ -745,7 +745,7 @@ where:<br>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_1<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_1<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="trace_emission_source_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="960"></p>
@@ -757,7 +757,7 @@ where:<br>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_2<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_2<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="trace_emission_source_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="960"></p>
@@ -769,7 +769,7 @@ where:<br>
 <div class="cell">
 <details open="">
 <summary>Hide code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_3<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_3<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="trace_emission_source_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="960"></p>

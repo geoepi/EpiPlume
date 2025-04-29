@@ -23,7 +23,7 @@ plot_distance_decay <- function(
   
   p <- ggplot(plot_data, aes(x = distance_m / 1000, y = weight, color = lambda_label)) +
     geom_line(size = 1.2) +
-    geom_hline(yintercept = weight_target, linetype = "dashed", color = "black", size = 1) +
+    geom_hline(yintercept = weight_target, linetype = "dashed", color = "black", linewdith = 1) +
     labs(
       x = "Distance (km)",
       y = "Inverse Distance Weight",

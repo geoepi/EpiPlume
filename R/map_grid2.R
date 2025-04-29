@@ -25,7 +25,7 @@ map_grid2 <- function(
     e[1], e[3]
   ), ncol = 2, byrow = TRUE)
   
-  grid_poly     <- st_polygon(list(corners))
+  grid_poly <- st_polygon(list(corners))
   
   grid_sf_wgs84 <- st_sfc(
     grid_poly,

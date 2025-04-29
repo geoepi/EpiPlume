@@ -27,8 +27,8 @@ website:
       - href: trace_emission_source.qmd
         text: Trace Emission
     right:
-      - href: https://geoepi.github.io/
-        text: GeoEpi
+ #     - href: https://geoepi.github.io/
+  #      text: GeoEpi
       - icon: github
         href: https://github.com/geoepi/EpiPlume
   page-footer:
