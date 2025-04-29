@@ -1,0 +1,42 @@
+---
+title: "HPAI Plume Modeling"
+description: "EpiPlume: Models of pathogen movement via aerosol, particle, and airborne dispersion."
+format:
+  html: 
+    df-print: kable
+    code-fold: show
+    code-summary: "Hide code"
+    code-overflow: wrap
+    toc-title: Page Contents
+    toc: true
+    toc-depth: 2
+    toc-location: right
+    number-sections: false
+    html-math-method: katex
+    smooth-scroll: true
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+```{=html}
+<style type="text/css">
+
+body, td {
+   font-size: 13pt;
+}
+code.r{
+  font-size: 9pt;
+}
+pre {
+  font-size: 11pt
+}
+</style>
+```
+
+::: {.callout-important icon=true}
+#### Under Active Development    
+
+The tabs across the top of this webpage can be navigated to view various exploratory analyses examining airborne pathogen dispersal. The code, data, and analyses on this site have not been verified or validated and are subject to change.  
+  
+::: 
+  
