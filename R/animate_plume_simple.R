@@ -8,7 +8,6 @@ animate_plume_simple <- function(
     height     = 600,          # px
     renderer   = gifski_renderer(loop = FALSE)
 ) {
-  options(bitmapType = "cairo")
   
   require(ggplot2)
   require(dplyr)

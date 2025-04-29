@@ -254,18 +254,19 @@ map_grid2(study_area$grid, plume_model$disp_df, group_col = "particle_i", vector
 ```
   
 A quick, low-weight animation as a spot check of time.  
-```{rfig.width=10, fig.height=10, warning=FALSE, message=FALSE}
+```{r fig.width=10, fig.height=10, warning=FALSE, message=FALSE, eval=FALSE}
 
 animate_disp <- animate_plume_simple(traj_data = plume_model$disp_df, 
                                      group_col = "particle_i", 
                                      point_size = 0.5, 
                                      source_loc=cfg$domain$source_origin)
-
-animate_disp
 ```
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 # save
 anim_save(here("assets/plume_animation2.gif"), animation = animate_disp)
+```
+```{r fig.width=10, fig.height=10, warning=FALSE, message=FALSE}
+knitr::include_graphics(here("assets/plume_animation2.gif"))
 ```
 
 ## Calculate Concentration  

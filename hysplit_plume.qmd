@@ -10,12 +10,11 @@ format:
    code-fold: show
    code-summary: "Hide code"
    preview-mode: raw
-   prefer-html: true
 editor: source
 editor_options:  
   chunk_output_type: console
 ---
-
+  
 ## Libraries
 ```{r warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -150,8 +149,8 @@ head(plume_table) # sample
 ```
 
 ## Plot Dispersion
-The base **splitr** plot. Interactive when locally run.    
-```{r eval=TRUE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
+The base **splitr** plot. Interactive when locally run.  (Doesn't render in static md)   
+```{r eval=FALSE, fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
 # not run, too big
 plot_dispersion(plume_table)
 ```
@@ -177,5 +176,3 @@ animated_plume
 # save
 anim_save(here("assets/plume_animation.gif"), animation = animated_plume)
 ```
-
-
