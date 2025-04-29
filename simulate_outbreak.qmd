@@ -645,5 +645,4 @@ osf_upload(osf_project_demo, path = here("local/assets/demo_outbreak_sim_2025-04
 
 ## Closing  
 This script simulated a pathogen plume from a source farm location followed secondary outbreaks at other farms downwind.  Next, the results here are analysed in the [script linked here](https://geoepi.github.io/EpiPlume/trace_emission_source.html) to determine if that outbreak can be traced back to the original source farm.
-```
 

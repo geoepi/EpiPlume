@@ -102,7 +102,7 @@
     "href": "simulate_outbreak.html#closing",
     "title": "Simulate Airborne Virus Introduction and Outbreak",
     "section": "15 Closing",
-    "text": "15 Closing\nThis script simulated a pathogen plume from a source farm location followed secondary outbreaks at other farms downwind. Next, the results here are analysed in the script linked here to determine if that outbreak can be traced back to the original source farm. ```"
+    "text": "15 Closing\nThis script simulated a pathogen plume from a source farm location followed secondary outbreaks at other farms downwind. Next, the results here are analysed in the script linked here to determine if that outbreak can be traced back to the original source farm."
   },
   {
     "objectID": "trace_emission_source.html",
