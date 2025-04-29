@@ -62,7 +62,7 @@ plume:
   plume_climate: "local/demo_run/climate" # climate input needed for HYSPLIT
   plume_outputs: "local/demo_run/plume" # HYSPLIT outputs for plume dispersion (will be populated during run)
   plume_height: 5 # height of source emissions (meters)
-  rate: 100 # particle emission rate
+  rate: 50 # particle emission rate
   pdiam: 2.5 # particle diameter
   density: 1.5 # particle density g/cm3
   shape_factor: 0.9 # particle shape rough (0.0) to smooth (1.0)

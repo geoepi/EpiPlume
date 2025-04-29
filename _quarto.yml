@@ -1,14 +1,41 @@
 project:
   type: website
   output-dir: docs
+  render:
+    - simulate_outbreak.qmd
+    - trace_emission_source.qmd
 
 execute-dir:
  fig-path: assets/
 
+#format:
+#  gfm:
+#    toc: true
+#    toc-depth: 2
+#    code-fold: show
+#    code-summary: "Hide code"
+#    preview-mode: raw
+
+
+website: 
+  title: "HPAI Plume Modeling"
+  navbar:
+    left:
+      - href: simulate_outbreak.qmd
+        text: Simulate Outbreak
+      - href: trace_emission_source.qmd
+        text: Trace Emission
+    right:
+      - href: https://geoepi.github.io/
+        text: GeoEpi
+      - icon: github
+        href: https://github.com/geoepi/fmd-preclinical-spread
+  page-footer:
+    right: "Built with [Quarto](https://quarto.org/)"
+
 format:
-  gfm:
+  html:
+    theme: lux
     toc: true
-    toc-depth: 2
-    code-fold: show
-    code-summary: "Hide code"
-    preview-mode: raw
+    
+editor: source

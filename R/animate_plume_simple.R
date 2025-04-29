@@ -2,7 +2,7 @@ animate_plume_simple <- function(
     traj_data,
     group_col  = NULL,
     point_size = 0.5,
-    source_loc,                # c(lon, lat)
+    source_loc,
     fps        = 2,            # frames per second
     width      = 800,          # px
     height     = 600,          # px

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2025-04-27">
+
+<title>HPAI Plume Modeling - Identify and Trace Plume Emission Source</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">HPAI Plume Modeling</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./simulate_outbreak.html">
+ <span class="menu-text">Simulate Outbreak</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./trace_emission_source.html" aria-current="page">
+ <span class="menu-text">Trace Emission</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://geoepi.github.io/">
+ <span class="menu-text">GeoEpi</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/geoepi/fmd-preclinical-spread"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Page Contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#preliminary-setup" id="toc-preliminary-setup" class="nav-link" data-scroll-target="#preliminary-setup">Preliminary Setup</a>
+  <ul class="collapse">
+  <li><a href="#libraries" id="toc-libraries" class="nav-link" data-scroll-target="#libraries">Libraries</a></li>
+  <li><a href="#core-functions" id="toc-core-functions" class="nav-link" data-scroll-target="#core-functions">Core Functions</a></li>
+  <li><a href="#authentication" id="toc-authentication" class="nav-link" data-scroll-target="#authentication">Authentication</a></li>
+  <li><a href="#api-registration" id="toc-api-registration" class="nav-link" data-scroll-target="#api-registration">API Registration</a></li>
+  <li><a href="#osf-link" id="toc-osf-link" class="nav-link" data-scroll-target="#osf-link">OSF Link</a></li>
+  </ul></li>
+  <li><a href="#read-configuration-parameters" id="toc-read-configuration-parameters" class="nav-link" data-scroll-target="#read-configuration-parameters">Read Configuration Parameters</a></li>
+  <li><a href="#simulated-outbreak" id="toc-simulated-outbreak" class="nav-link" data-scroll-target="#simulated-outbreak">Simulated Outbreak</a>
+  <ul class="collapse">
+  <li><a href="#convert-to-points" id="toc-convert-to-points" class="nav-link" data-scroll-target="#convert-to-points">Convert to Points</a></li>
+  </ul></li>
+  <li><a href="#create-study-area" id="toc-create-study-area" class="nav-link" data-scroll-target="#create-study-area">Create Study Area</a>
+  <ul class="collapse">
+  <li><a href="#plot-study-area" id="toc-plot-study-area" class="nav-link" data-scroll-target="#plot-study-area">Plot study area</a></li>
+  </ul></li>
+  <li><a href="#trajectory-models" id="toc-trajectory-models" class="nav-link" data-scroll-target="#trajectory-models">Trajectory Models</a>
+  <ul class="collapse">
+  <li><a href="#date-determination" id="toc-date-determination" class="nav-link" data-scroll-target="#date-determination">Date Determination</a></li>
+  <li><a href="#run-trajectory-model" id="toc-run-trajectory-model" class="nav-link" data-scroll-target="#run-trajectory-model">Run Trajectory Model</a></li>
+  <li><a href="#plot-hindcast-trajectories" id="toc-plot-hindcast-trajectories" class="nav-link" data-scroll-target="#plot-hindcast-trajectories">Plot hindcast trajectories</a></li>
+  </ul></li>
+  <li><a href="#spatial-analysis" id="toc-spatial-analysis" class="nav-link" data-scroll-target="#spatial-analysis">Spatial Analysis</a>
+  <ul class="collapse">
+  <li><a href="#measure-distances" id="toc-measure-distances" class="nav-link" data-scroll-target="#measure-distances">Measure distances</a></li>
+  <li><a href="#inverse-distance-decay" id="toc-inverse-distance-decay" class="nav-link" data-scroll-target="#inverse-distance-decay">Inverse Distance Decay</a></li>
+  <li><a href="#score-and-subset" id="toc-score-and-subset" class="nav-link" data-scroll-target="#score-and-subset">Score and Subset</a></li>
+  </ul></li>
+  <li><a href="#receptor-return" id="toc-receptor-return" class="nav-link" data-scroll-target="#receptor-return">Receptor Return</a>
+  <ul class="collapse">
+  <li><a href="#plume-1-simulated-dispersion" id="toc-plume-1-simulated-dispersion" class="nav-link" data-scroll-target="#plume-1-simulated-dispersion">Plume 1 simulated dispersion</a></li>
+  <li><a href="#plume-2-simulated-dispersion" id="toc-plume-2-simulated-dispersion" class="nav-link" data-scroll-target="#plume-2-simulated-dispersion">Plume 2 simulated dispersion</a></li>
+  <li><a href="#plume-3-simulated-dispersion" id="toc-plume-3-simulated-dispersion" class="nav-link" data-scroll-target="#plume-3-simulated-dispersion">Plume 3 simulated dispersion</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Identify and Trace Plume Emission Source</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">HPAI</div>
+    <div class="quarto-category">Spatiotemporal</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 27, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<style type="text/css">
+
+body, td {
+   font-size: 13pt;
+}
+code.r{
+  font-size: 9pt;
+}
+pre {
+  font-size: 11pt
+}
+</style>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>This script provides a conceptual workflow that <em>backtraces</em> or verifies the source farm that instigated secondary outbreaks at other farms through atmospheric dispersion of virus. That is, the script looks at data from a secondary outbreak and attempts to determine what source farm emitted the virus that seeded virus introduction. This script moves <em>backward</em> in time to identify the source of a pathogenic plume.</p>
+<p>The companion and preceding script for this analysis is available here, Simulated Outbreak. That analysis moves <em>forward</em> in time to model what farms could have been subject to pathogen invasion after plume emission from a source farm. This preliminary script provides a more intuitive overview than the current one which requires a hindsight perspective.</p>
+</section>
+<section id="preliminary-setup" class="level2">
+<h2 class="anchored" data-anchor-id="preliminary-setup">Preliminary Setup</h2>
+<section id="libraries" class="level3">
+<h3 class="anchored" data-anchor-id="libraries">Libraries</h3>
+<p>This workflow uses the <strong>renv</strong> package for package versioning and environmental management. The <code>renv.lock</code> file is included to facilitate package installain. See, <em>renv::restore()</em>.</p>
+<div class="cell">
+
+</div>
+</section>
+<section id="core-functions" class="level3">
+<h3 class="anchored" data-anchor-id="core-functions">Core Functions</h3>
+<p>Custom functions</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(<span class="st">"R/utilities.R"</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source_dir</span>(<span class="fu">here</span>(<span class="st">"R"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="authentication" class="level3">
+<h3 class="anchored" data-anchor-id="authentication">Authentication</h3>
+<p>User credentials to access data repository and API resources.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>authentications <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(<span class="fu">here</span>(<span class="st">"local"</span>, <span class="st">"secrets.yaml"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="api-registration" class="level3">
+<h3 class="anchored" data-anchor-id="api-registration">API Registration</h3>
+<p><strong>Stadia</strong> maps are used for backgrounds.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">register_stadiamaps</span>(<span class="at">key =</span> authentications<span class="sc">$</span>stadi_api)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="osf-link" class="level3">
+<h3 class="anchored" data-anchor-id="osf-link">OSF Link</h3>
+<p>Models and data generated from this script are stored at the <em>Open Science Framework (OSF)</em> for remote access. See, this <strong>OSF Project:</strong> https://osf.io/98hmt/</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_auth</span>(authentications<span class="sc">$</span>osf_token) <span class="co"># for write/admin privileges</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered PAT from the provided token</code></pre>
+</div>
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>osf_project_demo <span class="ot">&lt;-</span> <span class="fu">osf_retrieve_node</span>(<span class="st">"https://osf.io/su4yz/"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>osf_project_demo<span class="sc">$</span>name <span class="co"># scratch directory on OSF EpiPlume project</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Demonstration Data"</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="read-configuration-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="read-configuration-parameters">Read Configuration Parameters</h2>
+<p>Parameters for epidemiological and spatial analyses are recorded in configuration files. Loading the demonstration config file, which can be viewed here: <a href="https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml">Demo Configuration Parameters</a>.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cfg <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(<span class="fu">here</span>(<span class="st">"config"</span>, <span class="st">"demo_2025-04-21.yaml"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="simulated-outbreak" class="level2">
+<h2 class="anchored" data-anchor-id="simulated-outbreak">Simulated Outbreak</h2>
+<p>Downloading and reading the data frame resulting from forward simulation in the Simulated Outbreak script. This file has the coordinates and outbreak detection date for the secondarily infected farms (only one in this demo run) and source farm.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>osf_id <span class="ot">&lt;-</span> osf_project_demo <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">osf_ls_files</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"demo_outbreak_sim_2025-04-28.csv"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_download</span>(osf_id,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/temp"</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">conflicts =</span> <span class="st">"overwrite"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped">
+<colgroup>
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 97%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">name</th>
+<th style="text-align: left;">id</th>
+<th style="text-align: left;">local_path</th>
+<th style="text-align: left;">meta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">demo_outbreak_sim_2025-04-28.csv</td>
+<td style="text-align: left;">680faa9b91b1af0e5e7c5bb0</td>
+<td style="text-align: left;">local/temp/demo_outbreak_sim_2025-04-28.csv</td>
+<td style="text-align: left;">demo_outbreak_sim_2025-04-28.csv , file , /680faa9b91b1af0e5e7c5bb0 , 1414 , osfstorage , /demo_outbreak_sim_2025-04-28.csv , 1745857179 , 1745857179 , 13361dc0fd02ffb1c1b27224e97d7469 , 1201290c6e31d84d575f9ad16d5c62ce9de5b16256a4d125933476e7bd3a7833 , 0 , TRUE , 1 , FALSE , https://api.osf.io/v2/files/680faa9b91b1af0e5e7c5bb0/ , https://files.osf.io/v1/resources/su4yz/providers/osfstorage/680faa9b91b1af0e5e7c5bb0 , https://files.osf.io/v1/resources/su4yz/providers/osfstorage/680faa9b91b1af0e5e7c5bb0 , https://files.osf.io/v1/resources/su4yz/providers/osfstorage/680faa9b91b1af0e5e7c5bb0 , https://osf.io/download/680faa9b91b1af0e5e7c5bb0/ , https://mfr.osf.io/render?url=https%3A%2F%2Fosf.io%2Fdownload%2F680faa9b91b1af0e5e7c5bb0%2F%3Fdirect%26mode%3Drender, https://osf.io/su4yz/files/osfstorage/680faa9b91b1af0e5e7c5bb0 , https://api.osf.io/v2/files/680faa9b91b1af0e5e7c5bb0/ , https://api.osf.io/v2/files/680c0182fd8f8cdc22d2b775/ , 680c0182fd8f8cdc22d2b775 , files , https://api.osf.io/v2/files/680faa9b91b1af0e5e7c5bb0/versions/ , https://api.osf.io/v2/nodes/su4yz/ , su4yz , nodes , https://api.osf.io/v2/nodes/su4yz/ , nodes , nodes , su4yz , https://api.osf.io/v2/files/680faa9b91b1af0e5e7c5bb0/cedar_metadata_records/</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>simulated_outbreaks <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"local/temp/demo_outbreak_sim_2025-04-28.csv"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(outbreak)) <span class="co"># keeping only farms that experienced outbreak</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="convert-to-points" class="level3">
+<h3 class="anchored" data-anchor-id="convert-to-points">Convert to Points</h3>
+<p>Data frame to spatial points</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Long/Lat</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>farm_points_wgs84 <span class="ot">&lt;-</span> <span class="fu">vect</span>(simulated_outbreaks,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">geom =</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">crs =</span> <span class="st">"EPSG:4326"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Get metadata for simulated farms</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>outbreak_farm_meta <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(farm_points_wgs84, <span class="at">geom=</span><span class="st">"xy"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">!=</span> <span class="st">"source_farm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>X) <span class="co"># row names</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>orig_source_meta <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(farm_points_wgs84, <span class="at">geom=</span><span class="st">"xy"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"source_farm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>X) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="create-study-area" class="level2">
+<h2 class="anchored" data-anchor-id="create-study-area">Create Study Area</h2>
+<p>Defining a study area extent (raster grid) with the secondary outbreak farm at center. The original source farm is also depicted as reference. The <em>define_study_domain()</em> identifies the appropriate UTM and returns projected objects.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>study_area_args <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">source_origin =</span> <span class="fu">c</span>(outbreak_farm_meta<span class="sc">$</span>x, outbreak_farm_meta<span class="sc">$</span>y),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">extent_km =</span> cfg<span class="sc">$</span>domain<span class="sc">$</span>extent_km,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">res_m =</span> cfg<span class="sc">$</span>domain<span class="sc">$</span>res_m  </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>study_area <span class="ot">&lt;-</span> <span class="fu">exec</span>(define_study_domain, <span class="sc">!!!</span>study_area_args)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># projected UTM</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>farm_points <span class="ot">&lt;-</span> <span class="fu">project</span>(farm_points_wgs84, <span class="fu">crs</span>(study_area<span class="sc">$</span>projection))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="plot-study-area" class="level3">
+<h3 class="anchored" data-anchor-id="plot-study-area">Plot study area</h3>
+<p>The circle at center is the secondarily infected farm; the goal is to look backward in time to demonstrate that the source farm (triangle, lower right) emitted the plume that gave rise to the outbreak at the center.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid</span>(study_area<span class="sc">$</span>grid, <span class="at">source_loc =</span> farm_points)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="trajectory-models" class="level2">
+<h2 class="anchored" data-anchor-id="trajectory-models">Trajectory Models</h2>
+<p>A <a href="https://www.ready.noaa.gov/HYSPLIT.php">HYSPLIT</a> model is constructed assuming the secondary outbreak location was a <em>receptor</em> of the plume from an unknown source. The <a href="https://github.com/rich-iannone/splitr"><strong>splitR</strong> package</a> is used to call a HYSPLIT exceutable from R.</p>
+<p>Time limit to download meteorological data.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"timeout"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 60</code></pre>
+</div>
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">timeout=</span><span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="date-determination" class="level3">
+<h3 class="anchored" data-anchor-id="date-determination">Date Determination</h3>
+<p>Determine dates and times to evaluate. Although it is known when the outbreak was detected at the secondary farm, it is not known when the virus was introduced nor when initial infection occurred. In practice, poultry workers would likely only detect an outbreak once the rate of daily chicken mortality sufficiently and consistently (multiple days) exceeded that typical background rate. In this example, it’s assumed that latent periods and initial spread from a single chicken took at least 3 days (earliest possible detection), but may have taken 20 days to detect. Therefore, this demo analyses more than two weeks in the past.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>model_name <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"_"</span>, <span class="st">""</span>, outbreak_farm_meta<span class="sc">$</span>name) <span class="co"># 6 characters max</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>model_name</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "farm18"</code></pre>
+</div>
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>earliest_date <span class="ot">&lt;-</span> <span class="fu">as_date</span>(outbreak_farm_meta<span class="sc">$</span>outbreak) <span class="sc">-</span> <span class="fu">days</span>(<span class="dv">20</span>) <span class="co"># assuming slow to detect</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>latest_date <span class="ot">&lt;-</span> <span class="fu">as_date</span>(outbreak_farm_meta<span class="sc">$</span>outbreak) <span class="sc">-</span> <span class="fu">days</span>(<span class="dv">3</span>) <span class="co"># allowing for at least 2 day latent period and 1 day infectious</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>dates_to_check <span class="ot">&lt;-</span> <span class="fu">seq</span>(earliest_date, latest_date, <span class="at">by =</span> <span class="dv">1</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(dates_to_check) <span class="co"># total days to model</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 18</code></pre>
+</div>
+</div>
+</section>
+<section id="run-trajectory-model" class="level3">
+<h3 class="anchored" data-anchor-id="run-trajectory-model">Run Trajectory Model</h3>
+<p>The <em>wrap_trajectory_model()</em> saves locally, but a copy is also saved to OSF for others to use. There are a ton of parameter assumptions here to discuss. Brief explanations are provided with the <a href="https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml">config file (linked here)</a>, but its too much for this draft workflow.</p>
+<p>This model estimates four trajectories per day (every 6 hours) for each of the 18 days, for a a total of 72 trajectories.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>traj_model <span class="ot">&lt;-</span> <span class="fu">wrap_trajectory_model</span>(cfg, <span class="co"># configuration file</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">traj_name =</span> model_name,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">lon =</span> outbreak_farm_meta<span class="sc">$</span>x, <span class="co"># simulated outbreak farm</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">lat =</span> outbreak_farm_meta<span class="sc">$</span>y, <span class="co"># simulated outbreak farm</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">height =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>traj_height,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">duration =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>traj_duration,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">days =</span> dates_to_check, <span class="co"># days to assess based on simulated outbreak timeline</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">daily_hours =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>daily_hours,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">model_height =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>model_height, </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">direction =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>traj_direction,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">extended_met =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>extended_met,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">vert_motion =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>vert_motion,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">met_type =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>traj_met_type,</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">met_dir =</span> <span class="fu">here</span>(cfg<span class="sc">$</span>trajectory<span class="sc">$</span>traj_climate),</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">exec_dir =</span> <span class="fu">here</span>(cfg<span class="sc">$</span>trajectory<span class="sc">$</span>traj_outputs),</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">clean_up =</span> cfg<span class="sc">$</span>trajectory<span class="sc">$</span>traj_clean_up</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>                                )</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co"># save copy to OSF</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/traj/farm18_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Download trajectory model from OSF (if not run locally)</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>osf_id <span class="ot">&lt;-</span> osf_project_demo <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">osf_ls_files</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"farm18_model.rds"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_download</span>(osf_id,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/temp"</span>),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">conflicts =</span> <span class="st">"overwrite"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Read the pre-run trajectory model</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>traj_model <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/farm18_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plot-hindcast-trajectories" class="level3">
+<h3 class="anchored" data-anchor-id="plot-hindcast-trajectories">Plot hindcast trajectories</h3>
+<p>Each line is a trajectory extending from the secondarily infected farm (center) that follows atmospheric characteristics for the hind cast date and time. This plot shows the complete trajectory.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid2</span>(study_area<span class="sc">$</span>grid, traj_model<span class="sc">$</span>traj_df, <span class="at">group_col =</span> <span class="st">"run"</span>, <span class="at">vector_type =</span> <span class="st">"line"</span>, <span class="at">grid_cut =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+<p>The trajectories in this plot are cropped to the extent of study area with option <code>grid_cut</code> to better see individual paths.</p>
+<p><strong>Question:</strong> Do any of these trajectories help identify and confirm the source farm?</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, traj_model<span class="sc">$</span>traj_df, <span class="at">group_col =</span> <span class="st">"run"</span>, <span class="at">vector_type =</span> <span class="st">"line"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="spatial-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-analysis">Spatial Analysis</h2>
+<p>A couple basic steps to compare distances between the source farm and possible trajectories from the secondary outbreak farm.</p>
+<section id="measure-distances" class="level3">
+<h3 class="anchored" data-anchor-id="measure-distances">Measure distances</h3>
+<p>The <em>measure_proximty()</em> function measures distances for both the trajectory lines and point outputs.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>traj_dists <span class="ot">&lt;-</span> <span class="fu">measure_proximty</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">target_location =</span> <span class="fu">c</span>(orig_source_meta<span class="sc">$</span>x, orig_source_meta<span class="sc">$</span>y), <span class="co"># suspected source farm</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">traj_model =</span> traj_model,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">projection =</span> study_area<span class="sc">$</span>projection</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="inverse-distance-decay" class="level3">
+<h3 class="anchored" data-anchor-id="inverse-distance-decay">Inverse Distance Decay</h3>
+<p>Apply an inverse distance decay function assuming that trajectory probability decreases the further from the source farm it is:</p>
+<p><span class="math display">
+w(d) = \exp(-\lambda \times d)
+</span><br>
+where:<br>
+- <span class="math inline">w(d)</span> is the weight (between 0 and 1),<br>
+- <span class="math inline">d</span> is the distance in meters between the source and the trajectory,<br>
+- <span class="math inline">\lambda</span> is a decay rate parameter, how quickly the weight decreases with distance.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>distance_threshold <span class="ot">&lt;-</span> <span class="dv">10000</span> <span class="co"># meters, 10k, decreasing probability of trajectory after this distance</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>lambda_value <span class="ot">&lt;-</span> <span class="fu">calibrate_lambda</span>(distance_threshold, <span class="at">weight_target =</span> <span class="fl">0.5</span>) <span class="co"># find the best lambda with 10k as the median probability</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Show the relationship (green is the <code>lambda_value</code>).</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_distance_decay</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda_target =</span> lambda_value,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">weight_target =</span> <span class="fl">0.5</span> <span class="co"># median probability</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+<section id="score-and-subset" class="level3">
+<h3 class="anchored" data-anchor-id="score-and-subset">Score and Subset</h3>
+<p>Calculate the probability for each modeled trajectory</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>traj_dists<span class="sc">$</span>traj_lines<span class="sc">$</span>score <span class="ot">&lt;-</span> <span class="fu">calculate_inverse_distance_weight</span>(traj_dists<span class="sc">$</span>traj_lines<span class="sc">$</span>distance_m, </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="at">lambda =</span> lambda_value) <span class="co"># score distances</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Select trajectories with at least a 90% probability.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>closest_traj_line <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(traj_dists<span class="sc">$</span>traj_lines) <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(score <span class="sc">&gt;=</span> <span class="fl">0.9</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(score)) <span class="sc">%&gt;%</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(run, distance_m, score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Filter trajectory data to possible distances.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>runs_50 <span class="ot">&lt;-</span> <span class="fu">unique</span>(closest_traj_line<span class="sc">$</span>run)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">vect</span>(traj_dists<span class="sc">$</span>traj_point)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">project</span>(possible_dates, <span class="st">"EPSG:4326"</span> )</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>possible_dates <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(possible_dates,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>                                <span class="at">geom=</span><span class="st">"xy"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">lon =</span> x, <span class="at">lat =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(run <span class="sc">%in%</span> runs_50)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The above reduced 72 possible trajectories to 1970-01-07, 1970-01-11, 1970-01-16, 1970-01-17 probable ones. Show here:</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, possible_dates, <span class="at">group_col =</span> <span class="st">"run"</span>, <span class="at">vector_type =</span> <span class="st">"line"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="receptor-return" class="level2">
+<h2 class="anchored" data-anchor-id="receptor-return">Receptor Return</h2>
+<p>Having narrowed possible trajectory dates and times that could have produced the infecting plume, reverse plumes are simulated from the secondary outbreak farm (receptor) to the original source (nackwards in time).</p>
+<p>Execute plume model runs in a loop.</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>possible_datetimes <span class="ot">&lt;-</span> possible_dates <span class="sc">%&gt;%</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">as.Date</span>(traj_dt)) <span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">%&gt;%</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">start =</span> <span class="fu">min</span>(traj_dt)) <span class="sc">%&gt;%</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">unique</span>(possible_datetimes<span class="sc">$</span>start)){</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  plume_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"plume_"</span>, i)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  plume_model <span class="ot">&lt;-</span> <span class="fu">wrap_plume_model</span>(cfg, <span class="co"># configuration file</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>                                <span class="at">plume_name =</span> plume_name, <span class="co"># name/label</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>                                <span class="at">lon =</span> outbreak_farm_meta<span class="sc">$</span>x, <span class="co"># secondary outbreak farm</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>                                <span class="at">lat =</span> outbreak_farm_meta<span class="sc">$</span>y, <span class="co"># secondary outbreak farm</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>                                <span class="at">direction =</span> <span class="st">"backward"</span>, <span class="co"># from receptor back in time</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>                                <span class="at">release_start =</span> possible_datetimes<span class="sc">$</span>start[i], <span class="co"># release from source farm</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>                                <span class="at">release_end =</span> possible_datetimes<span class="sc">$</span>start[i] <span class="sc">-</span> <span class="fu">hours</span>(<span class="dv">1</span>), <span class="co"># reverse time</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>                                <span class="at">start_time =</span> possible_datetimes<span class="sc">$</span>start[i], <span class="co"># dispersion time same as emission</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>                                <span class="at">end_time =</span> possible_datetimes<span class="sc">$</span>start[i] <span class="sc">-</span> <span class="fu">hours</span>(<span class="dv">24</span>) <span class="co"># dispersion end</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>                                )</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a><span class="co"># copy to OSF</span></span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_1_model.rds"</span>))</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_2_model.rds"</span>))</span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_upload</span>(osf_project_demo, <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/demo_run/plume/plume_3_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Download from OSF</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>osf_id <span class="ot">&lt;-</span> osf_project_demo <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">osf_ls_files</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(name <span class="sc">==</span> <span class="st">"plume_1_model.rds"</span> <span class="sc">|</span> </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>         name <span class="sc">==</span> <span class="st">"plume_2_model.rds"</span> <span class="sc">|</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>         name <span class="sc">==</span> <span class="st">"plume_3_model.rds"</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="fu">osf_download</span>(osf_id,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">path =</span> <span class="fu">here</span>(<span class="st">"local/temp"</span>),</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">conflicts =</span> <span class="st">"overwrite"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Read plume models</p>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>plume_1 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_1_model.rds"</span>))</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>plume_2 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_2_model.rds"</span>))</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>plume_3 <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"local/temp/plume_3_model.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="plume-1-simulated-dispersion" class="level3">
+<h3 class="anchored" data-anchor-id="plume-1-simulated-dispersion">Plume 1 simulated dispersion</h3>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_1<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+</section>
+<section id="plume-2-simulated-dispersion" class="level3">
+<h3 class="anchored" data-anchor-id="plume-2-simulated-dispersion">Plume 2 simulated dispersion</h3>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_2<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+</section>
+<section id="plume-3-simulated-dispersion" class="level3">
+<h3 class="anchored" data-anchor-id="plume-3-simulated-dispersion">Plume 3 simulated dispersion</h3>
+<div class="cell">
+<details open="">
+<summary>Hide code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_grid3</span>(study_area<span class="sc">$</span>grid, plume_3<span class="sc">$</span>disp_df, <span class="at">group_col =</span> <span class="st">"particle_i"</span>, <span class="at">vector_type =</span> <span class="st">"point"</span>, <span class="at">source_loc =</span> farm_points_wgs84, <span class="at">grid_cut =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="trace_emission_source_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-right">Built with <a href="https://quarto.org/">Quarto</a></div>
+  </div>
+</footer>
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

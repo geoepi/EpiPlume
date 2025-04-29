@@ -2,28 +2,48 @@
 title: "Simulate Airborne Virus Introduction and Outbreak"
 description: " "
 date: "2025-04-27"
-categories: [R, HPAI]
+categories: [R, HPAI, Spatiotemporal]
 format:
-  gfm:
-   toc: true
-   toc-depth: 2
-   code-fold: show
-   code-summary: "Hide code"
-   preview-mode: raw
+  html: 
+    df-print: kable
+    code-fold: show
+    code-summary: "Hide code"
+    code-overflow: wrap
+    toc-title: Page Contents
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    number-sections: false
+    html-math-method: katex
+    smooth-scroll: true
 editor: source
 editor_options:  
   chunk_output_type: console
 ---
+```{=html}
+<style type="text/css">
+
+body, td {
+   font-size: 13pt;
+}
+code.r{
+  font-size: 9pt;
+}
+pre {
+  font-size: 11pt
+}
+</style>
+```
 
 ## Overview
-This script provides a conceptual workflow that simulates farm locations, performes atmospheric dispersion modeling (aka, *plume* modeling), analyizes the plume results in a spatial temporal model, and identifies simulated farms most vulnerable to airborne virus introduction.
-
+This script provides a conceptual workflow that simulates farm locations, performes atmospheric dispersion modeling from a source farm (aka, *plume* modeling), analyizes the plume results in a spatial temporal model, and then identifies the simulated farms most vulnerable to airborne virus introduction.  The results from this *forward* simulation are analysed in a second script BACKTRACE in an attempt to identify the soirce farms using only the information from the secondarily infected farms simulated here.  
+  
 
 ## Preliminary Setup
 
 ### Libraries
 This workflow uses the **renv** package for package versioning and environmental management.  The `renv.lock` file is included to facilitate package installain. See, *renv::restore()*.
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(patchwork)
 library(gganimate)
@@ -68,7 +88,7 @@ register_stadiamaps(key = authentications$stadi_api)
 ```
   
 ### OSF Link
-Models and data generated from this script are stored at the *Open Science Framwork (OSF)* for remote access.  See, this **OSF Project:** https://osf.io/su4yz/  
+Models and data generated from this script are stored at the *Open Science Framwork (OSF)* for remote access.  See, this **OSF Project:** https://osf.io/98hmt/  
 ```{r}
 osf_auth(authentications$osf_token) # for write/admin privileges
 
@@ -78,7 +98,7 @@ osf_project_demo$name # scratch directory on OSF EpiPlume project
 ```
   
 ## Read Configuration Parameters  
-Parameters for epidemiological and spatial analyses are recorded in configuration files.  Loading the demonstration config file, whic can be viewed here: [Demo Configuration Parameters](https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml).
+Parameters for epidemiological and spatial analyses are recorded in configuration files.  Loading the demonstration config file, which can be viewed here: [Demo Configuration Parameters](https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml).
 ```{r}
 cfg <- yaml::read_yaml(here("config", "demo_2025-04-21.yaml"))
 
@@ -138,7 +158,7 @@ sim_dates
 ```
 
 ### SEIR and Emission Estimates
-Run SEIR model for source farm.  There are a ton of parameter assumptions here to discuss.  Brief explantions are provided with the [config file (linked here)](https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml), but far too much to include in this draft workfow.    
+Run SEIR model for source farm.  There are a ton of parameter assumptions here to discuss.  Brief explanations are provided with the [config file (linked here)](https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml), but far too much to include in this draft workflow.    
 ```{r}
 # virus decay, rate of decreasing viability
 halflife <- calculate_half_life(viability_days = cfg$virus$viability_hours/24, # convert hours to days
@@ -190,7 +210,7 @@ simulated_realease_dt <- ymd_hm(paste0(sim_dates$release_date, " ", sprintf("%02
 ```
 
 ### Run plume model
-The *wrap_plume_model()* function saves the plume model locally, however, a copy is also saved to OSF.
+The *wrap_plume_model()* function saves the plume model locally, however, a copy is also saved to OSF. There are a ton of parameter assumptions here to discuss.  Brief explanations are provided with the [config file (linked here)](https://github.com/geoepi/EpiPlume/blob/main/config/demo_2025-04-21.yaml), but its too much for this draft workflow.    
 ```{r eval=FALSE}
 plume_model <- wrap_plume_model(cfg, # configuration file
                                 plume_name = "sim_demo", # name/label
@@ -298,7 +318,8 @@ $$
   \textit{y}_{2st} =
     \begin{cases}
       NA, & \text{concentration unknown} \\
-      concentration, & \text{estimated concentration values}   
+      concentration, & \text{estimated concentration values}
+    \end{cases}
 $$
   
 To model airborne particulate matter using a **binomial-gamma joint likelihood** was used to separately represent particle probability and concentration.  For particle detection ($y_1st$) was modeled using a Bernoulli distribution, while the latent concentration of particulate matter ($y_2st$) was modeled with a Gamma distribution:  
@@ -323,7 +344,7 @@ $$
 The concentration linear predictor was defined as:  
 
 $$
-\log(\mu_{st}) = \alpha^2 + \zeta_{st}^2 + \varphi_s^2 + \frac{1}{\lambda} S_{st}
+\log(\mu_{st}) = \alpha^2 + \zeta_{st}^2 + \frac{1}{\lambda} S_{st}
 $$
   
 where:
@@ -592,7 +613,7 @@ detection_date <- infect_date + days(rand_detect_day)
 ```
 
 ### View outbreak dynamics
-```{r}
+```{r fig.height=10, fig.width=10, warning=FALSE, message=FALSE}
 plot_ode_shed_dynamics(seir_exposed_farm, date_axis = TRUE, vline = detection_date, vline_text = "Detection")
 ```
 
