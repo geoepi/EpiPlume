@@ -2,6 +2,7 @@
 resolve_hysplit_meteorology <- function(manifest_row, cfg, must_exist = TRUE) {
   row <- validate_hysplit_manifest_row(manifest_row)
   directory <- cfg$hysplit$meteorology_directory
+  if (is.null(directory) || length(directory) != 1L || is.na(directory) || !nzchar(trimws(directory))) directory <- Sys.getenv("HYSPLIT_METEOROLOGY_DIRECTORY", unset = NA_character_)
   if (is.null(directory) || length(directory) != 1L || is.na(directory) || !nzchar(trimws(directory))) {
     if (isTRUE(must_exist)) stop("`hysplit.meteorology_directory` is missing.", call. = FALSE)
     directory <- NA_character_

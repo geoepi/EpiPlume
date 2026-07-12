@@ -1,0 +1,79 @@
+# Controlled single-run smoke configuration. Local HYSPLIT paths come from env vars.
+project:
+  scenario_id: "facility_exchange_single_run_smoke"
+  random_seed: 20260712
+inputs:
+  mode: "simulated"
+  facilities_file: null
+  observations_file: null
+simulation:
+  n_facilities: 120
+  n_positive_facilities: 24
+  n_negative_facilities: 88
+  n_unknown_facilities: 8
+  observation_start: "2020-05-01"
+  observation_end: "2020-06-15"
+  clustered_locations: true
+  minimum_spacing_m: 250
+domain:
+  center_longitude: -89.031407
+  center_latitude: 32.494830
+  extent_km: 60
+  raster_resolution_m: 250
+plume:
+  maximum_evaluation_distance_km: 20
+  computational_buffer_km: 5
+  simulation_duration_hours: 8
+  release_duration_hours: 1
+  release_interval_hours: 6
+  planned_release_times:
+    - "2020-05-01T00:00:00Z"
+    - "2020-05-01T06:00:00Z"
+    - "2020-05-01T12:00:00Z"
+    - "2020-05-01T18:00:00Z"
+  source_height_m: 5
+  emission_mode: "unit"
+  emission_rate: 1
+  particle_diameter_um: 2.5
+  particle_density_g_cm3: 1.5
+  particle_shape_factor: 0.9
+tracer_decay:
+  enabled: true
+  model: "exponential"
+  half_life_hours: 2
+  minimum_fraction: 0.05
+exposure:
+  receptor_buffer_m: 500
+  sampling_method: "buffer"
+  intercept_metric: "particle_count"
+  intercept_threshold: 1
+  minimum_intercept_hours: 1
+  cumulative_method: "sum"
+  include_source_as_receptor: false
+  retain_non_intercepts: true
+hysplit:
+  direction: "forward"
+  meteorology_type: "reanalysis"
+  meteorology_directory: null
+  hysplit_install_directory: null
+  run_root_directory: "local/facility_exchange_single_run_smoke/hysplit"
+  clean_up: false
+outputs:
+  root_directory: "local/facility_exchange_single_run_smoke"
+  manifest_directory: "local/facility_exchange_single_run_smoke/manifests"
+  raster_directory: "local/facility_exchange_single_run_smoke/rasters"
+  exposure_directory: "local/facility_exchange_single_run_smoke/exposures"
+  report_directory: "local/facility_exchange_single_run_smoke/reports"
+multirun:
+  continue_on_error: false
+  include_outside_distance_in_denominator: false
+  time_units: ["release", "day", "week", "month"]
+  matrix_values: ["intercept_frequency", "n_intercept_runs", "total_particle_count_cumulative"]
+pipeline:
+  parse_completed_runs: true
+  extract_receptors: true
+  assemble_multirun: true
+  write_intermediate_outputs: true
+  continue_on_error: false
+  targets_store: "local/facility_exchange_single_run_smoke/targets"
+  status_directory: "local/facility_exchange_single_run_smoke/pipeline_status"

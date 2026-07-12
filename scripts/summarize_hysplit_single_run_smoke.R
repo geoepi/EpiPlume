@@ -1,0 +1,13 @@
+args <- commandArgs(trailingOnly = TRUE)
+source("R/read_facility_exchange_config.R")
+source("R/hysplit_single_run_smoke.R")
+source("R/validate_hysplit_model_result.R")
+source("R/extract_hysplit_dispersion_table.R")
+tryCatch({
+  cli <- smoke_parse_args(args); cfg <- read_facility_exchange_config(cli$config); inputs <- smoke_load_manifest(cfg); row <- smoke_select_row(inputs$manifest, cli$run_id)
+  directory <- normalizePath(row$run_directory, winslash = "/", mustWork = FALSE); meta <- readRDS(file.path(directory, "run_metadata.rds")); parsed_meta <- readRDS(file.path(directory, "parsed", "parsing_metadata.rds")); summary <- utils::read.csv(file.path(directory, "parsed", "plume_summary.csv")); exchange <- utils::read.csv(file.path(directory, "receptors", "source_receptor_exchange.csv")); ts <- utils::read.csv(file.path(directory, "receptors", "sampled_receptor_time_series.csv"))
+  raw <- if (file.exists(file.path(directory, "parsed", "dispersion_standardized.rds"))) readRDS(file.path(directory, "parsed", "dispersion_standardized.rds")) else data.frame()
+  retained <- parsed_meta$retained_records; distance <- if (nrow(raw)) range(raw$distance_from_source_km, na.rm = TRUE) else c(NA, NA)
+  out <- data.frame(run_id = meta$run_id, execution_status = meta$status, hysplit_start = meta$started_at, hysplit_finish = meta$finished_at, elapsed_runtime_seconds = meta$elapsed_seconds, raw_dispersion_records = if (is.null(meta$model_result)) NA_integer_ else nrow(extract_hysplit_dispersion_table(meta$model_result)), standardized_dispersion_records = nrow(raw), elapsed_hour_min = if (nrow(raw)) min(raw$elapsed_hours, na.rm = TRUE) else NA, elapsed_hour_max = if (nrow(raw)) max(raw$elapsed_hours, na.rm = TRUE) else NA, maximum_transport_distance_km = max(distance), records_within_20km = retained, hourly_raster_layers = summary$n_hour_bins[1], candidate_receptor_facilities = nrow(inputs$facilities) - 1L, receptor_time_series_rows = nrow(ts), binary_intercepts = sum(exchange$intercept), maximum_retained_tracer_fraction = if (nrow(raw)) max(raw$tracer_remaining_fraction, na.rm = TRUE) else NA, missing_or_malformed_records = sum(!complete.cases(raw[c("elapsed_hours", "longitude", "latitude")])), parser_warnings = paste(meta$warnings, collapse = " | "), receptor_extraction_warnings = "", stringsAsFactors = FALSE)
+  report_dir <- file.path(cfg$outputs$report_directory); dir.create(report_dir, recursive = TRUE, showWarnings = FALSE); path <- file.path(report_dir, paste0(cli$run_id, "_smoke_summary.csv")); utils::write.csv(out, path, row.names = FALSE); print(out); cat("summary_path:", normalizePath(path, winslash = "/"), "\n")
+}, error = function(e) { message("SUMMARY FAILED: ", conditionMessage(e)); quit(save = "no", status = 1L) })
