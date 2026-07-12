@@ -30,6 +30,6 @@ utils::write.csv(facilities, file.path(facility_exchange_paths$data, "facilities
 utils::write.csv(observations, file.path(facility_exchange_paths$data, "observations.csv"), row.names = FALSE)
 utils::write.csv(simulation_truth, file.path(facility_exchange_paths$data, "simulation_truth.csv"), row.names = FALSE)
 utils::write.csv(facility_pairs, file.path(facility_exchange_paths$data, "directed_facility_pairs.csv"), row.names = FALSE)
-utils::write.csv(hysplit_run_manifest, file.path(facility_exchange_paths$manifests, "planned_hysplit_runs.csv"), row.names = FALSE)
+utils::write.csv(hysplit_run_manifest, file.path(facility_exchange_paths$manifests, "hysplit_run_manifest.csv"), row.names = FALSE)
 
 message("Prepared synthetic facility-exchange inputs and a planning-only HYSPLIT manifest under ", facility_exchange_paths$root)
