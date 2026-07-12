@@ -1,6 +1,13 @@
+<p align="center">
+  <img src="assets/epiplume_sticker.png" width="350" alt="hex sticker">
+</p>
+
+
 # EpiPlume
 
 Exploratory models of pathogen movement via aerosol, particle, and airborne dispersion.
+
+<br clear="right" /> 
 
 ## Conceptual Overview
 1.  [HPAI Plume Modeling](https://geoepi.github.io/EpiPlume/): This webpage includes a demonstrative workflow, with one tab showing a forward in time [Outbreak Simulation](https://geoepi.github.io/EpiPlume/simulate_outbreak.html) and a second tab [Back Tracing](https://geoepi.github.io/EpiPlume/trace_emission_source.html) an outbreak to an emission source.  
