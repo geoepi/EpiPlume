@@ -495,6 +495,11 @@
       "NeedsCompilation": "yes",
       "Repository": "CRAN"
     },
+    "base64url": {
+      "Package": "base64url",
+      "Version": "1.4",
+      "Source": "Repository"
+    },
     "bigD": {
       "Package": "bigD",
       "Version": "0.3.1",
@@ -3075,6 +3080,11 @@
       "Maintainer": "Rich FitzJohn <rich.fitzjohn@gmail.com>",
       "Repository": "CRAN"
     },
+    "igraph": {
+      "Package": "igraph",
+      "Version": "2.3.3",
+      "Source": "Repository"
+    },
     "ini": {
       "Package": "ini",
       "Version": "0.3.1",
@@ -5268,6 +5278,11 @@
       "Maintainer": "Thomas Lin Pedersen <thomas.pedersen@posit.co>",
       "Repository": "CRAN"
     },
+    "secretbase": {
+      "Package": "secretbase",
+      "Version": "1.3.0",
+      "Source": "Repository"
+    },
     "selectr": {
       "Package": "selectr",
       "Version": "0.4-2",
@@ -5596,6 +5611,11 @@
       "Author": "Thomas Lin Pedersen [aut, cre] (<https://orcid.org/0000-0002-5147-4711>), Jeroen Ooms [aut] (<https://orcid.org/0000-0002-4035-0289>), Devon Govett [aut] (Author of font-manager), Posit, PBC [cph, fnd]",
       "Maintainer": "Thomas Lin Pedersen <thomas.pedersen@posit.co>",
       "Repository": "CRAN"
+    },
+    "targets": {
+      "Package": "targets",
+      "Version": "1.12.0",
+      "Source": "Repository"
     },
     "terra": {
       "Package": "terra",

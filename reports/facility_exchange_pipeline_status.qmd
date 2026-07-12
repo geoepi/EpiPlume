@@ -1,0 +1,27 @@
+---
+title: "Facility Exchange Pipeline Status"
+format: html
+execute:
+  echo: false
+---
+
+```{r}
+status_dir <- Sys.getenv("EPIPLUME_STATUS_DIR", "local/facility_exchange_demo/pipeline_status")
+status_file <- file.path(status_dir, "pipeline_status.csv")
+status <- if (file.exists(status_file)) read.csv(status_file, stringsAsFactors = FALSE) else data.frame()
+```
+
+HYSPLIT execution is external, duration-driven, and explicitly opt-in. This report reads completed pipeline outputs and never executes HYSPLIT.
+
+## Pipeline status
+
+```{r}
+if (!nrow(status)) cat("No pipeline status is available yet.") else knitr::kable(status)
+```
+
+## Completion state
+
+```{r}
+if (nrow(status) && status$parsed_run_count == 0) cat("No parsed runs are currently available; missing and failed runs remain explicit in the inventory.")
+if (nrow(status) && status$exchange_row_count == 0) cat("No source-to-receptor exchange rows are currently assembled.")
+```

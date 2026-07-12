@@ -3,6 +3,12 @@ project:
   scenario_id: "facility_exchange_demo" # Filesystem-safe scenario label.
   random_seed: 20260711 # Seed used by all development simulations.
 
+# Input provenance: simulated development inputs or user-supplied CSV files.
+inputs:
+  mode: "simulated" # Allowed values: simulated or files.
+  facilities_file: null # Required CSV path when mode is files.
+  observations_file: null # Required CSV path when mode is files.
+
 # Synthetic network and normalized observation settings.
 simulation:
   n_facilities: 120 # Total simulated facilities.
@@ -81,3 +87,13 @@ multirun:
   include_outside_distance_in_denominator: false # Candidate denominators use only receptors within the evaluation radius.
   time_units: ["release", "day", "week", "month"] # Connectivity summary periods.
   matrix_values: ["intercept_frequency", "n_intercept_runs", "total_particle_count_cumulative"] # Directed matrix products.
+
+# Safe targets workflow controls. HYSPLIT execution is defined separately.
+pipeline:
+  parse_completed_runs: true # Parse completed run metadata when no portable parsed object exists.
+  extract_receptors: true # Extract facility receptors from successful parsed branches.
+  assemble_multirun: true # Assemble successful exchange branches.
+  write_intermediate_outputs: true # Persist portable parsed and receptor products.
+  continue_on_error: true # Capture independent branch errors rather than aborting unrelated work.
+  targets_store: "local/facility_exchange_demo/targets" # Ignored scenario-specific targets store.
+  status_directory: "local/facility_exchange_demo/pipeline_status" # Ignored status and report products.

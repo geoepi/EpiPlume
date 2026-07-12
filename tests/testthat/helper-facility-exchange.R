@@ -20,7 +20,9 @@ function_files <- c(
   "summarize_connectivity_by_time.R", "summarize_connectivity_by_source.R",
   "summarize_connectivity_by_receptor.R", "summarize_connectivity_by_dyad.R",
   "build_facility_connectivity_matrices.R", "write_multirun_connectivity_outputs.R",
-  "assemble_multirun_facility_connectivity.R"
+  "assemble_multirun_facility_connectivity.R",
+  "read_facility_exchange_inputs.R", "build_pipeline_run_selection.R",
+  "load_completed_parsed_run.R", "pipeline_branch_helpers.R", "write_pipeline_status_summary.R"
 )
 repo_root <- normalizePath(file.path("..", ".."), winslash = "/", mustWork = TRUE)
 invisible(lapply(file.path(repo_root, "R", function_files), source))

@@ -1,0 +1,4 @@
+args <- commandArgs(trailingOnly = TRUE); i <- match("--config", args); config <- if (is.na(i)) "config/facility_exchange_demo.yml" else args[i + 1L]; Sys.setenv(EPIPLUME_CONFIG = config)
+source("R/read_facility_exchange_config.R"); cfg <- read_facility_exchange_config(config); store <- cfg$pipeline$targets_store
+manifest <- targets::tar_manifest(script = "_targets.R"); cat("configuration:", normalizePath(config, winslash = "/"), "\nstore:", store, "\ntarget_count:", nrow(manifest), "\n"); print(manifest[, "name", drop = FALSE])
+if (dir.exists(store)) { meta <- targets::tar_meta(store = store); cat("recorded_targets:", nrow(meta), "\nfailed_targets:", sum(!is.na(meta$error)), "\n"); print(targets::tar_outdated(script = "_targets.R", store = store)) } else cat("status: store does not yet exist\n")

@@ -1,0 +1,4 @@
+observation_id,facility_id,observation_date,observation_status
+O001,F001,2020-05-01,positive
+O002,F002,2020-05-01,negative
+O003,F003,2020-05-02,unknown
