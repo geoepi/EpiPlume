@@ -5,7 +5,7 @@ if (is.null(manifest_path)) stop("--manifest is required.", call. = FALSE)
 allow <- "--allow-download" %in% args; no_download <- "--no-download" %in% args
 if (allow == no_download) stop("Require exactly one of --allow-download or --no-download.", call. = FALSE)
 source("R/read_facility_exchange_config.R"); cfg <- read_facility_exchange_config(config)
-source("R/validate_hysplit_manifest_row.R"); source("R/prepare_hysplit_meteorology.R"); source("R/plan_hysplit_manifest_meteorology.R"); source("R/validate_manifest_meteorology_plan.R"); source("R/write_manifest_meteorology_outputs.R");
+source("R/validate_hysplit_manifest_row.R"); source("R/prepare_hysplit_meteorology.R"); source("R/plan_hysplit_manifest_meteorology.R"); source("R/validate_manifest_meteorology_plan.R"); source("R/write_manifest_meteorology_outputs.R"); source("R/prepare_hysplit_manifest_meteorology.R");
 source("R/build_pipeline_run_selection.R")
 manifest <- utils::read.csv(manifest_path, stringsAsFactors = FALSE); ids <- value("--run-ids")
 selected <- if (is.null(ids)) manifest else build_pipeline_run_selection(manifest, ids)
