@@ -1,20 +1,3 @@
-make_manifest_row <- function(run_directory = tempfile("hysplit-run-")) {
-  facilities <- simulate_facility_network(test_cfg)
-  row <- build_hysplit_run_manifest(facilities, test_cfg, facilities$facility_id[1])
-  row <- row[1, , drop = FALSE]
-  row$run_directory <- run_directory
-  row
-}
-
-make_test_installation <- function() {
-  directory <- tempfile("hysplit-install-"); dir.create(directory)
-  suffix <- if (.Platform$OS.type == "windows") ".exe" else ""
-  files <- file.path(directory, paste0(c("hycs_std", "parhplot"), suffix))
-  file.create(files)
-  if (.Platform$OS.type != "windows") Sys.chmod(files, mode = "0755")
-  directory
-}
-
 testthat::test_that("manifest validation normalizes exactly one valid row", {
   row <- make_manifest_row()
   normalized <- validate_hysplit_manifest_row(row)
@@ -42,6 +25,20 @@ testthat::test_that("installation resolution validates a splitr binary directory
   installation <- make_test_installation()
   cfg$hysplit$hysplit_install_directory <- installation
   testthat::expect_equal(resolve_hysplit_installation(cfg), paste0(normalizePath(installation, winslash = "/"), "/"))
+})
+
+testthat::test_that("installation fixture permissions are validated by platform", {
+  executable <- make_test_installation(executable = TRUE)
+  non_executable <- make_test_installation(executable = FALSE)
+  cfg <- test_cfg
+  cfg$hysplit$hysplit_install_directory <- executable
+  testthat::expect_no_error(resolve_hysplit_installation(cfg, TRUE))
+  cfg$hysplit$hysplit_install_directory <- non_executable
+  if (.Platform$OS.type == "unix") {
+    testthat::expect_error(resolve_hysplit_installation(cfg, TRUE), "not executable")
+  } else {
+    testthat::expect_no_error(resolve_hysplit_installation(cfg, TRUE))
+  }
 })
 
 testthat::test_that("meteorology inspection is local and conservative", {

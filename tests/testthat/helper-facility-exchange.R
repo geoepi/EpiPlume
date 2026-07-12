@@ -6,6 +6,8 @@ function_files <- c(
   "validate_hysplit_manifest_row.R", "resolve_hysplit_installation.R",
   "resolve_hysplit_meteorology.R", "build_hysplit_run_spec.R",
   "prepare_hysplit_meteorology.R",
+  "plan_hysplit_manifest_meteorology.R",
+  "validate_manifest_meteorology_plan.R",
   "standardize_hysplit_run_result.R", "run_plume_model.R",
   "write_completed_run_index.R",
   "run_hysplit_manifest_row.R", "validate_hysplit_model_result.R",
@@ -29,5 +31,20 @@ function_files <- c(
   "load_completed_parsed_run.R", "pipeline_branch_helpers.R", "write_pipeline_status_summary.R"
 )
 repo_root <- normalizePath(file.path("..", ".."), winslash = "/", mustWork = TRUE)
+make_test_installation <- function(executable = TRUE) {
+  directory <- tempfile("hysplit-install-"); dir.create(directory)
+  suffix <- if (.Platform$OS.type == "windows") ".exe" else ""
+  binary_paths <- file.path(directory, paste0(c("hycs_std", "parhplot"), suffix))
+  file.create(binary_paths)
+  if (isTRUE(executable) && .Platform$OS.type == "unix") Sys.chmod(binary_paths, mode = "0755")
+  directory
+}
+make_manifest_row <- function(run_directory = tempfile("hysplit-run-")) {
+  facilities <- simulate_facility_network(test_cfg)
+  row <- build_hysplit_run_manifest(facilities, test_cfg, facilities$facility_id[1])
+  row <- row[1, , drop = FALSE]
+  row$run_directory <- run_directory
+  row
+}
 invisible(lapply(file.path(repo_root, "R", function_files), source))
 test_cfg <- read_facility_exchange_config(file.path(repo_root, "config", "facility_exchange_demo.yml"))
