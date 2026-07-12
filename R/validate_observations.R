@@ -1,0 +1,20 @@
+#' Validate normalized facility observations
+validate_observations <- function(observations, facilities) {
+  validate_facilities(facilities)
+  if (!is.data.frame(observations)) stop("`observations` must be a data frame.", call. = FALSE)
+  required <- c("observation_id", "facility_id", "observation_date", "observation_status")
+  missing <- setdiff(required, names(observations))
+  if (length(missing)) stop("Observation table is missing required columns: ", paste(missing, collapse = ", "), call. = FALSE)
+  bad_id <- which(is.na(observations$observation_id) | !nzchar(trimws(as.character(observations$observation_id))))
+  if (length(bad_id)) stop("Missing observation_id at rows: ", paste(bad_id, collapse = ", "), call. = FALSE)
+  dup <- which(duplicated(observations$observation_id) | duplicated(observations$observation_id, fromLast = TRUE))
+  if (length(dup)) stop("Duplicate observation_id at rows: ", paste(dup, collapse = ", "), call. = FALSE)
+  orphan <- which(is.na(observations$facility_id) | !observations$facility_id %in% facilities$facility_id)
+  if (length(orphan)) stop("Unknown facility_id in observations at rows: ", paste(orphan, collapse = ", "), call. = FALSE)
+  dates <- as.Date(as.character(observations$observation_date), format = "%Y-%m-%d")
+  bad_date <- which(is.na(dates) | format(dates, "%Y-%m-%d") != as.character(observations$observation_date))
+  if (length(bad_date)) stop("Invalid ISO observation_date at rows: ", paste(bad_date, collapse = ", "), call. = FALSE)
+  bad_status <- which(is.na(observations$observation_status) | !observations$observation_status %in% c("positive", "negative", "unknown"))
+  if (length(bad_status)) stop("Invalid observation_status at rows: ", paste(bad_status, collapse = ", "), call. = FALSE)
+  invisible(observations)
+}

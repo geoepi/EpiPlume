@@ -1,0 +1,25 @@
+#' Read and validate facility-exchange configuration
+read_facility_exchange_config <- function(path = "config/facility_exchange_demo.yml") {
+  if (!requireNamespace("yaml", quietly = TRUE)) stop("Package `yaml` is required.", call. = FALSE)
+  if (!file.exists(path)) stop("Configuration file does not exist: ", path, call. = FALSE)
+  cfg <- yaml::read_yaml(path)
+  required <- c("project", "simulation", "domain", "plume", "tracer_decay", "exposure", "hysplit", "outputs")
+  missing <- setdiff(required, names(cfg)); if (length(missing)) stop("Missing configuration sections: ", paste(missing, collapse = ", "), call. = FALSE)
+  positive <- function(x, label) if (length(x) != 1L || is.na(x) || !is.numeric(x) || x <= 0) stop(label, " must be positive.", call. = FALSE)
+  nonnegative <- function(x, label) if (length(x) != 1L || is.na(x) || !is.numeric(x) || x < 0) stop(label, " must be nonnegative.", call. = FALSE)
+  positive(cfg$simulation$n_facilities, "simulation.n_facilities")
+  counts <- unlist(cfg$simulation[c("n_positive_facilities", "n_negative_facilities", "n_unknown_facilities")])
+  if (any(is.na(counts)) || any(counts < 0) || sum(counts) != cfg$simulation$n_facilities) stop("Observation-status counts must be nonnegative and sum to simulation.n_facilities.", call. = FALSE)
+  start <- as.Date(cfg$simulation$observation_start); end <- as.Date(cfg$simulation$observation_end)
+  if (is.na(start) || is.na(end) || start > end) stop("Simulation dates must be valid ISO dates with start <= end.", call. = FALSE)
+  positive(cfg$domain$raster_resolution_m, "domain.raster_resolution_m")
+  positive(cfg$plume$maximum_evaluation_distance_km, "plume.maximum_evaluation_distance_km")
+  nonnegative(cfg$plume$computational_buffer_km, "plume.computational_buffer_km")
+  positive(cfg$plume$simulation_duration_hours, "plume.simulation_duration_hours")
+  releases <- as.POSIXct(unlist(cfg$plume$planned_release_times), format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+  if (length(releases) != 4L || anyNA(releases) || anyDuplicated(releases)) stop("plume.planned_release_times must contain four unique UTC date-times.", call. = FALSE)
+  if (isTRUE(cfg$tracer_decay$enabled)) positive(cfg$tracer_decay$half_life_hours, "tracer_decay.half_life_hours")
+  f <- cfg$tracer_decay$minimum_fraction
+  if (!is.numeric(f) || length(f) != 1L || is.na(f) || f < 0 || f > 1) stop("tracer_decay.minimum_fraction must be between zero and one.", call. = FALSE)
+  cfg
+}
