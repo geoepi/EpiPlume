@@ -7,6 +7,16 @@ read_facility_exchange_config <- function(path = "config/facility_exchange_demo.
   missing <- setdiff(required, names(cfg)); if (length(missing)) stop("Missing configuration sections: ", paste(missing, collapse = ", "), call. = FALSE)
   if (!cfg$inputs$mode %in% c("simulated", "files")) stop("inputs.mode must be `simulated` or `files`.", call. = FALSE)
   if (identical(cfg$inputs$mode, "files") && (is.null(cfg$inputs$facilities_file) || is.null(cfg$inputs$observations_file))) stop("File input mode requires facilities_file and observations_file.", call. = FALSE)
+  if (is.null(cfg$hysplit$allow_meteorology_download)) cfg$hysplit$allow_meteorology_download <- FALSE
+  if (is.null(cfg$hysplit$verify_meteorology_after_download)) cfg$hysplit$verify_meteorology_after_download <- TRUE
+  if (is.null(cfg$hysplit$meteorology_download_timeout_seconds)) cfg$hysplit$meteorology_download_timeout_seconds <- 1800
+  if (is.null(cfg$hysplit$meteorology_download_retries)) cfg$hysplit$meteorology_download_retries <- 2
+  if (is.null(cfg$hysplit$meteorology_inventory_filename)) cfg$hysplit$meteorology_inventory_filename <- "meteorology_inventory.csv"
+  if (!is.logical(cfg$hysplit$allow_meteorology_download) || length(cfg$hysplit$allow_meteorology_download) != 1L) stop("hysplit.allow_meteorology_download must be logical.", call. = FALSE)
+  if (!is.logical(cfg$hysplit$verify_meteorology_after_download) || length(cfg$hysplit$verify_meteorology_after_download) != 1L) stop("hysplit.verify_meteorology_after_download must be logical.", call. = FALSE)
+  if (!is.numeric(cfg$hysplit$meteorology_download_timeout_seconds) || length(cfg$hysplit$meteorology_download_timeout_seconds) != 1L || cfg$hysplit$meteorology_download_timeout_seconds <= 0) stop("hysplit.meteorology_download_timeout_seconds must be positive.", call. = FALSE)
+  if (!is.numeric(cfg$hysplit$meteorology_download_retries) || length(cfg$hysplit$meteorology_download_retries) != 1L || cfg$hysplit$meteorology_download_retries < 0 || cfg$hysplit$meteorology_download_retries != as.integer(cfg$hysplit$meteorology_download_retries)) stop("hysplit.meteorology_download_retries must be a nonnegative integer.", call. = FALSE)
+  if (!is.character(cfg$hysplit$meteorology_inventory_filename) || length(cfg$hysplit$meteorology_inventory_filename) != 1L || !identical(basename(cfg$hysplit$meteorology_inventory_filename), cfg$hysplit$meteorology_inventory_filename) || !nzchar(cfg$hysplit$meteorology_inventory_filename)) stop("hysplit.meteorology_inventory_filename must be a simple filename.", call. = FALSE)
   pipeline_flags <- c("parse_completed_runs", "extract_receptors", "assemble_multirun", "write_intermediate_outputs", "continue_on_error")
   if (any(!vapply(cfg$pipeline[pipeline_flags], is.logical, logical(1)))) stop("Pipeline control flags must be logical.", call. = FALSE)
   if (!nzchar(cfg$pipeline$targets_store) || !nzchar(cfg$pipeline$status_directory)) stop("Pipeline store and status paths must be nonempty.", call. = FALSE)

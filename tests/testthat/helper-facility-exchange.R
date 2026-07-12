@@ -5,6 +5,7 @@ function_files <- c(
   "apply_tracer_decay.R", "build_hysplit_run_manifest.R",
   "validate_hysplit_manifest_row.R", "resolve_hysplit_installation.R",
   "resolve_hysplit_meteorology.R", "build_hysplit_run_spec.R",
+  "prepare_hysplit_meteorology.R",
   "standardize_hysplit_run_result.R", "run_plume_model.R",
   "run_hysplit_manifest_row.R", "validate_hysplit_model_result.R",
   "extract_hysplit_dispersion_table.R", "standardize_hysplit_dispersion_table.R",

@@ -56,6 +56,11 @@ hysplit:
   meteorology_type: "reanalysis"
   meteorology_directory: null
   hysplit_install_directory: null
+  allow_meteorology_download: true
+  verify_meteorology_after_download: true
+  meteorology_download_timeout_seconds: 1800
+  meteorology_download_retries: 2
+  meteorology_inventory_filename: "meteorology_inventory.csv"
   run_root_directory: "local/facility_exchange_single_run_smoke/hysplit"
   clean_up: false
 outputs:

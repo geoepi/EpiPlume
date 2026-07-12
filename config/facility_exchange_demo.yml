@@ -70,6 +70,11 @@ hysplit:
   meteorology_type: "reanalysis" # Intended meteorological product family.
   meteorology_directory: "local/facility_exchange_demo/climate" # Local met-data cache.
   hysplit_install_directory: null # Optional directory containing hycs_std and parhplot; splitr's bundled binaries are the default.
+  allow_meteorology_download: false # Production/demo graph never downloads implicitly.
+  verify_meteorology_after_download: true
+  meteorology_download_timeout_seconds: 1800
+  meteorology_download_retries: 2
+  meteorology_inventory_filename: "meteorology_inventory.csv"
   run_root_directory: "local/facility_exchange_demo/hysplit" # Parent for deterministic per-run directories.
   clean_up: false # Retain intermediates while developing the adapter.
 
