@@ -74,6 +74,8 @@ hysplit:
   verify_meteorology_after_download: true
   meteorology_download_timeout_seconds: 1800
   meteorology_download_retries: 2
+  meteorology_lock_timeout_seconds: 60
+  require_manifest_meteorology_ready: true
   meteorology_inventory_filename: "meteorology_inventory.csv"
   run_root_directory: "local/facility_exchange_demo/hysplit" # Parent for deterministic per-run directories.
   clean_up: false # Retain intermediates while developing the adapter.

@@ -11,11 +11,15 @@ read_facility_exchange_config <- function(path = "config/facility_exchange_demo.
   if (is.null(cfg$hysplit$verify_meteorology_after_download)) cfg$hysplit$verify_meteorology_after_download <- TRUE
   if (is.null(cfg$hysplit$meteorology_download_timeout_seconds)) cfg$hysplit$meteorology_download_timeout_seconds <- 1800
   if (is.null(cfg$hysplit$meteorology_download_retries)) cfg$hysplit$meteorology_download_retries <- 2
+  if (is.null(cfg$hysplit$meteorology_lock_timeout_seconds)) cfg$hysplit$meteorology_lock_timeout_seconds <- 60
+  if (is.null(cfg$hysplit$require_manifest_meteorology_ready)) cfg$hysplit$require_manifest_meteorology_ready <- TRUE
   if (is.null(cfg$hysplit$meteorology_inventory_filename)) cfg$hysplit$meteorology_inventory_filename <- "meteorology_inventory.csv"
   if (!is.logical(cfg$hysplit$allow_meteorology_download) || length(cfg$hysplit$allow_meteorology_download) != 1L) stop("hysplit.allow_meteorology_download must be logical.", call. = FALSE)
   if (!is.logical(cfg$hysplit$verify_meteorology_after_download) || length(cfg$hysplit$verify_meteorology_after_download) != 1L) stop("hysplit.verify_meteorology_after_download must be logical.", call. = FALSE)
   if (!is.numeric(cfg$hysplit$meteorology_download_timeout_seconds) || length(cfg$hysplit$meteorology_download_timeout_seconds) != 1L || cfg$hysplit$meteorology_download_timeout_seconds <= 0) stop("hysplit.meteorology_download_timeout_seconds must be positive.", call. = FALSE)
   if (!is.numeric(cfg$hysplit$meteorology_download_retries) || length(cfg$hysplit$meteorology_download_retries) != 1L || cfg$hysplit$meteorology_download_retries < 0 || cfg$hysplit$meteorology_download_retries != as.integer(cfg$hysplit$meteorology_download_retries)) stop("hysplit.meteorology_download_retries must be a nonnegative integer.", call. = FALSE)
+  if (!is.numeric(cfg$hysplit$meteorology_lock_timeout_seconds) || length(cfg$hysplit$meteorology_lock_timeout_seconds) != 1L || cfg$hysplit$meteorology_lock_timeout_seconds <= 0) stop("hysplit.meteorology_lock_timeout_seconds must be positive.", call. = FALSE)
+  if (!is.logical(cfg$hysplit$require_manifest_meteorology_ready) || length(cfg$hysplit$require_manifest_meteorology_ready) != 1L) stop("hysplit.require_manifest_meteorology_ready must be logical.", call. = FALSE)
   if (!is.character(cfg$hysplit$meteorology_inventory_filename) || length(cfg$hysplit$meteorology_inventory_filename) != 1L || !identical(basename(cfg$hysplit$meteorology_inventory_filename), cfg$hysplit$meteorology_inventory_filename) || !nzchar(cfg$hysplit$meteorology_inventory_filename)) stop("hysplit.meteorology_inventory_filename must be a simple filename.", call. = FALSE)
   pipeline_flags <- c("parse_completed_runs", "extract_receptors", "assemble_multirun", "write_intermediate_outputs", "continue_on_error")
   if (any(!vapply(cfg$pipeline[pipeline_flags], is.logical, logical(1)))) stop("Pipeline control flags must be logical.", call. = FALSE)

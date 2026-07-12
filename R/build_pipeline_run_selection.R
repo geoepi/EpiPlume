@@ -13,3 +13,8 @@ run_selected_hysplit_case <- function(manifest_row, cfg, allow_execution, core_f
   row <- validate_hysplit_manifest_row(manifest_row); message("Executing explicitly selected run: ", row$run_id)
   run_hysplit_manifest_row(row, cfg, dry_run = FALSE, overwrite = FALSE, core_fun = core_fun)
 }
+
+assert_manifest_meteorology_ready <- function(preparation) {
+  if (!is.list(preparation) || !identical(preparation$status, "ready") || any(!preparation$run_readiness$meteorology_ready)) stop("Manifest meteorology readiness is required before HYSPLIT execution.", call. = FALSE)
+  invisible(preparation)
+}
