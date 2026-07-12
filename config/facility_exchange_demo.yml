@@ -74,3 +74,10 @@ outputs:
   raster_directory: "local/facility_exchange_demo/rasters" # Future plume rasters.
   exposure_directory: "local/facility_exchange_demo/exposures" # Exchange tables.
   report_directory: "local/facility_exchange_demo/reports" # Rendered local reports.
+
+# Multi-run aggregation settings; this stage never executes HYSPLIT.
+multirun:
+  continue_on_error: true # Record an individual failure and continue processing other parsed runs.
+  include_outside_distance_in_denominator: false # Candidate denominators use only receptors within the evaluation radius.
+  time_units: ["release", "day", "week", "month"] # Connectivity summary periods.
+  matrix_values: ["intercept_frequency", "n_intercept_runs", "total_particle_count_cumulative"] # Directed matrix products.

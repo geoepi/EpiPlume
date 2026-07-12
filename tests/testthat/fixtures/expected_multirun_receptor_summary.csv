@@ -1,0 +1,7 @@
+"receptor_id","n_source_runs_evaluated","n_unique_sources_evaluated","n_unique_sources_intercepting","total_intercept_events","intercept_fraction","mean_first_arrival_hours","minimum_first_arrival_hours","mean_exposure_duration_hours","maximum_particle_count","total_particle_count_cumulative","total_decayed_mass_cumulative","total_decayed_concentration_hourly_sum","first_intercept_datetime_utc","last_intercept_datetime_utc"
+"F001",4,2,2,4,1,0,0,1,2,8,120,6,2020-05-01 06:00:00,2020-05-02 12:00:00
+"F002",6,3,3,6,1,0,0,1,2,12,180,9,2020-05-01,2020-05-02 12:00:00
+"F003",4,2,2,4,1,0,0,1,2,8,120,6,2020-05-01,2020-05-02 12:00:00
+"F004",4,2,2,4,1,1,1,1,1,4,45.254833995939,4.5254833995939,2020-05-01 01:00:00,2020-05-02 07:00:00
+"F005",6,3,0,0,0,NA,NA,NA,0,0,NA,NA,NA,NA
+"F008",6,3,3,6,1,0,0,1,2,12,180,9,2020-05-01,2020-05-02 12:00:00

@@ -14,7 +14,13 @@ function_files <- c(
   "parse_hysplit_run_output.R", "prepare_receptor_facilities.R",
   "sample_hourly_plume_at_receptors.R", "summarize_receptor_time_series.R",
   "classify_receptor_intercepts.R", "build_source_receptor_exchange.R",
-  "write_facility_receptor_outputs.R", "extract_facility_receptors_from_plume.R"
+  "write_facility_receptor_outputs.R", "extract_facility_receptors_from_plume.R",
+  "discover_parsed_run_inventory.R", "validate_parsed_run_inventory.R",
+  "combine_source_receptor_exchanges.R", "process_parsed_run_inventory.R",
+  "summarize_connectivity_by_time.R", "summarize_connectivity_by_source.R",
+  "summarize_connectivity_by_receptor.R", "summarize_connectivity_by_dyad.R",
+  "build_facility_connectivity_matrices.R", "write_multirun_connectivity_outputs.R",
+  "assemble_multirun_facility_connectivity.R"
 )
 repo_root <- normalizePath(file.path("..", ".."), winslash = "/", mustWork = TRUE)
 invisible(lapply(file.path(repo_root, "R", function_files), source))

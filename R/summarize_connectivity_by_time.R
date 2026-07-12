@@ -1,0 +1,9 @@
+#' Summarize candidate connectivity by release or calendar period
+summarize_connectivity_by_time <- function(exchange, time_unit = c("release", "day", "week", "month")) {
+  time_unit <- match.arg(time_unit); if (!nrow(exchange)) return(data.frame())
+  key <- switch(time_unit, release = format(exchange$release_start, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"), day = as.character(exchange$release_date), week = exchange$release_week, month = exchange$release_month)
+  candidate <- exchange$within_evaluation_distance; groups <- split(exchange[candidate, ], key[candidate])
+  safe_mean <- function(x) if (all(is.na(x))) NA_real_ else mean(x, na.rm = TRUE); safe_median <- function(x) if (all(is.na(x))) NA_real_ else median(x, na.rm = TRUE); safe_sum <- function(x) if (all(is.na(x))) NA_real_ else sum(x, na.rm = TRUE)
+  out <- lapply(names(groups), function(period) { x <- groups[[period]]; per_run <- tapply(x$intercept, x$run_id, sum); data.frame(time_unit = time_unit, period = period, n_runs = length(unique(x$run_id)), n_sources = length(unique(x$source_id)), n_receptors = length(unique(x$receptor_id)), n_candidate_pairs = nrow(x), n_intercepts = sum(x$intercept), intercept_fraction = sum(x$intercept) / nrow(x), mean_intercepts_per_run = mean(per_run), median_intercepts_per_run = median(per_run), maximum_intercepts_per_run = max(per_run), mean_first_arrival_hours = safe_mean(x$first_arrival_hour[x$intercept]), median_first_arrival_hours = safe_median(x$first_arrival_hour[x$intercept]), mean_exposure_duration_hours = safe_mean(x$exposure_duration_hours[x$intercept]), particle_count_cumulative_total = safe_sum(x$particle_count_cumulative), decayed_mass_cumulative_total = safe_sum(x$decayed_mass_cumulative), decayed_concentration_hourly_sum_total = safe_sum(x$decayed_concentration_hourly_sum), stringsAsFactors = FALSE) })
+  if (!length(out)) data.frame() else do.call(rbind, out)
+}

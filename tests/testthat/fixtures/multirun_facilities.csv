@@ -1,0 +1,9 @@
+facility_id,facility_name,longitude,latitude,facility_type,source_height_m
+F001,Source One,-89.0000,32.5000,simulated,5
+F002,Receptor Two,-89.0002,32.5002,simulated,5
+F003,Source Three,-89.0010,32.5010,simulated,5
+F004,Source Four,-88.9800,32.5200,simulated,5
+F005,Receptor Five,-89.0500,32.5500,simulated,5
+F006,Outside Receptor,-88.7000,32.5000,simulated,5
+F007,Edge Receptor,-88.7400,32.5000,simulated,5
+F008,Receptor Eight,-88.9990,32.5005,simulated,5

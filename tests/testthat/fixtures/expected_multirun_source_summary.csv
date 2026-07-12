@@ -1,0 +1,4 @@
+"source_id","n_runs","n_unique_receptors","n_candidate_receptors","n_intercepted_receptors","total_intercept_events","intercept_rate_per_candidate_run","mean_receptors_intercepted_per_run","maximum_receptors_intercepted_per_run","mean_first_arrival_hours","mean_particle_count_cumulative","total_particle_count_cumulative","total_decayed_mass_cumulative","total_decayed_concentration_hourly_sum","first_release_start","last_release_start"
+"F001",2,5,5,4,8,0.8,4,4,0.25,1.4,14,202.62741699797,11.262741699797,2020-05-01,2020-05-02
+"F003",2,5,5,4,8,0.8,4,4,0.25,1.4,14,202.62741699797,11.262741699797,2020-05-01 06:00:00,2020-05-02 06:00:00
+"F004",2,5,5,4,8,0.8,4,4,0,1.6,16,240,12,2020-05-01 12:00:00,2020-05-02 12:00:00
