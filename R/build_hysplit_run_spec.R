@@ -7,7 +7,7 @@ build_hysplit_run_spec <- function(manifest_row, cfg, installation = NULL, meteo
   working_directory <- normalizePath(file.path(run_directory, "splitr_work"), winslash = "/", mustWork = FALSE)
   output_directory <- run_directory
   plume_name <- row$run_id
-  commit <- tryCatch(system2("git", c("rev-parse", "HEAD"), stdout = TRUE, stderr = FALSE), error = function(e) character())
+  commit <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "HEAD"), stdout = TRUE, stderr = FALSE), error = function(e) character()))
   commit <- if (length(commit) == 1L && grepl("^[0-9a-f]{40}$", commit)) commit else NA_character_
   expected <- normalizePath(file.path(output_directory, c("run_metadata.rds", "run_metadata.json")), winslash = "/", mustWork = FALSE)
   core_args <- list(

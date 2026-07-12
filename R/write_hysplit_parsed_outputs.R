@@ -9,7 +9,10 @@ write_hysplit_parsed_outputs <- function(parsed, run_directory, overwrite = FALS
   add_rds <- function(object, name) { path <- file.path(directory, name); written <<- c(written, atomic(path, function(x) saveRDS(object, x))) }
   add_csv <- function(object, name) { path <- file.path(directory, name); written <<- c(written, atomic(path, function(x) utils::write.csv(object, x, row.names = FALSE))) }
   add_rds(parsed$dispersion_standardized, "dispersion_standardized.rds"); add_csv(parsed$dispersion_standardized, "dispersion_standardized.csv")
-  add_rds(parsed, "parsed_plume.rds"); add_csv(parsed$dispersion_filtered, "dispersion_table.csv")
+  portable_parsed <- parsed
+  if (inherits(portable_parsed$raster_template, "SpatRaster")) portable_parsed$raster_template <- suppressWarnings(terra::wrap(portable_parsed$raster_template))
+  for (key in names(portable_parsed$hourly_rasters)) if (inherits(portable_parsed$hourly_rasters[[key]]$raster, "SpatRaster")) portable_parsed$hourly_rasters[[key]]$raster <- terra::wrap(portable_parsed$hourly_rasters[[key]]$raster)
+  add_rds(portable_parsed, "parsed_plume.rds"); add_csv(parsed$dispersion_filtered, "dispersion_table.csv")
   add_rds(parsed$dispersion_filtered, "dispersion_filtered.rds"); add_csv(parsed$dispersion_filtered, "dispersion_filtered.csv")
   raster_names <- c(particle_count = "hourly_particle_count.tif", decayed_mass = "hourly_decayed_mass.tif", decayed_concentration = "hourly_decayed_concentration.tif")
   for (key in intersect(names(raster_names), names(parsed$hourly_rasters))) { path <- file.path(directory, raster_names[[key]]); written <- c(written, atomic(path, function(x) terra::writeRaster(parsed$hourly_rasters[[key]]$raster, x, overwrite = TRUE, filetype = "GTiff"))) }

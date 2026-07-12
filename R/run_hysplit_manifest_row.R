@@ -7,7 +7,9 @@ run_hysplit_manifest_row <- function(manifest_row, cfg, dry_run = TRUE, overwrit
   if (isTRUE(dry_run)) return(standardize_hysplit_run_result(spec, "dry_run"))
   if (is.null(core_fun)) core_fun <- run_plume_model
   if (!is.function(core_fun)) stop("`core_fun` must be a function.", call. = FALSE)
-  if (dir.exists(spec$run_directory) && length(list.files(spec$run_directory, all.files = TRUE, no.. = TRUE)) && !isTRUE(overwrite)) stop("Run directory is not empty; use `overwrite = TRUE`: ", spec$run_directory, call. = FALSE)
+  existing_entries <- if (dir.exists(spec$run_directory)) list.files(spec$run_directory, all.files = TRUE, no.. = TRUE) else character()
+  unrecognized_entries <- setdiff(existing_entries, ".execution.lock")
+  if (length(unrecognized_entries) && !isTRUE(overwrite)) stop("Run directory is not empty; use `overwrite = TRUE`: ", spec$run_directory, call. = FALSE)
   dir.create(spec$run_directory, recursive = TRUE, showWarnings = FALSE)
   dir.create(spec$working_directory, recursive = TRUE, showWarnings = FALSE)
   started <- Sys.time(); captured_warnings <- character(); model_result <- NULL; error_message <- NULL

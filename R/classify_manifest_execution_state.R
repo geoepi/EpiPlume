@@ -3,6 +3,10 @@
 classify_manifest_execution_state <- function(manifest, cfg, meteorology_readiness = NULL) {
   if (!is.data.frame(manifest) || !"run_id" %in% names(manifest)) stop("`manifest` must contain run_id.", call. = FALSE)
   if (anyDuplicated(manifest$run_id)) stop("Manifest contains duplicate run IDs.", call. = FALSE)
+  if (is.null(meteorology_readiness)) {
+    readiness_path <- file.path(cfg$hysplit$meteorology_directory %||% "", "meteorology_run_readiness.rds")
+    if (file.exists(readiness_path)) meteorology_readiness <- tryCatch(readRDS(readiness_path), error = function(e) NULL)
+  }
   ready_for <- function(row) {
     if (is.null(meteorology_readiness)) return(NA)
     x <- meteorology_readiness
@@ -21,14 +25,14 @@ classify_manifest_execution_state <- function(manifest, cfg, meteorology_readine
       completed <- identical(metadata$status, "completed")
       if (identical(metadata$status, "failed")) err <- metadata$error_message %||% "Run execution failed."
     }
-    met <- ready_for(row); if (is.na(met)) met <- tryCatch({ resolve_hysplit_meteorology(row, cfg, must_exist = FALSE); length(resolve_hysplit_meteorology(row, cfg, must_exist = FALSE)$candidate_files) > 0L }, error = function(e) FALSE)
+    met <- ready_for(row); if (is.na(met)) met <- FALSE
     lock_active <- dir.exists(file.path(dir, ".execution.lock"))
     nonempty <- dir.exists(dir) && length(list.files(dir, all.files = TRUE, no.. = TRUE)) > 0L
     ambiguous <- nonempty && (!meta_exists || is.null(metadata) || (!completed && !identical(metadata$status, "failed")))
     state <- if (lock_active) "running" else if (ambiguous) "invalid" else if (!met) "meteorology_blocked" else if (completed && parsed && receptor) "completed" else if (completed && !parsed) "parse_failed" else if (completed && parsed && !receptor) "receptor_failed" else if (!nonempty) "planned" else if (!is.null(metadata) && identical(metadata$status, "failed")) "execution_failed" else "ready"
     if (ambiguous) err <- "Nonempty run directory lacks an unambiguous durable execution result."
     if (lock_active && is.na(err)) err <- "An execution lock is active; inspect before recovery."
-    data.frame(run_id = run, source_id = as.character(row$source_id), release_start = as.character(row$release_start), run_directory = dir, meteorology_ready = met, execution_state = state, metadata_exists = meta_exists, execution_completed = completed, parsed_exists = parsed, receptor_exists = receptor, last_error = ifelse(is.null(err), NA_character_, err), eligible_for_execution = state %in% c("planned", "ready", "execution_failed", "parse_failed", "receptor_failed"), eligible_for_postprocessing = state %in% c("completed", "ready", "parse_failed", "receptor_failed"), stringsAsFactors = FALSE)
+    data.frame(run_id = run, source_id = as.character(row$source_id), release_start = as.character(row$release_start), run_directory = dir, meteorology_ready = met, execution_state = state, metadata_exists = meta_exists, execution_completed = completed, parsed_exists = parsed, receptor_exists = receptor, last_error = ifelse(is.null(err), NA_character_, err), eligible_for_execution = state %in% c("planned", "ready", "execution_failed"), eligible_for_postprocessing = state %in% c("parse_failed", "receptor_failed"), stringsAsFactors = FALSE)
   }
   out <- if (nrow(manifest)) do.call(rbind, lapply(seq_len(nrow(manifest)), one)) else data.frame()
   rownames(out) <- NULL; out
