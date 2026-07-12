@@ -1,0 +1,32 @@
+`%||%` <- function(x, y) if (is.null(x) || !length(x) || is.na(x[1])) y else x[1]
+run_hysplit_manifest_subset <- function(manifest, cfg, run_ids = NULL, workers = 1L, continue_on_error = TRUE, retry_failed = FALSE, reuse_completed = TRUE, parse_outputs = TRUE, extract_receptors = TRUE) {
+  if (!is.data.frame(manifest) || !nrow(manifest)) stop("Manifest must contain at least one run.", call. = FALSE)
+  if (!is.null(run_ids)) manifest <- build_pipeline_run_selection(manifest, if (length(run_ids) == 1L) run_ids else paste(run_ids, collapse = ","))
+  if (!nrow(manifest)) stop("No manifest rows were selected.", call. = FALSE)
+  if (length(workers) != 1L || is.na(workers) || workers < 1 || workers != as.integer(workers)) stop("workers must be a positive integer.", call. = FALSE)
+  workers <- min(as.integer(workers), nrow(manifest)); states <- classify_manifest_execution_state(manifest, cfg)
+  if (any(!states$meteorology_ready)) stop("Verified shared meteorology is required before execution.", call. = FALSE)
+  if (any(states$execution_state == "invalid")) stop("Ambiguous run directories require manual recovery: ", paste(states$run_id[states$execution_state == "invalid"], collapse = ", "), call. = FALSE)
+  if (isTRUE(reuse_completed)) states$eligible_for_execution[states$execution_state == "completed"] <- FALSE
+  if (any(states$execution_state == "execution_failed" & !isTRUE(retry_failed))) stop("Failed runs require retry_failed = TRUE: ", paste(states$run_id[states$execution_state == "execution_failed"], collapse = ", "), call. = FALSE)
+  ledger_dir <- file.path(cfg$outputs$root_directory, "execution"); results <- vector("list", nrow(manifest)); names(results) <- manifest$run_id
+  repo_commit <- tryCatch(system2("git", c("rev-parse", "HEAD"), stdout = TRUE, stderr = FALSE)[1], error = function(e) NA_character_)
+  lock <- function(path, id) { p <- file.path(path, ".execution.lock"); if (!dir.create(p, recursive = TRUE, showWarnings = FALSE)) stop("Active execution lock exists: ", p, call. = FALSE); writeLines(c(paste0("run_id=", id), paste0("pid=", Sys.getpid()), paste0("hostname=", Sys.info()[["nodename"]]), paste0("started_at=", format(Sys.time(), tz = "UTC")), paste0("repository_commit=", repo_commit)), file.path(p, "owner")); p }
+  precomputed <- list(); prelocks <- list(); eligible <- which(states$eligible_for_execution)
+  if (workers > 1L && length(eligible) > 1L) {
+    for (i in eligible) prelocks[[manifest$run_id[i]]] <- lock(manifest$run_directory[i], manifest$run_id[i])
+    cl <- parallel::makeCluster(workers); on.exit(parallel::stopCluster(cl), add = TRUE)
+    rfiles <- list.files("R", pattern = "\\.R$", full.names = TRUE)
+    parallel::clusterExport(cl, "rfiles", envir = environment()); parallel::clusterEvalQ(cl, { invisible(lapply(rfiles, source)); NULL })
+    raw <- parallel::parLapply(cl, eligible, function(i) tryCatch(list(metadata = run_hysplit_manifest_row(manifest[i, , drop = FALSE], cfg, dry_run = FALSE, overwrite = FALSE)), error = function(e) list(error = conditionMessage(e))))
+    names(raw) <- manifest$run_id[eligible]; precomputed <- raw
+  }
+  for (i in seq_len(nrow(manifest))) {
+    row <- manifest[i, , drop = FALSE]; id <- row$run_id; st <- states$execution_state[i]
+    if (!states$eligible_for_execution[i]) { results[[id]] <- list(run_id = id, execution_state = if (st == "completed") "skipped_completed" else st); next }
+    started <- Sys.time(); lock_path <- NULL; outcome <- tryCatch({ lock_path <- if (id %in% names(prelocks)) prelocks[[id]] else lock(row$run_directory, id); pre <- precomputed[[id]]; metadata <- if (!is.null(pre)) { if (!is.null(pre$error)) stop(pre$error, call. = FALSE); pre$metadata } else run_hysplit_manifest_row(row, cfg, dry_run = FALSE, overwrite = FALSE); if (!identical(metadata$status, "completed")) stop(metadata$error_message %||% "HYSPLIT execution failed."); parsed <- if (isTRUE(parse_outputs)) parse_hysplit_run_output(metadata, cfg, write_outputs = TRUE, overwrite = FALSE) else NULL; inputs <- if (isTRUE(extract_receptors)) read_facility_exchange_inputs(cfg) else NULL; receptors <- if (isTRUE(extract_receptors)) extract_facility_receptors_from_plume(parsed, inputs$facilities, cfg, write_outputs = TRUE, overwrite = FALSE) else NULL; list(run_id = id, execution_state = "completed", metadata = metadata, parsed = parsed, receptors = receptors) }, error = function(e) list(run_id = id, execution_state = if (!is.null(lock_path)) "execution_failed" else "invalid", last_error = conditionMessage(e)), finally = { if (!is.null(lock_path) && dir.exists(lock_path)) unlink(lock_path, recursive = TRUE, force = TRUE) }); results[[id]] <- outcome
+    elapsed <- as.numeric(difftime(Sys.time(), started, units = "secs")); prior <- if (file.exists(file.path(ledger_dir, "manifest_execution_ledger.rds"))) tryCatch(readRDS(file.path(ledger_dir, "manifest_execution_ledger.rds")), error = function(e) NULL) else NULL; old <- if (!is.null(prior) && id %in% prior$run_id) prior[match(id, prior$run_id), , drop = FALSE] else NULL; attempts <- if (is.null(old)) 1L else as.integer(old$attempt_count) + 1L; total <- if (is.null(old) || is.na(old$elapsed_seconds_total)) elapsed else as.numeric(old$elapsed_seconds_total) + elapsed; entry <- data.frame(run_id = id, source_id = row$source_id, release_start = row$release_start, execution_state = outcome$execution_state, attempt_count = attempts, last_attempt_started = started, last_attempt_finished = Sys.time(), elapsed_seconds_last_attempt = elapsed, elapsed_seconds_total = total, meteorology_files = NA_character_, metadata_path = file.path(row$run_directory, "run_metadata.rds"), parsed_output_path = file.path(row$run_directory, "parsed", "parsed_plume.rds"), receptor_output_path = file.path(row$run_directory, "receptors", "source_receptor_exchange.csv"), last_error = outcome$last_error %||% NA_character_, warning_count = 0L, worker_id = "local", process_id = Sys.getpid(), repository_commit = repo_commit, updated_at = Sys.time(), stringsAsFactors = FALSE); update_manifest_execution_ledger(entry, cfg, ledger_dir)
+    if (!isTRUE(continue_on_error) && outcome$execution_state != "completed") break
+  }
+  list(manifest = manifest, initial_state = states, results = results, state_summary = table(vapply(results, `[[`, character(1), "execution_state")), ledger = file.path(ledger_dir, "manifest_execution_ledger.rds"), workers = workers)
+}
