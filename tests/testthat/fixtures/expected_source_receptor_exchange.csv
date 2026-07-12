@@ -1,0 +1,8 @@
+"receptor_id","intercept","intercept_reason","first_arrival_hour","last_exposure_hour","particle_count_max","particle_count_cumulative"
+"F002",TRUE,"threshold_met",0,0,2,2
+"F003",TRUE,"threshold_met",0,0,2,2
+"F004",TRUE,"threshold_met",1,1,1,1
+"F005",FALSE,"no_modeled_exposure",NA,NA,0,0
+"F006",FALSE,"outside_evaluation_distance",NA,NA,NA,NA
+"F007",FALSE,"outside_evaluation_distance",NA,NA,NA,NA
+"F008",TRUE,"threshold_met",0,0,2,2

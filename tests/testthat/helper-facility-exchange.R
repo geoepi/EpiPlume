@@ -11,7 +11,10 @@ function_files <- c(
   "add_tracer_decay_to_dispersion.R", "filter_dispersion_distance.R",
   "build_plume_raster_template.R", "rasterize_hysplit_hourly.R",
   "summarize_hysplit_plume.R", "write_hysplit_parsed_outputs.R",
-  "parse_hysplit_run_output.R"
+  "parse_hysplit_run_output.R", "prepare_receptor_facilities.R",
+  "sample_hourly_plume_at_receptors.R", "summarize_receptor_time_series.R",
+  "classify_receptor_intercepts.R", "build_source_receptor_exchange.R",
+  "write_facility_receptor_outputs.R", "extract_facility_receptors_from_plume.R"
 )
 repo_root <- normalizePath(file.path("..", ".."), winslash = "/", mustWork = TRUE)
 invisible(lapply(file.path(repo_root, "R", function_files), source))

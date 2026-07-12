@@ -50,8 +50,13 @@ tracer_decay:
 # Receptor extraction and retained measurement settings.
 exposure:
   receptor_buffer_m: 500 # Radius used for receptor-area extraction.
-  minimum_concentration: 0 # Optional derived intercept threshold.
-  retain_continuous_values: true # Keep continuous exposure as the primary result.
+  sampling_method: "buffer" # Initial receptor sampling method: point or projected buffer.
+  intercept_metric: "particle_count" # Continuous raster metric used for derived contact classification.
+  intercept_threshold: 1 # A sampled value at or above this threshold meets the contact rule.
+  minimum_intercept_hours: 1 # Minimum number of threshold-meeting hourly bins.
+  cumulative_method: "sum" # Sum hourly summaries without hidden temporal units.
+  include_source_as_receptor: false # Exclude the emitting facility from receptor records.
+  retain_non_intercepts: true # Retain explicit zero, unavailable, and screened receptor records.
 
 # HYSPLIT inputs and run workspace. Runs remain duration-driven.
 hysplit:
