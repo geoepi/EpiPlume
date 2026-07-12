@@ -9,7 +9,7 @@ facility_exchange_paths <- function(cfg, create = FALSE, root = getwd()) {
     exposures = file.path(root, rel$exposure_directory),
     reports = file.path(root, rel$report_directory),
     climate = file.path(root, cfg$hysplit$meteorology_directory),
-    hysplit = file.path(root, cfg$hysplit$run_directory)
+    hysplit = file.path(root, if (is.null(cfg$hysplit$run_root_directory)) cfg$hysplit$run_directory else cfg$hysplit$run_root_directory)
   )
   paths <- lapply(paths, normalizePath, winslash = "/", mustWork = FALSE)
   if (isTRUE(create)) invisible(lapply(paths, dir.create, recursive = TRUE, showWarnings = FALSE))

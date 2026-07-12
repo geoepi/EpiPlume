@@ -58,8 +58,8 @@ hysplit:
   direction: "forward" # Forward source-to-receptor transport.
   meteorology_type: "reanalysis" # Intended meteorological product family.
   meteorology_directory: "local/facility_exchange_demo/climate" # Local met-data cache.
-  executable_path: null # Optional HYSPLIT executable file; splitr performs execution.
-  run_directory: "local/facility_exchange_demo/hysplit" # Per-run working directories.
+  hysplit_install_directory: null # Optional directory containing hycs_std and parhplot; splitr's bundled binaries are the default.
+  run_root_directory: "local/facility_exchange_demo/hysplit" # Parent for deterministic per-run directories.
   clean_up: false # Retain intermediates while developing the adapter.
 
 # All generated products are kept below ignored local/ paths.

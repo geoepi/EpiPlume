@@ -1,13 +1,15 @@
 #' Build a deterministic, non-executing HYSPLIT run specification
-build_hysplit_run_spec <- function(manifest_row, cfg, executable = NULL, meteorology = NULL) {
+build_hysplit_run_spec <- function(manifest_row, cfg, installation = NULL, meteorology = NULL) {
   row <- validate_hysplit_manifest_row(manifest_row)
-  if (is.null(executable)) executable <- resolve_hysplit_executable(cfg, must_exist = FALSE)
+  if (is.null(installation)) installation <- resolve_hysplit_installation(cfg, must_exist = FALSE)
   if (is.null(meteorology)) meteorology <- resolve_hysplit_meteorology(row, cfg, must_exist = FALSE)
   run_directory <- normalizePath(path.expand(row$run_directory), winslash = "/", mustWork = FALSE)
+  working_directory <- normalizePath(file.path(run_directory, "splitr_work"), winslash = "/", mustWork = FALSE)
+  output_directory <- run_directory
   plume_name <- row$run_id
   commit <- tryCatch(system2("git", c("rev-parse", "HEAD"), stdout = TRUE, stderr = FALSE), error = function(e) character())
   commit <- if (length(commit) == 1L && grepl("^[0-9a-f]{40}$", commit)) commit else NA_character_
-  expected <- normalizePath(file.path(run_directory, c(paste0(plume_name, "_model.rds"), "run_metadata.rds", "run_metadata.json")), winslash = "/", mustWork = FALSE)
+  expected <- normalizePath(file.path(output_directory, c("run_metadata.rds", "run_metadata.json")), winslash = "/", mustWork = FALSE)
   core_args <- list(
     plume_name = plume_name,
     lon = row$source_longitude,
@@ -24,9 +26,13 @@ build_hysplit_run_spec <- function(manifest_row, cfg, executable = NULL, meteoro
     direction = cfg$hysplit$direction,
     met_type = row$meteorology_type,
     met_dir = meteorology$meteorology_directory,
-    exec_dir = run_directory,
-    clean_up = isTRUE(cfg$hysplit$clean_up)
+    exec_dir = working_directory,
+    clean_up = isTRUE(cfg$hysplit$clean_up),
+    binary_path = installation
   )
+  core_formals <- names(formals(run_plume_model))
+  unsupported <- setdiff(names(core_args), core_formals)
+  if (length(unsupported)) stop("Run specification contains arguments unsupported by `run_plume_model()`: ", paste(unsupported, collapse = ", "), call. = FALSE)
   list(
     schema_version = "1.0.0", adapter_version = "1.0.0",
     run_id = row$run_id, scenario_id = row$scenario_id, source_id = row$source_id,
@@ -39,8 +45,10 @@ build_hysplit_run_spec <- function(manifest_row, cfg, executable = NULL, meteoro
     meteorology_files = meteorology$candidate_files,
     meteorology_coverage_status = meteorology$coverage_status,
     meteorology_diagnostic = meteorology$diagnostic_message,
-    run_directory = run_directory, execution_directory = run_directory,
-    hysplit_executable = executable,
+    hysplit_install_directory = installation,
+    run_root_directory = normalizePath(path.expand(cfg$hysplit$run_root_directory), winslash = "/", mustWork = FALSE),
+    run_directory = run_directory, working_directory = working_directory,
+    output_directory = output_directory,
     particle_diameter_um = cfg$plume$particle_diameter_um,
     particle_density_g_cm3 = cfg$plume$particle_density_g_cm3,
     particle_shape_factor = cfg$plume$particle_shape_factor,

@@ -6,6 +6,15 @@ make_manifest_row <- function(run_directory = tempfile("hysplit-run-")) {
   row
 }
 
+make_test_installation <- function() {
+  directory <- tempfile("hysplit-install-"); dir.create(directory)
+  suffix <- if (.Platform$OS.type == "windows") ".exe" else ""
+  files <- file.path(directory, paste0(c("hycs_std", "parhplot"), suffix))
+  file.create(files)
+  if (.Platform$OS.type != "windows") Sys.chmod(files, mode = "0755")
+  directory
+}
+
 testthat::test_that("manifest validation normalizes exactly one valid row", {
   row <- make_manifest_row()
   normalized <- validate_hysplit_manifest_row(row)
@@ -26,19 +35,13 @@ testthat::test_that("manifest validation reports field-specific errors", {
   testthat::expect_error(validate_hysplit_manifest_row(bad), "run_id")
 })
 
-testthat::test_that("executable resolution distinguishes unresolved and invalid paths", {
-  cfg <- test_cfg; cfg$hysplit$executable_path <- NULL
-  old <- Sys.getenv("HYSPLIT_EXECUTABLE", unset = NA_character_)
-  on.exit(if (is.na(old)) Sys.unsetenv("HYSPLIT_EXECUTABLE") else Sys.setenv(HYSPLIT_EXECUTABLE = old), add = TRUE)
-  Sys.unsetenv("HYSPLIT_EXECUTABLE")
-  testthat::expect_true(is.na(resolve_hysplit_executable(cfg, FALSE)))
-  cfg$hysplit$executable_path <- tempfile("missing-hysplit-")
-  testthat::expect_error(resolve_hysplit_executable(cfg, TRUE), "does not exist")
-  cfg$hysplit$executable_path <- NULL
-  executable <- tempfile("hysplit-"); file.create(executable)
-  if (.Platform$OS.type != "windows") Sys.chmod(executable, mode = "0755")
-  Sys.setenv(HYSPLIT_EXECUTABLE = executable)
-  testthat::expect_equal(resolve_hysplit_executable(cfg), normalizePath(executable, winslash = "/"))
+testthat::test_that("installation resolution validates a splitr binary directory", {
+  cfg <- test_cfg
+  cfg$hysplit$hysplit_install_directory <- tempfile("missing-hysplit-")
+  testthat::expect_error(resolve_hysplit_installation(cfg, TRUE), "does not exist")
+  installation <- make_test_installation()
+  cfg$hysplit$hysplit_install_directory <- installation
+  testthat::expect_equal(resolve_hysplit_installation(cfg), paste0(normalizePath(installation, winslash = "/"), "/"))
 })
 
 testthat::test_that("meteorology inspection is local and conservative", {
@@ -59,7 +62,14 @@ testthat::test_that("run specification maps manifest fields to core plume argume
   testthat::expect_equal(spec$core_args$lon, row$source_longitude)
   testthat::expect_equal(spec$core_args$lat, row$source_latitude)
   testthat::expect_equal(spec$core_args$plume_name, row$run_id)
-  testthat::expect_equal(spec$core_args$exec_dir, normalizePath(row$run_directory, winslash = "/", mustWork = FALSE))
+  testthat::expect_equal(spec$core_args$release_start, as.POSIXct(row$release_start, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"))
+  testthat::expect_equal(spec$core_args$end_time, as.POSIXct(row$simulation_end, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"))
+  testthat::expect_setequal(names(spec$core_args), names(formals(run_plume_model)))
+  testthat::expect_true(all(names(spec$core_args) %in% names(formals(run_plume_model))))
+  testthat::expect_false("hysplit_executable" %in% names(spec))
+  testthat::expect_equal(spec$core_args$binary_path, spec$hysplit_install_directory)
+  testthat::expect_false(identical(spec$core_args$exec_dir, spec$hysplit_install_directory))
+  testthat::expect_false(identical(spec$working_directory, spec$output_directory))
 })
 
 testthat::test_that("dry-run never calls the core or creates a run directory", {
@@ -75,10 +85,8 @@ testthat::test_that("dry-run never calls the core or creates a run directory", {
 
 execution_cfg <- function() {
   cfg <- test_cfg
-  executable <- tempfile("hysplit-"); file.create(executable)
-  if (.Platform$OS.type != "windows") Sys.chmod(executable, mode = "0755")
   met_dir <- tempfile("met-"); dir.create(met_dir); file.create(file.path(met_dir, "input.arl"))
-  cfg$hysplit$executable_path <- executable
+  cfg$hysplit$hysplit_install_directory <- make_test_installation()
   cfg$hysplit$meteorology_directory <- met_dir
   cfg
 }
@@ -90,8 +98,14 @@ testthat::test_that("injected successful execution receives exact core arguments
   testthat::expect_equal(result$status, "completed")
   testthat::expect_equal(received$lon, row$source_longitude)
   testthat::expect_equal(received$plume_name, row$run_id)
+  testthat::expect_equal(received$binary_path, result$hysplit_install_directory)
+  testthat::expect_equal(received$exec_dir, result$working_directory)
   testthat::expect_true(file.exists(file.path(row$run_directory, "run_metadata.rds")))
   testthat::expect_true(file.exists(file.path(row$run_directory, "run_metadata.json")))
+  persisted <- readRDS(file.path(row$run_directory, "run_metadata.rds"))
+  testthat::expect_true(all(c("run_metadata.rds", "run_metadata.json") %in% basename(persisted$actual_output_files)))
+  json <- jsonlite::read_json(file.path(row$run_directory, "run_metadata.json"), simplifyVector = TRUE)
+  testthat::expect_true(all(c("run_metadata.rds", "run_metadata.json") %in% basename(json$actual_output_files)))
 })
 
 testthat::test_that("injected failure returns failed metadata and records the error", {
@@ -101,4 +115,8 @@ testthat::test_that("injected failure returns failed metadata and records the er
   testthat::expect_match(result$error_message, "mock failure")
   testthat::expect_true(file.exists(file.path(row$run_directory, "run_metadata.rds")))
   testthat::expect_true(file.exists(file.path(row$run_directory, "run_metadata.json")))
+  persisted <- readRDS(file.path(row$run_directory, "run_metadata.rds"))
+  testthat::expect_equal(persisted$status, "failed")
+  testthat::expect_match(persisted$error_message, "mock failure")
+  testthat::expect_true(all(c("run_metadata.rds", "run_metadata.json") %in% basename(persisted$actual_output_files)))
 })

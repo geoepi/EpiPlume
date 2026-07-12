@@ -14,7 +14,8 @@ run_plume_model <- function(
     met_type,
     met_dir,
     exec_dir,
-    clean_up
+    clean_up,
+    binary_path = NULL
 ) {
   require(splitr)
   
@@ -39,6 +40,7 @@ run_plume_model <- function(
       met_type   = met_type,
       met_dir    = met_dir,
       exec_dir   = exec_dir,
+      binary_path = binary_path,
       clean_up   = clean_up
     )
   

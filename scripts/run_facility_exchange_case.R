@@ -1,6 +1,6 @@
 # Run or validate exactly one facility-exchange manifest row.
 adapter_files <- c(
-  "validate_hysplit_manifest_row.R", "resolve_hysplit_executable.R",
+  "validate_hysplit_manifest_row.R", "resolve_hysplit_installation.R",
   "resolve_hysplit_meteorology.R", "build_hysplit_run_spec.R",
   "standardize_hysplit_run_result.R", "run_plume_model.R",
   "run_hysplit_manifest_row.R", "read_facility_exchange_config.R"
