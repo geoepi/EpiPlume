@@ -7,6 +7,7 @@ target_function_files <- c(
   "validate_hysplit_manifest_row.R", "resolve_hysplit_installation.R", "resolve_hysplit_meteorology.R",
   "build_hysplit_run_spec.R", "discover_parsed_run_inventory.R", "validate_parsed_run_inventory.R",
   "write_completed_run_index.R",
+  "validate_hysplit_execution_result.R",
   "run_plume_model.R",
   "load_completed_parsed_run.R", "prepare_receptor_facilities.R", "sample_hourly_plume_at_receptors.R",
   "summarize_receptor_time_series.R", "classify_receptor_intercepts.R", "build_source_receptor_exchange.R",
