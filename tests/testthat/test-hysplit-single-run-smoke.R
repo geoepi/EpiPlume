@@ -11,7 +11,7 @@ testthat::test_that("smoke preflight rejects missing executable and meteorology"
   inputs <- smoke_load_manifest(test_cfg); row <- smoke_select_row(inputs$manifest, inputs$manifest$run_id[1]); cfg <- test_cfg
   cfg$hysplit$hysplit_install_directory <- file.path(tempdir(), "not-an-installation")
   testthat::expect_error(smoke_preflight(cfg, row), "does not exist")
-  installation <- tempfile("smoke-install-"); dir.create(installation); file.create(file.path(installation, paste0(c("hycs_std", "parhplot"), if (.Platform$OS.type == "windows") ".exe" else ""))); cfg$hysplit$hysplit_install_directory <- installation; cfg$hysplit$meteorology_directory <- file.path(tempdir(), "not-meteorology")
+  installation <- make_test_installation(); cfg$hysplit$hysplit_install_directory <- installation; cfg$hysplit$meteorology_directory <- file.path(tempdir(), "not-meteorology")
   testthat::expect_error(smoke_preflight(cfg, row), "incomplete")
 })
 
@@ -39,13 +39,13 @@ testthat::test_that("meteorology preparation handles disabled, partial, failed, 
 })
 
 testthat::test_that("verified cached meteorology is required before smoke preflight", {
-  cfg <- test_cfg; met <- tempfile("met-preflight-"); dir.create(met); writeLines("mock meteorology", file.path(met, "RP202005.gbl")); cfg$hysplit$meteorology_directory <- met; install <- tempfile("install-"); dir.create(install); file.create(file.path(install, paste0(c("hycs_std", "parhplot"), if (.Platform$OS.type == "windows") ".exe" else ""))); cfg$hysplit$hysplit_install_directory <- install; inputs <- smoke_load_manifest(cfg); row <- smoke_select_row(inputs$manifest, inputs$manifest$run_id[1]); row$run_directory <- tempfile("preflight-run-"); check <- smoke_preflight(cfg, row); testthat::expect_equal(check$meteorology_preparation$status, "cached"); testthat::expect_equal(check$meteorology_preparation$coverage_status, "complete")
+  cfg <- test_cfg; met <- tempfile("met-preflight-"); dir.create(met); writeLines("mock meteorology", file.path(met, "RP202005.gbl")); cfg$hysplit$meteorology_directory <- met; install <- make_test_installation(); cfg$hysplit$hysplit_install_directory <- install; inputs <- smoke_load_manifest(cfg); row <- smoke_select_row(inputs$manifest, inputs$manifest$run_id[1]); row$run_directory <- tempfile("preflight-run-"); check <- smoke_preflight(cfg, row); testthat::expect_equal(check$meteorology_preparation$status, "cached"); testthat::expect_equal(check$meteorology_preparation$coverage_status, "complete")
 })
 
 testthat::test_that("smoke preflight rejects overwrite by default", {
   source(file.path(repo_root, "R", "hysplit_single_run_smoke.R"))
   inputs <- smoke_load_manifest(test_cfg); row <- smoke_select_row(inputs$manifest, inputs$manifest$run_id[1]); cfg <- test_cfg
-  installation <- tempfile("smoke-install-"); dir.create(installation); file.create(file.path(installation, paste0(c("hycs_std", "parhplot"), if (.Platform$OS.type == "windows") ".exe" else "")))
+  installation <- make_test_installation()
   met <- tempfile("smoke-met-"); dir.create(met); cfg$hysplit$hysplit_install_directory <- installation; cfg$hysplit$meteorology_directory <- met
   row$run_directory <- tempfile("existing-run-"); dir.create(row$run_directory, recursive = TRUE); file.create(file.path(row$run_directory, "existing.out")); cfg$hysplit$meteorology_directory <- met; writeLines("mock meteorology", file.path(met, "RP202005.gbl"))
   testthat::expect_error(smoke_preflight(cfg, row), "refusing to overwrite")

@@ -1,5 +1,5 @@
 restart_execution_cfg <- function() {
-  cfg <- test_cfg; met <- tempfile("restart-met-"); dir.create(met); file.create(file.path(met, "input.arl")); install <- tempfile("restart-install-"); dir.create(install); suffix <- if (.Platform$OS.type == "windows") ".exe" else ""; binaries <- file.path(install, paste0(c("hycs_std", "parhplot"), suffix)); file.create(binaries); if (.Platform$OS.type != "windows") Sys.chmod(binaries, "0755"); cfg$hysplit$meteorology_directory <- met; cfg$hysplit$hysplit_install_directory <- install; cfg$outputs$root_directory <- tempfile("restart-output-"); cfg
+  cfg <- test_cfg; met <- tempfile("restart-met-"); dir.create(met); file.create(file.path(met, "input.arl")); install <- make_test_installation(); cfg$hysplit$meteorology_directory <- met; cfg$hysplit$hysplit_install_directory <- install; cfg$outputs$root_directory <- tempfile("restart-output-"); cfg
 }
 restart_manifest_row <- function() { facilities <- simulate_facility_network(test_cfg); x <- build_hysplit_run_manifest(facilities, test_cfg, facilities$facility_id[1]); x <- x[1, , drop = FALSE]; x$run_directory <- tempfile("restart-run-"); x }
 

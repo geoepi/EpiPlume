@@ -59,13 +59,54 @@ prepare_hysplit_meteorology <- function(
 splitr_required_meteorology_files <- function(start_time, duration, direction, meteorology_type) {
   if (!requireNamespace("splitr", quietly = TRUE)) stop("Package `splitr` is required for meteorology file selection.", call. = FALSE)
   ns <- asNamespace("splitr")
-  if (identical(meteorology_type, "reanalysis")) return(get("get_monthly_filenames", ns)(days = as.Date(start_time), duration = duration, direction = direction, prefix = "RP", extension = ".gbl"))
+  if (identical(meteorology_type, "reanalysis")) {
+    monthly_helpers <- unique(c(
+      "get_monthly_filenames",
+      ls(ns, all.names = TRUE)[grepl("monthly.*filename|filename.*monthly", ls(ns, all.names = TRUE), ignore.case = TRUE)]
+    ))
+    for (helper_name in monthly_helpers) {
+      if (!exists(helper_name, ns, inherits = FALSE)) next
+      helper <- get(helper_name, ns, inherits = FALSE)
+      args <- list(days = as.Date(start_time), duration = duration, direction = direction, prefix = "RP", extension = ".gbl")
+      formal_names <- names(formals(helper))
+      if (!("..." %in% formal_names)) args <- args[names(args) %in% formal_names]
+      result <- tryCatch(do.call(helper, args), error = function(e) NULL)
+      if (is.character(result) && length(result)) return(unique(result))
+    }
+    return(.repository_monthly_filenames(start_time, duration, direction, prefix = "RP", extension = ".gbl"))
+  }
   stop("No acquisition-only file-selection adapter is implemented for splitr meteorology type `", meteorology_type, "`.", call. = FALSE)
+}
+
+.repository_monthly_filenames <- function(start_time, duration, direction, prefix = "RP", extension = ".gbl") {
+  start <- as.POSIXct(start_time, tz = "UTC")
+  if (!inherits(start, "POSIXct") || length(start) != 1L || is.na(start)) stop("start_time must be one valid UTC datetime.", call. = FALSE)
+  duration_hours <- as.numeric(duration)
+  if (!is.finite(duration_hours) || duration_hours < 0) stop("duration must be a non-negative number of hours.", call. = FALSE)
+  if (identical(direction, "backward")) end <- start - duration_hours * 3600 else if (identical(direction, "forward")) end <- start + duration_hours * 3600 else stop("direction must be `forward` or `backward`.", call. = FALSE)
+  endpoints <- as.POSIXlt(c(start, end), tz = "UTC")
+  month_start <- as.Date(sprintf("%04d-%02d-01", endpoints$year[1] + 1900L, endpoints$mon[1] + 1L))
+  month_end <- as.Date(sprintf("%04d-%02d-01", endpoints$year[2] + 1900L, endpoints$mon[2] + 1L))
+  months <- if (month_start <= month_end) seq(month_start, month_end, by = "month") else seq(month_end, month_start, by = "month")
+  unique(paste0(prefix, format(months, "%Y%m"), extension))
 }
 
 splitr_meteorology_downloader <- function(meteorology_type, days, duration, direction, met_dir) {
   if (!requireNamespace("splitr", quietly = TRUE)) stop("Package `splitr` is required for meteorology download.", call. = FALSE)
-  get("download_met_files", asNamespace("splitr"))(met_type = meteorology_type, days = days, duration = duration, direction = direction, met_dir = met_dir)
+  ns <- asNamespace("splitr")
+  direct <- c("download_met_files", ls(ns, all.names = TRUE)[grepl("download", ls(ns, all.names = TRUE), ignore.case = TRUE)])
+  for (helper_name in unique(direct)) {
+    if (!exists(helper_name, ns, inherits = FALSE)) next
+    helper <- get(helper_name, ns, inherits = FALSE)
+    formal_names <- names(formals(helper))
+    if (!all(c("met_type", "days", "duration", "direction", "met_dir") %in% formal_names) && !("..." %in% formal_names)) next
+    return(helper(met_type = meteorology_type, days = days, duration = duration, direction = direction, met_dir = met_dir))
+  }
+  equivalent <- switch(meteorology_type, gdas1 = "get_met_gdas1", `gdas0.5` = "get_met_gdas0p5", `gfs0.25` = "get_met_gfs0p25", reanalysis = "get_met_reanalysis", nam12 = "get_met_nam12", narr = "get_met_narr", era5 = "get_met_era5", NULL)
+  if (!is.null(equivalent) && exists(equivalent, ns, inherits = FALSE)) {
+    return(get(equivalent, ns, inherits = FALSE)(days = days, duration = duration, direction = direction, path_met_files = met_dir))
+  }
+  stop("Automatic meteorology download is unsupported for this splitr revision; provide cached files or a tested downloader.", call. = FALSE)
 }
 
 inventory_meteorology_files <- function(directory) {
