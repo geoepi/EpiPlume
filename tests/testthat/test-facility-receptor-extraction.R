@@ -54,7 +54,8 @@ testthat::test_that("end-to-end extraction writes complete protected metadata", 
   parsed <- parsed_fixture(); parsed$parsing_metadata$run_directory <- tempfile("receptor-run-")
   result <- extract_facility_receptors_from_plume(parsed, receptor_fixture(), test_cfg)
   testthat::expect_false(dir.exists(parsed$parsing_metadata$run_directory))
-  written <- extract_facility_receptors_from_plume(parsed, receptor_fixture(), test_cfg, TRUE)
+  written <- extract_facility_receptors_from_plume(parsed, receptor_fixture(), test_cfg, TRUE,
+    refresh_run_index = FALSE)
   inventory <- written$extraction_metadata$written_files
   testthat::expect_true(all(file.exists(inventory$path)))
   testthat::expect_true(all(c("extraction_metadata.rds", "extraction_metadata.json") %in% basename(inventory$path)))

@@ -7,6 +7,7 @@ function_files <- c(
   "resolve_hysplit_meteorology.R", "build_hysplit_run_spec.R",
   "prepare_hysplit_meteorology.R",
   "standardize_hysplit_run_result.R", "run_plume_model.R",
+  "write_completed_run_index.R",
   "run_hysplit_manifest_row.R", "validate_hysplit_model_result.R",
   "classify_manifest_execution_state.R", "update_manifest_execution_ledger.R",
   "run_hysplit_manifest_subset.R",

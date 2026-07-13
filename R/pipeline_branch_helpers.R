@@ -1,7 +1,7 @@
 #' Capture one receptor-extraction branch without aborting independent runs
 extract_pipeline_receptor_result <- function(parsed_result, facilities, cfg) {
   if (!identical(parsed_result$status, "parsed")) return(list(run_id = parsed_result$run_id, status = "skipped", extraction = NULL, error_message = parsed_result$error_message))
-  tryCatch({ existing_receptor_outputs <- file.exists(file.path(parsed_result$parsed_plume$parsing_metadata$run_directory, "receptors", "source_receptor_exchange.csv")); write_outputs <- isTRUE(cfg$pipeline$write_intermediate_outputs) && !existing_receptor_outputs; extraction <- extract_facility_receptors_from_plume(parsed_result$parsed_plume, facilities, cfg, write_outputs); list(run_id = parsed_result$run_id, status = "receptor_extracted", extraction = extraction, error_message = NA_character_) }, error = function(e) list(run_id = parsed_result$run_id, status = "failed", extraction = NULL, error_message = conditionMessage(e)))
+  tryCatch({ existing_receptor_outputs <- file.exists(file.path(parsed_result$parsed_plume$parsing_metadata$run_directory, "receptors", "source_receptor_exchange.csv")); write_outputs <- isTRUE(cfg$pipeline$write_intermediate_outputs) && !existing_receptor_outputs; extraction <- extract_facility_receptors_from_plume(parsed_result$parsed_plume, facilities, cfg, write_outputs, refresh_run_index = FALSE); list(run_id = parsed_result$run_id, status = "receptor_extracted", extraction = extraction, error_message = NA_character_) }, error = function(e) list(run_id = parsed_result$run_id, status = "failed", extraction = NULL, error_message = conditionMessage(e)))
 }
 
 #' Assemble successful target branches without rediscovering runs

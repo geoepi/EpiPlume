@@ -92,7 +92,7 @@ execution_cfg <- function() {
 }
 
 testthat::test_that("injected successful execution receives exact core arguments and writes metadata", {
-  row <- make_manifest_row(); cfg <- execution_cfg(); received <- NULL
+  row <- make_manifest_row(); cfg <- execution_cfg(); cfg$hysplit$run_root_directory <- tempfile("run-root-"); row$run_directory <- file.path(cfg$hysplit$run_root_directory, row$run_id); received <- NULL
   fake <- function(...) { received <<- list(...); list(particles = data.frame(x = 1)) }
   result <- run_hysplit_manifest_row(row, cfg, dry_run = FALSE, core_fun = fake)
   testthat::expect_equal(result$status, "completed")
@@ -109,7 +109,7 @@ testthat::test_that("injected successful execution receives exact core arguments
 })
 
 testthat::test_that("injected failure returns failed metadata and records the error", {
-  row <- make_manifest_row(); cfg <- execution_cfg()
+  row <- make_manifest_row(); cfg <- execution_cfg(); cfg$hysplit$run_root_directory <- tempfile("run-root-"); row$run_directory <- file.path(cfg$hysplit$run_root_directory, row$run_id)
   result <- run_hysplit_manifest_row(row, cfg, dry_run = FALSE, core_fun = function(...) stop("mock failure"))
   testthat::expect_equal(result$status, "failed")
   testthat::expect_match(result$error_message, "mock failure")

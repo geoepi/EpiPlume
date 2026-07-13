@@ -6,6 +6,7 @@ target_function_files <- c(
   "simulate_facility_observations.R", "build_candidate_pairs.R", "build_hysplit_run_manifest.R",
   "validate_hysplit_manifest_row.R", "resolve_hysplit_installation.R", "resolve_hysplit_meteorology.R",
   "build_hysplit_run_spec.R", "discover_parsed_run_inventory.R", "validate_parsed_run_inventory.R",
+  "write_completed_run_index.R",
   "run_plume_model.R",
   "load_completed_parsed_run.R", "prepare_receptor_facilities.R", "sample_hourly_plume_at_receptors.R",
   "summarize_receptor_time_series.R", "classify_receptor_intercepts.R", "build_source_receptor_exchange.R",
@@ -41,7 +42,8 @@ list(
   tar_target(hysplit_manifest, build_hysplit_run_manifest(facilities, cfg, if (nrow(simulation_truth)) simulation_truth$facility_id else head(facilities$facility_id, 1L))),
   tar_target(manifest_row, split(hysplit_manifest, seq_len(nrow(hysplit_manifest))), iteration = "list"),
   tar_target(hysplit_run_specs, build_hysplit_run_spec(manifest_row, cfg), pattern = map(manifest_row), iteration = "list"),
-  tar_target(parsed_run_inventory, discover_parsed_run_inventory(hysplit_manifest, cfg$hysplit$run_root_directory)),
+  tar_target(completed_run_index, write_completed_run_index(cfg$hysplit$run_root_directory), format = "file"),
+  tar_target(parsed_run_inventory, { completed_run_index; discover_parsed_run_inventory(hysplit_manifest, cfg$hysplit$run_root_directory) }),
   tar_target(eligible_parsed_runs, {
     eligible <- parsed_run_inventory[parsed_run_inventory$available_for_processing | parsed_run_inventory$run_status == "completed", , drop = FALSE]
     if (nrow(eligible)) split(eligible, seq_len(nrow(eligible))) else { sentinel <- parsed_run_inventory[1, , drop = FALSE]; sentinel$run_id <- "__no_eligible_runs__"; sentinel$parsed_object_path <- ""; sentinel$run_metadata_path <- ""; sentinel$run_status <- "missing"; list(sentinel) }

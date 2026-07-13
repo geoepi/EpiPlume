@@ -1,5 +1,5 @@
 library(targets)
-execution_files <- c("validate_facilities.R", "read_facility_exchange_config.R", "simulate_facility_network.R", "build_hysplit_run_manifest.R", "validate_hysplit_manifest_row.R", "resolve_hysplit_meteorology.R", "prepare_hysplit_meteorology.R", "plan_hysplit_manifest_meteorology.R", "validate_manifest_meteorology_plan.R", "write_manifest_meteorology_outputs.R", "resolve_hysplit_installation.R", "build_hysplit_run_spec.R", "run_plume_model.R", "standardize_hysplit_run_result.R", "run_hysplit_manifest_row.R", "build_pipeline_run_selection.R")
+execution_files <- c("validate_facilities.R", "read_facility_exchange_config.R", "simulate_facility_network.R", "build_hysplit_run_manifest.R", "validate_hysplit_manifest_row.R", "resolve_hysplit_meteorology.R", "prepare_hysplit_meteorology.R", "plan_hysplit_manifest_meteorology.R", "validate_manifest_meteorology_plan.R", "write_manifest_meteorology_outputs.R", "resolve_hysplit_installation.R", "build_hysplit_run_spec.R", "run_plume_model.R", "standardize_hysplit_run_result.R", "write_completed_run_index.R", "run_hysplit_manifest_row.R", "build_pipeline_run_selection.R")
 invisible(lapply(file.path("R", execution_files), source))
 tar_option_set(packages = c("yaml", "sf", "terra"), iteration = "list")
 config_path <- Sys.getenv("EPIPLUME_CONFIG", "config/facility_exchange_demo.yml")

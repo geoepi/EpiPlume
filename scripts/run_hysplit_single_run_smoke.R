@@ -1,6 +1,7 @@
 args <- commandArgs(trailingOnly = TRUE)
 source("R/read_facility_exchange_config.R")
 source("R/hysplit_single_run_smoke.R")
+source("R/write_completed_run_index.R")
 source("R/run_hysplit_manifest_row.R")
 source("R/standardize_hysplit_run_result.R")
 source("R/parse_hysplit_run_output.R")

@@ -1,5 +1,5 @@
 # Parse one completed HYSPLIT result; this script never executes HYSPLIT.
-files <- c("read_facility_exchange_config.R", "apply_tracer_decay.R", "validate_hysplit_model_result.R", "extract_hysplit_dispersion_table.R", "standardize_hysplit_dispersion_table.R", "add_tracer_decay_to_dispersion.R", "filter_dispersion_distance.R", "build_plume_raster_template.R", "rasterize_hysplit_hourly.R", "summarize_hysplit_plume.R", "write_hysplit_parsed_outputs.R", "parse_hysplit_run_output.R")
+files <- c("read_facility_exchange_config.R", "apply_tracer_decay.R", "validate_hysplit_model_result.R", "extract_hysplit_dispersion_table.R", "standardize_hysplit_dispersion_table.R", "add_tracer_decay_to_dispersion.R", "filter_dispersion_distance.R", "build_plume_raster_template.R", "rasterize_hysplit_hourly.R", "summarize_hysplit_plume.R", "write_hysplit_parsed_outputs.R", "write_completed_run_index.R", "parse_hysplit_run_output.R")
 invisible(lapply(file.path("R", files), source))
 
 parse_args <- function(args) {

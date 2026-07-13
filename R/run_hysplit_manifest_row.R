@@ -44,5 +44,6 @@ run_hysplit_manifest_row <- function(manifest_row, cfg, dry_run = TRUE, overwrit
     metadata$actual_output_files <- setdiff(metadata$actual_output_files, normalizePath(json_path, winslash = "/", mustWork = FALSE))
   }
   saveRDS(metadata, rds_path)
+  write_completed_run_index(cfg$hysplit$run_root_directory)
   metadata
 }

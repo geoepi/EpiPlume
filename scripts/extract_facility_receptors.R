@@ -1,5 +1,5 @@
 # Extract one parsed plume at facility receptors; never executes HYSPLIT.
-files <- c("validate_facilities.R", "read_facility_exchange_config.R", "prepare_receptor_facilities.R", "sample_hourly_plume_at_receptors.R", "summarize_receptor_time_series.R", "classify_receptor_intercepts.R", "build_source_receptor_exchange.R", "write_facility_receptor_outputs.R", "extract_facility_receptors_from_plume.R")
+files <- c("validate_facilities.R", "read_facility_exchange_config.R", "prepare_receptor_facilities.R", "sample_hourly_plume_at_receptors.R", "summarize_receptor_time_series.R", "classify_receptor_intercepts.R", "build_source_receptor_exchange.R", "write_facility_receptor_outputs.R", "write_completed_run_index.R", "extract_facility_receptors_from_plume.R")
 invisible(lapply(file.path("R", files), source))
 parse_args <- function(args) {
   out <- list(write = FALSE, no_write = FALSE, overwrite = FALSE); i <- 1L

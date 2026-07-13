@@ -86,7 +86,8 @@ testthat::test_that("end-to-end parsing is non-writing by default and validates 
 })
 
 testthat::test_that("writer inventories outputs and protects against overwrite", {
-  meta <- parsing_metadata_fixture(); parsed <- parse_hysplit_run_output(meta, test_cfg, write_outputs = TRUE)
+  meta <- parsing_metadata_fixture(); parsed <- parse_hysplit_run_output(meta, test_cfg,
+    write_outputs = TRUE, refresh_run_index = FALSE)
   inventory <- parsed$parsing_metadata$written_files
   testthat::expect_true(all(file.exists(inventory$path)))
   testthat::expect_true(all(c("parsing_metadata.rds", "parsing_metadata.json") %in% basename(inventory$path)))
