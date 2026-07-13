@@ -10,6 +10,8 @@ function_files <- c(
   "validate_manifest_meteorology_plan.R",
   "standardize_hysplit_run_result.R", "run_plume_model.R",
   "write_completed_run_index.R",
+  "validate_hysplit_execution_result.R",
+  "reconcile_hysplit_run_status.R",
   "run_hysplit_manifest_row.R", "validate_hysplit_model_result.R",
   "classify_manifest_execution_state.R", "update_manifest_execution_ledger.R",
   "run_hysplit_manifest_subset.R",
@@ -48,3 +50,31 @@ make_manifest_row <- function(run_directory = tempfile("hysplit-run-")) {
 }
 invisible(lapply(file.path(repo_root, "R", function_files), source))
 test_cfg <- read_facility_exchange_config(file.path(repo_root, "config", "facility_exchange_demo.yml"))
+
+mock_valid_hysplit_dispersion <- function() data.frame(
+  particle_i = c("1", "2"), hour = c(0, 1), lat = c(32.5, 32.51),
+  lon = c(-89, -88.99), height = c(5, 10), stringsAsFactors = FALSE
+)
+
+write_mock_hysplit_artifact <- function(exec_dir, filename = "output.bin") {
+  dir.create(exec_dir, recursive = TRUE, showWarnings = FALSE)
+  path <- file.path(exec_dir, filename)
+  writeLines("mock substantive HYSPLIT output", path)
+  path
+}
+
+execution_cfg <- function() {
+  cfg <- test_cfg
+  met_dir <- tempfile("met-"); dir.create(met_dir); file.create(file.path(met_dir, "input.arl"))
+  cfg$hysplit$hysplit_install_directory <- make_test_installation()
+  cfg$hysplit$meteorology_directory <- met_dir
+  cfg
+}
+
+durable_completed_metadata <- function(directory, run_id = basename(directory)) {
+  working <- file.path(directory, "splitr_work")
+  write_mock_hysplit_artifact(working)
+  list(status = "completed", run_id = run_id, run_directory = directory,
+    working_directory = working, output_directory = directory,
+    model_result = list(disp_df = mock_valid_hysplit_dispersion()), warnings = character())
+}

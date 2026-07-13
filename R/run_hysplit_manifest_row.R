@@ -21,8 +21,18 @@ run_hysplit_manifest_row <- function(manifest_row, cfg, dry_run = TRUE, overwrit
     error = function(e) { error_message <<- conditionMessage(e); NULL }
   )
   finished <- Sys.time()
-  status <- if (is.null(error_message)) "completed" else "failed"
+  validation_spec <- spec
+  validation_spec$artifact_not_before <- started
+  validation <- validate_hysplit_execution_result(model_result, validation_spec, captured_warnings)
+  if (!is.null(error_message)) {
+    validation$valid <- FALSE
+    validation$failure_stage <- "execution"
+    validation$error_message <- paste0("HYSPLIT execution raised an error: ", error_message)
+  }
+  status <- if (isTRUE(validation$valid)) "completed" else "failed"
+  error_message <- if (identical(status, "failed")) validation$error_message else NULL
   metadata <- standardize_hysplit_run_result(spec, status, started, finished, model_result, captured_warnings, error_message)
+  metadata$execution_validation <- validation
   rds_path <- file.path(spec$output_directory, "run_metadata.rds")
   json_path <- file.path(spec$output_directory, "run_metadata.json")
   existing <- list.files(spec$run_directory, full.names = TRUE, recursive = TRUE)

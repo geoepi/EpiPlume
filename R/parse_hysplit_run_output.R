@@ -3,6 +3,8 @@ parse_hysplit_run_output <- function(run_metadata, cfg, write_outputs = FALSE, o
     refresh_run_index = TRUE) {
   if (!is.list(run_metadata) || is.null(run_metadata$status)) stop("`run_metadata` must be standardized run metadata.", call. = FALSE)
   if (!identical(run_metadata$status, "completed")) stop("Only completed runs can be parsed; status is `", run_metadata$status, "`.", call. = FALSE)
+  execution_validation <- validate_completed_hysplit_metadata(run_metadata, run_metadata$run_directory)
+  if (!isTRUE(execution_validation$valid)) stop("Completed run failed execution-result validation: ", execution_validation$error_message, call. = FALSE)
   raw <- extract_hysplit_dispersion_table(run_metadata$model_result)
   standardized <- standardize_hysplit_dispersion_table(raw, run_metadata)
   decayed <- add_tracer_decay_to_dispersion(standardized, cfg$tracer_decay$half_life_hours, cfg$tracer_decay$minimum_fraction)

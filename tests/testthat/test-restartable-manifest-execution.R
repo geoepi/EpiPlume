@@ -1,5 +1,5 @@
 restart_execution_cfg <- function() {
-  cfg <- test_cfg; met <- tempfile("restart-met-"); dir.create(met); file.create(file.path(met, "input.arl")); install <- make_test_installation(); cfg$hysplit$meteorology_directory <- met; cfg$hysplit$hysplit_install_directory <- install; cfg$outputs$root_directory <- tempfile("restart-output-"); cfg
+  cfg <- test_cfg; met <- tempfile("restart-met-"); dir.create(met); file.create(file.path(met, "input.arl")); install <- make_test_installation(); cfg$hysplit$meteorology_directory <- met; cfg$hysplit$hysplit_install_directory <- install; cfg$hysplit$run_root_directory <- tempfile("restart-runs-"); cfg$outputs$root_directory <- tempfile("restart-output-"); cfg
 }
 restart_manifest_row <- function() { facilities <- simulate_facility_network(test_cfg); x <- build_hysplit_run_manifest(facilities, test_cfg, facilities$facility_id[1]); x <- x[1, , drop = FALSE]; x$run_directory <- tempfile("restart-run-"); x }
 
@@ -7,7 +7,7 @@ testthat::test_that("manifest classification distinguishes durable completion an
   d <- tempfile("restartable-"); dir.create(d); row <- data.frame(run_id = "R1", source_id = "F1", release_start = "2020-05-01T00:00:00Z", run_directory = d, stringsAsFactors = FALSE)
   cfg <- list(hysplit = list(meteorology_directory = d), outputs = list(root_directory = tempfile("ledger-")))
   writeLines("met", file.path(d, "RP202005.gbl")); s <- classify_manifest_execution_state(row, cfg, data.frame(run_id = "R1", meteorology_ready = TRUE)); testthat::expect_equal(s$execution_state, "invalid")
-  unlink(file.path(d, "RP202005.gbl")); dir.create(file.path(d, "parsed")); dir.create(file.path(d, "receptors")); saveRDS(list(status = "completed"), file.path(d, "run_metadata.rds")); file.create(file.path(d, "parsed", "parsed_plume.rds")); file.create(file.path(d, "receptors", "source_receptor_exchange.csv")); s <- classify_manifest_execution_state(row, cfg, data.frame(run_id = "R1", meteorology_ready = TRUE)); testthat::expect_equal(s$execution_state, "completed")
+  unlink(file.path(d, "RP202005.gbl")); dir.create(file.path(d, "parsed")); dir.create(file.path(d, "receptors")); saveRDS(durable_completed_metadata(d, "R1"), file.path(d, "run_metadata.rds")); file.create(file.path(d, "parsed", "parsed_plume.rds")); file.create(file.path(d, "receptors", "source_receptor_exchange.csv")); s <- classify_manifest_execution_state(row, cfg, data.frame(run_id = "R1", meteorology_ready = TRUE)); testthat::expect_equal(s$execution_state, "completed")
 })
 
 testthat::test_that("manifest ledger preserves rows atomically", {
@@ -17,7 +17,7 @@ testthat::test_that("manifest ledger preserves rows atomically", {
 testthat::test_that("the real adapter accepts only the recognized execution lock", {
   cfg <- restart_execution_cfg(); row <- restart_manifest_row(); ready <- data.frame(run_id = row$run_id, meteorology_ready = TRUE)
   saw_lock <- FALSE
-  fake <- function(...) { saw_lock <<- dir.exists(file.path(row$run_directory, ".execution.lock")); list(particles = data.frame(x = 1)) }
+  fake <- function(...) { x <- list(...); saw_lock <<- dir.exists(file.path(row$run_directory, ".execution.lock")); write_mock_hysplit_artifact(x$exec_dir); list(disp_df = mock_valid_hysplit_dispersion()) }
   result <- run_hysplit_manifest_subset(row, cfg, workers = 1L, parse_outputs = FALSE, extract_receptors = FALSE, core_fun = fake, meteorology_readiness = ready)
   testthat::expect_true(saw_lock)
   testthat::expect_equal(result$results[[1]]$execution_state, "completed")
@@ -37,7 +37,7 @@ testthat::test_that("classification separates execution and postprocessing eligi
   rows$run_id <- c("complete", "parse", "receptor", "failed", "running", "invalid", "empty")
   rows$run_directory <- vapply(rows$run_id, function(x) tempfile(paste0(x, "-")), character(1)); rows$source_id <- paste0("F", seq_len(7))
   for (d in rows$run_directory) dir.create(d)
-  completed <- function(i) saveRDS(list(status = "completed"), file.path(rows$run_directory[i], "run_metadata.rds"))
+  completed <- function(i) saveRDS(durable_completed_metadata(rows$run_directory[i], rows$run_id[i]), file.path(rows$run_directory[i], "run_metadata.rds"))
   for (i in 1:3) completed(i)
   for (i in c(1, 3)) { dir.create(file.path(rows$run_directory[i], "parsed")); saveRDS(list(), file.path(rows$run_directory[i], "parsed", "parsed_plume.rds")) }
   dir.create(file.path(rows$run_directory[1], "receptors")); file.create(file.path(rows$run_directory[1], "receptors", "source_receptor_exchange.csv"))
@@ -50,7 +50,7 @@ testthat::test_that("classification separates execution and postprocessing eligi
 })
 
 testthat::test_that("parse and receptor failures resume postprocessing without model execution", {
-  cfg <- restart_execution_cfg(); row <- restart_manifest_row(); dir.create(row$run_directory); metadata <- list(status = "completed", run_id = row$run_id); saveRDS(metadata, file.path(row$run_directory, "run_metadata.rds")); ready <- data.frame(run_id = row$run_id, meteorology_ready = TRUE)
+  cfg <- restart_execution_cfg(); row <- restart_manifest_row(); dir.create(row$run_directory); metadata <- durable_completed_metadata(row$run_directory, row$run_id); saveRDS(metadata, file.path(row$run_directory, "run_metadata.rds")); ready <- data.frame(run_id = row$run_id, meteorology_ready = TRUE)
   parse_calls <- 0L; receptor_calls <- 0L
   parse_fake <- function(run_metadata, cfg, write_outputs, overwrite) { parse_calls <<- parse_calls + 1L; dir.create(file.path(row$run_directory, "parsed")); parsed <- list(marker = "parsed"); saveRDS(parsed, file.path(row$run_directory, "parsed", "parsed_plume.rds")); parsed }
   receptor_fake <- function(parsed, facilities, cfg, write_outputs, overwrite) { receptor_calls <<- receptor_calls + 1L; dir.create(file.path(row$run_directory, "receptors")); utils::write.csv(data.frame(run_id = row$run_id), file.path(row$run_directory, "receptors", "source_receptor_exchange.csv"), row.names = FALSE); list(marker = "receptors") }
@@ -66,7 +66,7 @@ testthat::test_that("parse and receptor failures resume postprocessing without m
 testthat::test_that("bounded PSOCK execution preserves order and independent outcomes", {
   cfg <- restart_execution_cfg(); first <- restart_manifest_row(); second <- first; second$run_id <- paste0(first$run_id, "_B"); first$run_id <- paste0(first$run_id, "_A"); first$run_directory <- tempfile("parallel-a-"); second$run_directory <- tempfile("parallel-b-"); rows <- rbind(first, second)
   ready <- data.frame(run_id = rows$run_id, meteorology_ready = TRUE)
-  fake <- function(...) { x <- list(...); if (grepl("_B$", x$plume_name)) stop("independent worker failure"); list(lock_seen = dir.exists(file.path(dirname(x$exec_dir), ".execution.lock"))) }
+  fake <- function(...) { x <- list(...); if (grepl("_B$", x$plume_name)) stop("independent worker failure"); dir.create(x$exec_dir, recursive = TRUE, showWarnings = FALSE); writeLines("mock output", file.path(x$exec_dir, "output.bin")); structure(list(disp_df = data.frame(particle_i = "1", hour = 0, lat = x$lat, lon = x$lon, height = x$height), lock_seen = dir.exists(file.path(dirname(x$exec_dir), ".execution.lock"))), class = "dispersion_model") }
   result <- run_hysplit_manifest_subset(rows, cfg, workers = 8L, continue_on_error = TRUE, parse_outputs = FALSE, extract_receptors = FALSE, core_fun = fake, meteorology_readiness = ready)
   testthat::expect_equal(names(result$results), rows$run_id)
   testthat::expect_equal(unname(vapply(result$results, `[[`, character(1), "execution_state")), c("completed", "execution_failed"))
@@ -74,6 +74,27 @@ testthat::test_that("bounded PSOCK execution preserves order and independent out
   testthat::expect_equal(result$workers, 2L)
   testthat::expect_false(any(dir.exists(file.path(rows$run_directory, ".execution.lock"))))
   ledger <- readRDS(result$ledger); testthat::expect_setequal(ledger$run_id, rows$run_id); testthat::expect_equal(ledger$attempt_count[match(rows$run_id, ledger$run_id)], c(1L, 1L))
+})
+
+testthat::test_that("retrying failed execution requires explicit retry authorization", {
+  cfg <- restart_execution_cfg(); row <- restart_manifest_row()
+  row$run_directory <- file.path(cfg$hysplit$run_root_directory, row$run_id)
+  dir.create(row$run_directory, recursive = TRUE)
+  saveRDS(list(status = "failed", run_id = row$run_id, error_message = "legacy command failure"),
+    file.path(row$run_directory, "run_metadata.rds"))
+  ready <- data.frame(run_id = row$run_id, meteorology_ready = TRUE)
+  fake <- function(...) {
+    x <- list(...); dir.create(x$exec_dir, recursive = TRUE, showWarnings = FALSE)
+    writeLines("mock output", file.path(x$exec_dir, "output.bin"))
+    list(disp_df = data.frame(particle_i = "1", hour = 0, lat = x$lat, lon = x$lon, height = x$height))
+  }
+  testthat::expect_error(run_hysplit_manifest_subset(row, cfg, parse_outputs = FALSE,
+    extract_receptors = FALSE, core_fun = fake, meteorology_readiness = ready), "retry_failed = TRUE")
+  retried <- run_hysplit_manifest_subset(row, cfg, retry_failed = TRUE,
+    parse_outputs = FALSE, extract_receptors = FALSE, core_fun = fake,
+    meteorology_readiness = ready)
+  testthat::expect_equal(retried$results[[1]]$execution_state, "completed")
+  testthat::expect_gt(readRDS(retried$ledger)$attempt_count, 0L)
 })
 
 testthat::test_that("CLI requires separate authorization for a full manifest", {

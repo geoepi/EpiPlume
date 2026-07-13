@@ -6,7 +6,9 @@ read_fixture <- function(name) {
   utils::read.csv(path, stringsAsFactors = FALSE, colClasses = classes)
 }
 parsing_metadata_fixture <- function(run_directory = tempfile("parsed-run-"), dispersion = read_fixture("dispersion_valid.csv")) {
-  list(status = "completed", run_id = "F001__20200501T000000Z", scenario_id = "facility_exchange_demo", source_id = "F001", source_longitude = -89, source_latitude = 32.5, release_start = as.POSIXct("2020-05-01 00:00:00", tz = "UTC"), release_end = as.POSIXct("2020-05-01 01:00:00", tz = "UTC"), simulation_start = as.POSIXct("2020-05-01 00:00:00", tz = "UTC"), simulation_end = as.POSIXct("2020-05-01 08:00:00", tz = "UTC"), run_directory = run_directory, model_result = structure(list(disp_df = dispersion), class = "dispersion_model"))
+  working_directory <- file.path(run_directory, "splitr_work")
+  write_mock_hysplit_artifact(working_directory)
+  list(status = "completed", run_id = "F001__20200501T000000Z", scenario_id = "facility_exchange_demo", source_id = "F001", source_longitude = -89, source_latitude = 32.5, release_start = as.POSIXct("2020-05-01 00:00:00", tz = "UTC"), release_end = as.POSIXct("2020-05-01 01:00:00", tz = "UTC"), simulation_start = as.POSIXct("2020-05-01 00:00:00", tz = "UTC"), simulation_end = as.POSIXct("2020-05-01 08:00:00", tz = "UTC"), run_directory = run_directory, working_directory = working_directory, output_directory = run_directory, model_result = structure(list(disp_df = dispersion), class = "dispersion_model"))
 }
 
 testthat::test_that("validation and extraction preserve the raw table", {
@@ -76,7 +78,7 @@ testthat::test_that("hourly rasterization preserves geometry and totals", {
 testthat::test_that("end-to-end parsing is non-writing by default and validates status", {
   meta <- parsing_metadata_fixture(); parsed <- parse_hysplit_run_output(meta, test_cfg)
   testthat::expect_equal(parsed$plume_summary$parse_status, "completed")
-  testthat::expect_false(dir.exists(meta$run_directory))
+  testthat::expect_false(dir.exists(file.path(meta$run_directory, "parsed")))
   dry <- meta; dry$status <- "dry_run"
   testthat::expect_error(parse_hysplit_run_output(dry, test_cfg), "Only completed")
   failed <- meta; failed$status <- "failed"

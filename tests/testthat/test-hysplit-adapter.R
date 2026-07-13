@@ -80,17 +80,9 @@ testthat::test_that("dry-run never calls the core or creates a run directory", {
   testthat::expect_true(length(result$expected_output_files) > 0)
 })
 
-execution_cfg <- function() {
-  cfg <- test_cfg
-  met_dir <- tempfile("met-"); dir.create(met_dir); file.create(file.path(met_dir, "input.arl"))
-  cfg$hysplit$hysplit_install_directory <- make_test_installation()
-  cfg$hysplit$meteorology_directory <- met_dir
-  cfg
-}
-
 testthat::test_that("injected successful execution receives exact core arguments and writes metadata", {
   row <- make_manifest_row(); cfg <- execution_cfg(); cfg$hysplit$run_root_directory <- tempfile("run-root-"); row$run_directory <- file.path(cfg$hysplit$run_root_directory, row$run_id); received <- NULL
-  fake <- function(...) { received <<- list(...); list(particles = data.frame(x = 1)) }
+  fake <- function(...) { received <<- list(...); write_mock_hysplit_artifact(received$exec_dir); list(disp_df = mock_valid_hysplit_dispersion()) }
   result <- run_hysplit_manifest_row(row, cfg, dry_run = FALSE, core_fun = fake)
   testthat::expect_equal(result$status, "completed")
   testthat::expect_equal(received$lon, row$source_longitude)
