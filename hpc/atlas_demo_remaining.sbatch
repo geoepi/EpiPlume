@@ -31,7 +31,7 @@ Rscript --version
 RUN_IDS="$(Rscript scripts/select_remaining_demo_runs.R --config "${CONFIG}" --manifest "${MANIFEST}" --expected-remaining "${EXPECTED_REMAINING}" --output "${STATUS_DIR}/selected_run_ids.txt")"
 if [[ -z "${RUN_IDS}" ]]; then echo "No run IDs were selected." >&2; exit 3; fi
 echo "selected_run_ids=${RUN_IDS}"
-Rscript scripts/prepare_hysplit_manifest_meteorology.R --config "${CONFIG}" --manifest "${MANIFEST}" --run-ids "${RUN_IDS}" --no-download
+Rscript scripts/prepare_hysplit_manifest_meteorology.R --config "${CONFIG}" --manifest "${MANIFEST}" --no-download
 export EPIPLUME_ALLOW_HYSPLIT_EXECUTION=true
 Rscript scripts/run_hysplit_manifest_subset.R --config "${CONFIG}" --manifest "${MANIFEST}" --run-ids "${RUN_IDS}" --workers "${RUN_WORKERS}" --authorize-execution --continue-on-error --reuse-completed --parse --extract-receptors
 Rscript scripts/inspect_hysplit_manifest_execution.R --config "${CONFIG}" --manifest "${MANIFEST}" > "${STATUS_DIR}/execution_state_after_runs.txt"

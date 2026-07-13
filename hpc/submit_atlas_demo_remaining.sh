@@ -17,7 +17,7 @@ echo "Workers: ${WORKERS}"
 RUN_IDS="$(Rscript scripts/select_remaining_demo_runs.R --config "${CONFIG}" --manifest "${MANIFEST}" --expected-remaining 7)"
 echo "Remaining run IDs:"
 echo "${RUN_IDS}" | tr ',' '\n'
-Rscript scripts/prepare_hysplit_manifest_meteorology.R --config "${CONFIG}" --manifest "${MANIFEST}" --run-ids "${RUN_IDS}" --no-download
+Rscript scripts/prepare_hysplit_manifest_meteorology.R --config "${CONFIG}" --manifest "${MANIFEST}" --no-download
 SUBMISSION="$(sbatch --export=ALL,REPO_DIR="${REPO_DIR}",RUN_WORKERS="${WORKERS}",EXPECTED_REMAINING=7 hpc/atlas_demo_remaining.sbatch)"
 echo "${SUBMISSION}"
 JOB_ID="$(echo "${SUBMISSION}" | awk '{print $NF}')"
