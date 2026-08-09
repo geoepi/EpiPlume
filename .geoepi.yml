@@ -1,0 +1,26 @@
+schema_version: 1
+
+project_id: hpai-plume
+subproject_id: EpiPlume
+
+title: Atmospheric Dispersion of HPAI
+summary: >
+  Retrospective analysis of atmospheric HPAI transport between poultry facilities.
+
+lead:
+  name: John Humphreys
+  github: JMHumphreys
+
+status: active
+current_focus: Developing workflow for parallel processing of facility-to-facility plume simulations.
+
+repository:
+  canonical: geoepi/EpiPlume
+  upstream: null
+
+compute:
+  - Atlas
+
+next_milestone:
+  description: Parallel processing workflow
+  target: 2026-09-01
