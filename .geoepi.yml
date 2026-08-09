@@ -1,7 +1,7 @@
 schema_version: 1
 
 project_id: hpai-plume
-subproject_id: EpiPlume
+subproject_id: epiplume
 
 title: Atmospheric Dispersion of HPAI
 summary: >
