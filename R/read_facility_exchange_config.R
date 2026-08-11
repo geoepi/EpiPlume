@@ -5,6 +5,7 @@ read_facility_exchange_config <- function(path = "config/facility_exchange_demo.
   cfg <- yaml::read_yaml(path)
   required <- c("project", "inputs", "simulation", "domain", "plume", "tracer_decay", "exposure", "hysplit", "outputs", "pipeline")
   missing <- setdiff(required, names(cfg)); if (length(missing)) stop("Missing configuration sections: ", paste(missing, collapse = ", "), call. = FALSE)
+  demo_adapter <- identical(cfg$project$config_type, "user_configurable_demo")
   if (!cfg$inputs$mode %in% c("simulated", "files")) stop("inputs.mode must be `simulated` or `files`.", call. = FALSE)
   if (identical(cfg$inputs$mode, "files") && (is.null(cfg$inputs$facilities_file) || is.null(cfg$inputs$observations_file))) stop("File input mode requires facilities_file and observations_file.", call. = FALSE)
   if (is.null(cfg$hysplit$allow_meteorology_download)) cfg$hysplit$allow_meteorology_download <- FALSE
@@ -34,6 +35,7 @@ read_facility_exchange_config <- function(path = "config/facility_exchange_demo.
   positive(cfg$domain$raster_resolution_m, "domain.raster_resolution_m")
   positive(cfg$exposure$receptor_buffer_m, "exposure.receptor_buffer_m")
   if (!cfg$exposure$sampling_method %in% c("point", "buffer")) stop("exposure.sampling_method must be `point` or `buffer`.", call. = FALSE)
+  if (is.null(cfg$exposure$intercept_metric) || !is.character(cfg$exposure$intercept_metric) || length(cfg$exposure$intercept_metric) != 1L || is.na(cfg$exposure$intercept_metric) || !nzchar(cfg$exposure$intercept_metric)) stop("exposure.intercept_metric must be a nonempty character value.", call. = FALSE)
   nonnegative(cfg$exposure$intercept_threshold, "exposure.intercept_threshold")
   positive(cfg$exposure$minimum_intercept_hours, "exposure.minimum_intercept_hours")
   if (!identical(cfg$exposure$cumulative_method, "sum")) stop("exposure.cumulative_method must be `sum`.", call. = FALSE)
@@ -41,7 +43,7 @@ read_facility_exchange_config <- function(path = "config/facility_exchange_demo.
   nonnegative(cfg$plume$computational_buffer_km, "plume.computational_buffer_km")
   positive(cfg$plume$simulation_duration_hours, "plume.simulation_duration_hours")
   releases <- as.POSIXct(unlist(cfg$plume$planned_release_times), format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-  if (length(releases) != 4L || anyNA(releases) || anyDuplicated(releases)) stop("plume.planned_release_times must contain four unique UTC date-times.", call. = FALSE)
+  if ((!demo_adapter && length(releases) != 4L) || anyNA(releases) || anyDuplicated(releases)) stop("plume.planned_release_times must contain unique UTC date-times (four for the legacy facility demo).", call. = FALSE)
   if (isTRUE(cfg$tracer_decay$enabled)) positive(cfg$tracer_decay$half_life_hours, "tracer_decay.half_life_hours")
   f <- cfg$tracer_decay$minimum_fraction
   if (!is.numeric(f) || length(f) != 1L || is.na(f) || f < 0 || f > 1) stop("tracer_decay.minimum_fraction must be between zero and one.", call. = FALSE)
