@@ -1,0 +1,50 @@
+testthat::test_that("retry classification excludes completed-valid state", {
+  states <- c("completed_valid", "missing_output", "parse_failed", "receptor_failed", "execution_failed")
+  testthat::expect_false("completed_valid" %in% states[states %in% c("execution_failed", "missing_output", "parse_failed", "receptor_failed", "completed_invalid")])
+})
+
+testthat::test_that("audit distinguishes valid, missing, parse, and receptor states", {
+  root <- tempfile("audit-root-"); dir.create(file.path(root, "inputs"), recursive = TRUE); dir.create(file.path(root, "manifests")); dir.create(file.path(root, "combined"))
+  ids <- c("valid", "missing", "parse", "receptor"); dirs <- file.path(root, "runs", ids); invisible(lapply(dirs, dir.create, recursive = TRUE))
+  manifest <- data.frame(run_id = ids, source_facility_id = "A1", release_datetime_utc = "2020-05-01T00:00:00Z", run_directory = dirs, stringsAsFactors = FALSE)
+  utils::write.csv(manifest, file.path(root, "inputs", "run_manifest.csv"), row.names = FALSE); utils::write.csv(data.frame(run_id = ids, shard_id = 1L), file.path(root, "manifests", "shard_manifest.csv"), row.names = FALSE)
+  for (id in c("valid", "parse", "receptor")) saveRDS(durable_completed_metadata(file.path(root, "runs", id), id), file.path(root, "runs", id, "run_metadata.rds"))
+  writeLines("partial", file.path(root, "runs", "missing", "partial.txt"))
+  for (id in c("valid", "receptor")) { dir.create(file.path(root, "runs", id, "parsed")); saveRDS(data.frame(x = 1), file.path(root, "runs", id, "parsed", "parsed_plume.rds")) }
+  dir.create(file.path(root, "runs", "valid", "receptors")); utils::write.csv(data.frame(x = 1), file.path(root, "runs", "valid", "receptors", "source_receptor_exchange.csv"), row.names = FALSE)
+  a <- inventory_demo_runs(root); testthat::expect_equal(a$execution_status, c("completed_valid", "missing_output", "parse_failed", "receptor_failed"))
+  retry <- write_retry_manifest(root); testthat::expect_false("valid" %in% utils::read.csv(retry)$run_id)
+})
+
+testthat::test_that("audit tolerates absent ledgers and zero-length ledger cells", {
+  root <- tempfile("audit-ledger-root-"); dir.create(file.path(root, "inputs"), recursive = TRUE); dir.create(file.path(root, "manifests")); dir.create(file.path(root, "combined"))
+  ids <- c("failed", "receptor", "valid"); dirs <- file.path(root, "runs", ids); invisible(lapply(dirs, dir.create, recursive = TRUE))
+  manifest <- data.frame(run_id = ids, source_facility_id = "A1", release_datetime_utc = "2020-05-01T00:00:00Z", run_directory = dirs, stringsAsFactors = FALSE)
+  utils::write.csv(manifest, file.path(root, "inputs", "run_manifest.csv"), row.names = FALSE)
+  utils::write.csv(data.frame(run_id = ids, shard_id = 1L), file.path(root, "manifests", "shard_manifest.csv"), row.names = FALSE)
+  saveRDS(list(status = "failed", error_message = "controlled failure"), file.path(dirs[1], "run_metadata.rds"))
+  for (i in 2:3) saveRDS(durable_completed_metadata(dirs[i], ids[i]), file.path(dirs[i], "run_metadata.rds"))
+  for (i in 2:3) { dir.create(file.path(dirs[i], "parsed")); saveRDS(data.frame(x = 1), file.path(dirs[i], "parsed", "parsed_plume.rds")) }
+  dir.create(file.path(dirs[3], "receptors")); utils::write.csv(data.frame(x = 1), file.path(dirs[3], "receptors", "source_receptor_exchange.csv"), row.names = FALSE)
+  without_ledger <- inventory_demo_runs(root)
+  testthat::expect_equal(without_ledger$execution_status, c("execution_failed", "receptor_failed", "completed_valid"))
+  dir.create(file.path(root, "execution"))
+  ledger <- data.frame(run_id = ids, stringsAsFactors = FALSE)
+  ledger$array_job_id <- I(list(NULL, character(), "12345")); ledger$array_task_id <- I(list(integer(), list(), 3L)); ledger$attempt_count <- I(list(NULL, integer(), 1L)); ledger$last_error <- I(list(character(), NULL, NA_character_))
+  saveRDS(ledger, file.path(root, "execution", "manifest_execution_ledger.rds"))
+  shard_root <- file.path(root, "slurm_array", "shards")
+  write_shard <- function(submission, id, action, attempted, elapsed, commit) {
+    directory <- file.path(shard_root, submission); dir.create(directory, recursive = TRUE)
+    saveRDS(list(submission_id = submission, run_id = id, array_job_id = submission, array_task_id = 1L, action = action, repository_commit = commit, execution_attempted = attempted, hysplit_attempt_count_before = if (attempted) 0L else 1L, hysplit_attempt_count_after = 1L, elapsed_seconds = elapsed, started_at = "2026-08-01T00:00:00Z", finished_at = "2026-08-01T00:00:10Z", post_state = if (id == "failed") "execution_failed" else "completed", task_exit_status = if (id == "failed") 1L else 0L), file.path(directory, paste0(id, ".rds")))}
+  write_shard("EXEC", "failed", "execute", TRUE, 10, "aaaaaaaa")
+  write_shard("RESUME", "receptor", "resume_postprocessing", FALSE, 2, "bbbbbbbb")
+  audit <- inventory_demo_runs(root); status <- summarize_demo_status(root)
+  testthat::expect_equal(nrow(audit), 3L)
+  testthat::expect_equal(audit$execution_status, c("execution_failed", "receptor_failed", "completed_valid"))
+  testthat::expect_equal(audit$attempt_count, c(1L, 1L, 1L))
+  testthat::expect_equal(audit$execution_elapsed_seconds, c(10, NA, NA))
+  testthat::expect_equal(audit$postprocessing_elapsed_seconds, c(NA, 2, NA))
+  testthat::expect_true(audit$postprocessing_resumed[2])
+  testthat::expect_identical(audit$postprocessing_commits[2], "bbbbbbbb")
+  testthat::expect_equal(sum(status$summary$run_count), 3L)
+})

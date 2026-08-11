@@ -1,0 +1,392 @@
+---
+title: "User-configurable EpiPlume demonstration diagnostic"
+format:
+  html:
+    toc: true
+    embed-resources: true
+    html-math-method: plain
+params:
+  run_root: null
+execute:
+  echo: false
+  warning: false
+---
+
+```{r}
+audit_source <- if (file.exists("R/audit_demo_run.R")) "R/audit_demo_run.R" else "../R/audit_demo_run.R"
+source(audit_source)
+report_source <- if (file.exists("R/demo_report.R")) "R/demo_report.R" else "../R/demo_report.R"
+source(report_source)
+root <- params$run_root
+`%||%` <- function(x, y) if (is.null(x) || !length(x)) y else x
+if (is.null(root) || !dir.exists(root)) stop("A prepared `run_root` parameter is required.")
+root <- normalizePath(root, winslash = "/", mustWork = TRUE)
+read_csv <- function(path) if (file.exists(path)) utils::read.csv(path, stringsAsFactors = FALSE) else data.frame()
+read_yml <- function(path) if (file.exists(path) && requireNamespace("yaml", quietly = TRUE)) yaml::read_yaml(path) else list()
+column_or <- function(x, name, default = NA) if (name %in% names(x)) x[[name]] else rep(default, nrow(x))
+pretty_number <- function(x, digits = 0L) format(round(as.numeric(x), digits), big.mark = ",", scientific = FALSE, trim = TRUE, nsmall = digits)
+report_table <- function(x, col.names = names(x), digits = 1L) knitr::kable(x, format = "html", col.names = col.names, digits = digits, format.args = list(big.mark = ","), table.attr = 'class="table table-striped table-hover table-sm"')
+asis_paragraph <- function(x) knitr::asis_output(paste0("\n\n", x, "\n\n"))
+theme_epiplume_report <- function(base_size = 10) {
+  ggplot2::theme_minimal(base_size = base_size) +
+    ggplot2::theme(
+      legend.position = "top", legend.box = "horizontal", legend.justification = "left",
+      legend.margin = ggplot2::margin(0, 0, 4, 0), legend.box.margin = ggplot2::margin(0, 0, 3, 0),
+      plot.title = ggplot2::element_text(face = "bold", size = ggplot2::rel(1.05), margin = ggplot2::margin(b = 5)),
+      plot.subtitle = ggplot2::element_text(color = "#4d4d4d", margin = ggplot2::margin(b = 5)),
+      panel.grid.major = ggplot2::element_line(color = "#dddddd", linewidth = 0.3),
+      panel.grid.minor = ggplot2::element_blank(), axis.text = ggplot2::element_text(color = "#333333"),
+      plot.margin = ggplot2::margin(10, 12, 10, 12)
+    )
+}
+select_for_report <- function(x, labels) {
+  fields <- intersect(names(labels), names(x))
+  out <- x[, fields, drop = FALSE]
+  names(out) <- unname(labels[fields])
+  out
+}
+finite_summary <- function(x) {
+  x <- suppressWarnings(as.numeric(x)); x <- x[is.finite(x)]
+  if (!length(x)) return(c(n = 0, median = NA, minimum = NA, maximum = NA))
+  c(n = length(x), median = stats::median(x), minimum = min(x), maximum = max(x))
+}
+facilities <- read_csv(file.path(root, "inputs", "facilities.csv"))
+schedule <- read_csv(file.path(root, "inputs", "release_schedule.csv"))
+manifest <- read_csv(file.path(root, "inputs", "run_manifest.csv"))
+met <- read_csv(file.path(root, "meteorology", "meteorology_inventory.csv"))
+audit <- read_csv(file.path(root, "combined", "run_audit.csv"))
+status <- read_csv(file.path(root, "combined", "run_status_summary.csv"))
+shards <- read_csv(file.path(root, "manifests", "shard_manifest.csv"))
+history <- inventory_demo_shard_history(root)
+prov <- read_yml(file.path(root, "provenance", "preparation_provenance.yml"))
+cfg <- read_yml(file.path(root, "inputs", "config.yml"))
+exchange_files <- list.files(file.path(root, "runs"), pattern = "source_receptor_exchange[.]csv$", recursive = TRUE, full.names = TRUE)
+exchange <- if (length(exchange_files)) do.call(rbind, lapply(exchange_files, read_csv)) else data.frame()
+intercept <- if ("intercept" %in% names(exchange)) as.logical(exchange$intercept) else if ("binary_intercept" %in% names(exchange)) as.logical(exchange$binary_intercept) else rep(NA, nrow(exchange))
+n_intercepts <- sum(intercept %in% TRUE)
+source_ids <- if ("source_facility_id" %in% names(manifest)) unique(as.character(manifest$source_facility_id)) else if ("source_id" %in% names(manifest)) unique(as.character(manifest$source_id)) else character()
+coverage_ok <- nrow(manifest) == nrow(audit) && nrow(audit) > 0L && !anyDuplicated(audit$run_id) && setequal(manifest$run_id, audit$run_id)
+diagnostic <- demo_diagnostic_result(audit, coverage_ok)
+n_completed <- sum(column_or(audit, "execution_status", "unknown") == "completed_valid")
+selected_representative_runs <- demo_representative_runs(manifest, audit, 4L)
+representative_fig_height <- max(6, 5.2 * nrow(selected_representative_runs) + 1.2)
+parsed_total <- sum(column_or(audit, "parsed_row_count", NA_real_), na.rm = TRUE)
+parsed_available <- any(!is.na(column_or(audit, "parsed_row_count", NA_real_)))
+receptor_total <- if (nrow(exchange)) nrow(exchange) else sum(column_or(audit, "receptor_row_count", NA_real_), na.rm = TRUE)
+receptor_available <- nrow(exchange) > 0L || any(!is.na(column_or(audit, "receptor_row_count", NA_real_)))
+release_values <- if ("release_datetime_utc" %in% names(manifest)) manifest$release_datetime_utc else if ("release_start" %in% names(manifest)) manifest$release_start else character()
+release_times <- as.POSIXct(release_values, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+release_times <- release_times[!is.na(release_times)]
+release_text <- if (!length(release_times)) "an unavailable release-time range" else if (min(release_times) == max(release_times)) format(min(release_times), "%B %d, %Y at %H:%M UTC", tz = "UTC") else paste(format(min(release_times), "%B %d, %Y at %H:%M UTC", tz = "UTC"), "through", format(max(release_times), "%B %d, %Y at %H:%M UTC", tz = "UTC"))
+duration_values <- if ("duration_hours" %in% names(manifest)) unique(manifest$duration_hours) else cfg$simulation$duration_hours %||% NA_real_
+duration_values <- suppressWarnings(as.numeric(duration_values)); duration_values <- duration_values[is.finite(duration_values)]
+duration_text <- if (!length(duration_values)) "not available" else if (length(unique(duration_values)) == 1L) paste0(pretty_number(duration_values[1]), " hours") else paste0(pretty_number(min(duration_values)), "-", pretty_number(max(duration_values)), " hours")
+```
+
+Run: `r basename(root)` | Prepared: `r prov$prepared_at_utc %||% "unavailable"` | Preparation commit: `r prov$git_commit_sha %||% "unavailable"`
+
+## Executive summary
+
+```{r}
+#| output: asis
+design_sentence <- sprintf("This demonstration evaluated %s atmospheric dispersion simulation%s from %s source facilit%s within a network of %s facilities. Releases span %s, and simulation duration was %s.", pretty_number(nrow(manifest)), if (nrow(manifest) == 1L) "" else "s", pretty_number(length(source_ids)), if (length(source_ids) == 1L) "y" else "ies", pretty_number(nrow(facilities)), release_text, duration_text)
+completion_sentence <- if (nrow(audit) && n_completed == nrow(manifest) && coverage_ok) sprintf("All %s requested runs completed and validated successfully.", pretty_number(n_completed)) else sprintf("%s of %s requested runs are currently completed and validated; %s", pretty_number(n_completed), pretty_number(nrow(manifest)), diagnostic)
+output_bits <- character()
+if (parsed_available) output_bits <- c(output_bits, sprintf("%s standardized dispersion records", pretty_number(parsed_total)))
+if (receptor_available) output_bits <- c(output_bits, sprintf("%s directed run-receptor summaries", pretty_number(receptor_total)))
+if (nrow(exchange)) output_bits <- c(output_bits, sprintf("%s met the configured binary intercept criterion", pretty_number(n_intercepts)))
+output_sentence <- if (length(output_bits)) paste0("The workflow produced ", paste(output_bits, collapse = ", "), ".") else "Dispersion and receptor outputs are not yet available."
+coverage_sentence <- if (coverage_ok) "Manifest coverage is complete and internally consistent." else "Manifest coverage requires attention."
+asis_paragraph(paste(design_sentence, completion_sentence, output_sentence, coverage_sentence))
+```
+
+## Study and test configuration
+
+The design summary below describes what was requested. Detailed normalized configuration is retained in the technical section.
+
+```{r}
+#| label: tbl-test-design
+#| tbl-cap: "Test design. Counts and timing are derived from the normalized facility inventory and immutable run manifest."
+design <- data.frame(
+  Characteristic = c("Facilities", "Source facilities", "Simulations", "Release period", "Simulation duration", "Manifest coverage"),
+  Value = c(pretty_number(nrow(facilities)), pretty_number(length(source_ids)), pretty_number(nrow(manifest)), release_text, duration_text, if (coverage_ok) "Valid" else "Requires attention"),
+  check.names = FALSE
+)
+report_table(design, c("Characteristic", "Value"), digits = 0)
+```
+
+## Geographic orientation
+
+The orientation figure is generated entirely from facility coordinates and the offline state-boundary data bundled with the installed `maps` package. If those boundaries are unavailable, the facility network and study extent are still shown without attempting a download.
+
+```{r}
+#| label: fig-regional-orientation
+#| fig-cap: "Regional and local orientation of the facility network. Red triangles identify atmospheric release sources; blue circles identify receptor-only facilities. Panel A places the network bounding box within state boundaries, while Panel B labels the local facilities. The arrow indicates north and the bar gives an approximate geographic scale."
+#| fig-width: 11
+#| fig-height: 5.5
+if (nrow(facilities) && all(c("longitude", "latitude", "facility_id") %in% names(facilities)) && requireNamespace("maps", quietly = TRUE)) {
+  lon <- facilities$longitude; lat <- facilities$latitude
+  facilities$facility_type <- factor(ifelse(facilities$facility_id %in% source_ids, "Source facility", "Receptor-only facility"), levels = c("Source facility", "Receptor-only facility"))
+  local_pad_x <- max(diff(range(lon)) * 0.15, 0.03); local_pad_y <- max(diff(range(lat)) * 0.15, 0.03)
+  local_x <- range(lon) + c(-local_pad_x, local_pad_x); local_y <- range(lat) + c(-local_pad_y, local_pad_y)
+  regional_x <- range(lon) + c(-max(2, diff(range(lon)) * 5), max(2, diff(range(lon)) * 5)); regional_y <- range(lat) + c(-max(1.5, diff(range(lat)) * 5), max(1.5, diff(range(lat)) * 5))
+  states <- ggplot2::map_data("state")
+  map_base <- ggplot2::ggplot() + ggplot2::geom_polygon(data = states, ggplot2::aes(long, lat, group = group), fill = "#f7f7f7", color = "#9e9e9e", linewidth = 0.35) +
+    ggplot2::geom_point(data = facilities, ggplot2::aes(longitude, latitude, color = facility_type, shape = facility_type), size = 2.2) +
+    ggplot2::scale_color_manual(values = c("Source facility" = "#d73027", "Receptor-only facility" = "#2878a8"), name = NULL) +
+    ggplot2::scale_shape_manual(values = c("Source facility" = 17, "Receptor-only facility" = 21), name = NULL) +
+    ggspatial::annotation_scale(location = "bl", width_hint = 0.22, unit_category = "metric") +
+    ggspatial::annotation_north_arrow(location = "tr", which_north = "true", style = ggspatial::north_arrow_minimal(text_size = 7)) +
+    ggplot2::guides(color = ggplot2::guide_legend(nrow = 1, byrow = TRUE), shape = ggplot2::guide_legend(nrow = 1, byrow = TRUE)) + theme_epiplume_report()
+  regional <- map_base + ggplot2::annotate("rect", xmin = local_x[1], xmax = local_x[2], ymin = local_y[1], ymax = local_y[2], fill = NA, color = "#d73027", linewidth = 0.8, linetype = 2) +
+    ggplot2::coord_sf(xlim = regional_x, ylim = regional_y, crs = sf::st_crs(4326), default_crs = sf::st_crs(4326), expand = FALSE) + ggplot2::labs(title = "A. Regional context", x = "Longitude", y = "Latitude") + ggplot2::theme(legend.position = "none")
+  local <- map_base + ggplot2::geom_text(data = facilities, ggplot2::aes(longitude, latitude, label = facility_id), nudge_y = 0.01, size = 2.6, check_overlap = TRUE, show.legend = FALSE) +
+    ggplot2::coord_sf(xlim = local_x, ylim = local_y, crs = sf::st_crs(4326), default_crs = sf::st_crs(4326), expand = FALSE) + ggplot2::labs(title = "B. Facility network", x = "Longitude", y = "Latitude")
+  grid::grid.newpage(); layout <- grid::grid.layout(1, 2); grid::pushViewport(grid::viewport(layout = layout))
+  print(regional, vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1)); print(local, vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 2))
+} else {
+  asis_paragraph("Facility coordinates or offline jurisdictional boundaries are unavailable.")
+}
+```
+
+## Simulation and execution summary
+
+`r if (nrow(audit)) sprintf("%s of %s simulations are completed and validated. %s", pretty_number(n_completed), pretty_number(nrow(manifest)), diagnostic) else "Execution status is unavailable."` Meteorology is `r if (nrow(met) && all(met$ready %in% TRUE)) "ready for all required files" else if (nrow(met)) "incomplete or unavailable for at least one required file" else "not inventoried"`.
+
+```{r}
+#| label: tbl-run-status
+#| tbl-cap: "Run status. Zero-count categories are omitted for readability; the counts sum to the requested simulations represented in the current audit."
+if (nrow(status)) {
+  display <- status[status$run_count > 0, , drop = FALSE]
+  display$execution_status <- gsub("_", " ", display$execution_status); display$execution_status <- tools::toTitleCase(display$execution_status)
+  names(display) <- c("Run status", "Runs")
+  report_table(display, names(display), digits = 0)
+} else asis_paragraph("Run-status details are unavailable.")
+```
+
+```{r}
+#| label: tbl-runtime
+#| tbl-cap: "Runtime telemetry by processing stage. HYSPLIT execution and resumed post-processing are kept separate; unavailable telemetry is displayed as unavailable rather than zero."
+if (nrow(audit)) {
+  execution_runtime <- finite_summary(column_or(audit, "execution_elapsed_seconds", NA_real_))
+  resume_runtime <- finite_summary(column_or(audit, "postprocessing_elapsed_seconds", NA_real_))
+  runtime <- data.frame(Stage = c("HYSPLIT execution attempts", "Resumed post-processing"), `Runs with telemetry` = c(execution_runtime["n"], resume_runtime["n"]), `Median seconds` = c(execution_runtime["median"], resume_runtime["median"]), `Minimum seconds` = c(execution_runtime["minimum"], resume_runtime["minimum"]), `Maximum seconds` = c(execution_runtime["maximum"], resume_runtime["maximum"]), check.names = FALSE)
+  report_table(runtime, names(runtime), digits = 1)
+} else asis_paragraph("Runtime telemetry is unavailable.")
+```
+
+## Atmospheric plume diagnostics
+
+The workflow produced `r if (parsed_available) pretty_number(parsed_total) else "an unavailable number of"` standardized dispersion records. The plots below use saved `hourly_particle_count.tif` products only; HYSPLIT is never rerun. At most four completed runs are selected deterministically in manifest order, and each plot shows the saved hourly layer with the largest total particle count.
+
+```{r}
+#| label: fig-representative-plumes
+#| fig-cap: "Representative plume diagnostics selected deterministically from up to the first four completed runs in manifest order. For each panel, the displayed hour has the largest raster-wide particle total in the saved particle-count output; HYSPLIT is not rerun. Red triangles identify the release source, blue circles identify receptor-only facilities, the shared fill legend reports particle count, and scale bars are in kilometers."
+#| fig-width: 10
+#| fig-height: !expr representative_fig_height
+#| output: asis
+selected <- selected_representative_runs
+plume_records <- list()
+if (nrow(selected) && requireNamespace("terra", quietly = TRUE)) {
+  for (i in seq_len(nrow(selected))) {
+    raster_path <- file.path(selected$run_directory[i], "parsed", "hourly_particle_count.tif")
+    if (!file.exists(raster_path)) next
+    r <- tryCatch(terra::rast(raster_path), error = function(e) NULL); if (is.null(r) || terra::nlyr(r) < 1L) next
+    totals <- tryCatch(as.numeric(terra::global(r, "sum", na.rm = TRUE)[, 1]), error = function(e) rep(NA_real_, terra::nlyr(r)))
+    layer <- if (any(is.finite(totals))) which.max(replace(totals, !is.finite(totals), -Inf)) else 1L
+    layer_meta <- read_csv(file.path(selected$run_directory[i], "parsed", "raster_layer_metadata.csv")); layer_meta <- layer_meta[layer_meta$value == "particle_count", , drop = FALSE]
+    hour <- if (nrow(layer_meta) >= layer) layer_meta$elapsed_hour_bin[layer] else layer - 1L
+    source_id <- if ("source_facility_id" %in% names(selected)) as.character(selected$source_facility_id[i]) else as.character(selected$source_id[i]); source <- facilities[facilities$facility_id == source_id, , drop = FALSE]
+    source_name <- if (nrow(source) && "facility_name" %in% names(source)) as.character(source$facility_name[1]) else source_id
+    release_value <- if ("release_start" %in% names(selected)) selected$release_start[i] else if ("release_datetime_utc" %in% names(selected)) selected$release_datetime_utc[i] else NA_character_
+    release_time <- as.POSIXct(release_value, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+    release_label <- if (is.na(release_time)) as.character(release_value) else format(release_time, "%Y-%m-%d %H:%M UTC", tz = "UTC")
+    panel <- paste0(LETTERS[i], ". ", source_name, " — ", release_label, " — hour ", hour)
+    raster_data <- terra::as.data.frame(r[[layer]], xy = TRUE, na.rm = FALSE); names(raster_data)[3] <- "particle_count"; raster_data$panel <- panel
+    facility_points <- tryCatch(terra::project(terra::vect(facilities, geom = c("longitude", "latitude"), crs = "EPSG:4326"), terra::crs(r)), error = function(e) NULL)
+    if (!is.null(facility_points)) {
+      xy <- as.data.frame(terra::crds(facility_points)); names(xy) <- c("x", "y")
+      xy$facility_type <- factor(ifelse(facilities$facility_id == source_id, "Source facility", "Receptor-only facility"), levels = c("Source facility", "Receptor-only facility")); xy$panel <- panel
+    } else xy <- data.frame()
+    plume_records[[length(plume_records) + 1L]] <- list(raster = raster_data, facilities = xy, crs = terra::crs(r), panel = panel)
+  }
+}
+if (length(plume_records)) {
+  crs_values <- unique(vapply(plume_records, `[[`, character(1), "crs"))
+  if (length(crs_values) != 1L) stop("Representative plume rasters use incompatible coordinate reference systems.", call. = FALSE)
+  plume_data <- do.call(rbind, lapply(plume_records, `[[`, "raster")); facility_data <- do.call(rbind, lapply(plume_records, `[[`, "facilities"))
+  plume_crs <- sf::st_crs(crs_values[1])
+  panel_levels <- vapply(plume_records, `[[`, character(1), "panel"); plume_data$panel <- factor(plume_data$panel, levels = panel_levels); facility_data$panel <- factor(facility_data$panel, levels = panel_levels)
+  common_max <- max(plume_data$particle_count, na.rm = TRUE); if (!is.finite(common_max) || common_max <= 0) common_max <- 1
+  plume_plot <- ggplot2::ggplot(plume_data, ggplot2::aes(x, y, fill = particle_count)) +
+    ggplot2::geom_raster(interpolate = FALSE) +
+    ggplot2::geom_point(data = facility_data, ggplot2::aes(x, y, color = facility_type, shape = facility_type), inherit.aes = FALSE, size = 2) +
+    ggplot2::facet_wrap(~panel, ncol = 1) +
+    ggplot2::scale_fill_viridis_c(name = "Particle count", limits = c(0, common_max), na.value = "transparent", guide = ggplot2::guide_colorbar(direction = "horizontal", barwidth = grid::unit(3.5, "cm"), title.position = "top")) +
+    ggplot2::scale_color_manual(values = c("Source facility" = "#d73027", "Receptor-only facility" = "#2878a8"), name = NULL) +
+    ggplot2::scale_shape_manual(values = c("Source facility" = 17, "Receptor-only facility" = 21), name = NULL) +
+    ggspatial::annotation_scale(location = "bl", width_hint = 0.18, unit_category = "metric", text_cex = 0.65, pad_x = grid::unit(0.2, "cm"), pad_y = grid::unit(0.2, "cm")) +
+    ggplot2::coord_sf(crs = plume_crs, default_crs = plume_crs, expand = TRUE) +
+    ggplot2::labs(x = "Longitude", y = "Latitude") +
+    ggplot2::guides(color = ggplot2::guide_legend(nrow = 1, byrow = TRUE, order = 2), shape = ggplot2::guide_legend(nrow = 1, byrow = TRUE, order = 2), fill = ggplot2::guide_colorbar(order = 1, direction = "horizontal", barwidth = grid::unit(3.5, "cm"), title.position = "top")) +
+    theme_epiplume_report(9) + ggplot2::theme(strip.text = ggplot2::element_text(face = "bold", size = 8.5), legend.key.height = grid::unit(0.35, "cm"))
+  print(plume_plot)
+} else asis_paragraph("No completed saved particle-count rasters are available for plotting.")
+```
+
+## Source-receptor exchange results
+
+```{r}
+#| output: asis
+if (!nrow(exchange)) {
+  asis_paragraph("Receptor outputs are incomplete or absent. **Missing output is not interpreted as zero exposure.**")
+} else if (n_intercepts == 0L) {
+  asis_paragraph(sprintf("The completed receptor products contain **%s directed run-receptor records**. No source-receptor pair met the binary intercept criterion.", pretty_number(nrow(exchange))))
+} else {
+  asis_paragraph(sprintf("The completed receptor products contain **%s directed run-receptor records**. **%s** met the configured binary intercept criterion.", pretty_number(nrow(exchange)), pretty_number(n_intercepts)))
+}
+```
+
+```{r}
+#| label: tbl-exposure-outcomes
+#| tbl-cap: "Source-receptor outcome categories. Counts represent directed run-receptor records after excluding the source facility itself. Outside evaluation distance identifies pairs beyond the configured distance threshold; no modeled exposure identifies valid receptor output with zero modeled particle exposure."
+if (nrow(exchange) && "intercept_reason" %in% names(exchange)) {
+  outcomes <- as.data.frame(table(exchange$intercept_reason, useNA = "ifany"), stringsAsFactors = FALSE)
+  names(outcomes) <- c("Outcome category", "Directed records"); outcomes[[1]] <- tools::toTitleCase(gsub("_", " ", outcomes[[1]]))
+  outcomes <- rbind(outcomes, data.frame(`Outcome category` = "Total", `Directed records` = sum(outcomes[[2]]), check.names = FALSE))
+  report_table(outcomes, names(outcomes), digits = 0)
+} else asis_paragraph("Exposure outcome categories are unavailable.")
+```
+
+```{r}
+#| label: tbl-continuous-exposure
+#| tbl-cap: "Continuous particle-count exposure summaries. Available, zero, and nonzero directed records remain distinct; screened or unavailable values are not converted to zero."
+continuous <- intersect(c("particle_count_max", "particle_count_cumulative"), names(exchange))
+if (nrow(exchange) && length(continuous)) {
+  summaries <- do.call(rbind, lapply(continuous, function(metric) {
+    x <- suppressWarnings(as.numeric(exchange[[metric]])); available <- is.finite(x)
+    data.frame(Metric = tools::toTitleCase(gsub("_", " ", metric)), `Available records` = sum(available), `Zero records` = sum(available & x == 0), `Nonzero records` = sum(available & x > 0), Minimum = if (any(available)) min(x[available]) else NA_real_, Median = if (any(available)) stats::median(x[available]) else NA_real_, Maximum = if (any(available)) max(x[available]) else NA_real_, check.names = FALSE)
+  }))
+  report_table(summaries, names(summaries), digits = 2)
+} else asis_paragraph("Continuous particle-count summaries are unavailable.")
+```
+
+```{r}
+#| label: tbl-source-summary
+#| tbl-cap: "Source summary for positive binary intercepts. The table is suppressed when no source-receptor pair meets the configured criterion."
+if (n_intercepts > 0L && all(c("source_id", "receptor_id") %in% names(exchange))) {
+  source_summary <- as.data.frame(table(exchange$source_id[intercept %in% TRUE]), stringsAsFactors = FALSE); names(source_summary) <- c("Source facility", "Positive intercepts")
+  report_table(source_summary, names(source_summary), digits = 0)
+} else asis_paragraph("No source-level positive-intercept table is shown because no pair met the criterion.")
+```
+
+```{r}
+#| label: tbl-receptor-summary
+#| tbl-cap: "Receptor summary for positive binary intercepts. Counts indicate how often each receptor met the binary criterion across completed source-release simulations."
+if (n_intercepts > 0L && all(c("source_id", "receptor_id") %in% names(exchange))) {
+  receptor_summary <- as.data.frame(table(exchange$receptor_id[intercept %in% TRUE]), stringsAsFactors = FALSE); names(receptor_summary) <- c("Receptor facility", "Positive intercepts")
+  report_table(receptor_summary, names(receptor_summary), digits = 0)
+} else asis_paragraph("No receptor-level positive-intercept table is shown because no pair met the criterion.")
+```
+
+```{r}
+#| label: fig-positive-links
+#| fig-cap: "Facility context and positive binary source-receptor links. Red line segments are drawn only for pairs meeting the configured criterion; source facilities are red triangles and other facilities are blue circles."
+#| fig-width: 7
+#| fig-height: 6
+if (nrow(facilities) && all(c("longitude", "latitude", "facility_id") %in% names(facilities))) {
+  link_facilities <- facilities; link_facilities$facility_type <- factor(ifelse(link_facilities$facility_id %in% source_ids, "Source facility", "Receptor-only facility"), levels = c("Source facility", "Receptor-only facility"))
+  link_x <- range(link_facilities$longitude); link_y <- range(link_facilities$latitude); link_dx <- max(diff(link_x), 0.02); link_dy <- max(diff(link_y), 0.02)
+  link_data <- if (n_intercepts > 0L && all(c("source_longitude", "source_latitude", "receptor_longitude", "receptor_latitude") %in% names(exchange))) exchange[intercept %in% TRUE, , drop = FALSE] else data.frame(source_longitude = numeric(), source_latitude = numeric(), receptor_longitude = numeric(), receptor_latitude = numeric())
+  link_plot <- ggplot2::ggplot() +
+    ggplot2::geom_segment(data = link_data, ggplot2::aes(x = source_longitude, y = source_latitude, xend = receptor_longitude, yend = receptor_latitude), color = "#d73027", linewidth = 0.7, alpha = 0.8) +
+    ggplot2::geom_point(data = link_facilities, ggplot2::aes(longitude, latitude, color = facility_type, shape = facility_type), size = 2.7) +
+    ggplot2::scale_color_manual(values = c("Source facility" = "#d73027", "Receptor-only facility" = "#2878a8"), name = NULL) +
+    ggplot2::scale_shape_manual(values = c("Source facility" = 17, "Receptor-only facility" = 21), name = NULL) +
+    ggspatial::annotation_scale(location = "bl", width_hint = 0.22, unit_category = "metric") +
+    ggspatial::annotation_north_arrow(location = "tr", which_north = "true", style = ggspatial::north_arrow_minimal(text_size = 7)) +
+    ggplot2::coord_sf(xlim = link_x + c(-0.05, 0.05) * link_dx, ylim = link_y + c(-0.30, 0.10) * link_dy, crs = sf::st_crs(4326), default_crs = sf::st_crs(4326), expand = FALSE) +
+    ggplot2::labs(title = if (n_intercepts > 0L) "Positive binary source-receptor links" else "Facility network — no positive binary links", x = "Longitude", y = "Latitude") +
+    ggplot2::guides(color = ggplot2::guide_legend(nrow = 1, byrow = TRUE), shape = ggplot2::guide_legend(nrow = 1, byrow = TRUE)) + theme_epiplume_report()
+  print(link_plot)
+} else {
+  asis_paragraph("Facility coordinates are unavailable for the source-receptor map.")
+}
+```
+
+## Key findings
+
+```{r}
+#| output: asis
+findings <- character()
+findings <- c(findings, if (nrow(audit) && n_completed == nrow(manifest)) sprintf("All %s requested simulations completed and validated.", pretty_number(n_completed)) else sprintf("%s of %s requested simulations are currently completed and validated.", pretty_number(n_completed), pretty_number(nrow(manifest))))
+if (nrow(exchange)) {
+  findings <- c(findings, if (n_intercepts > 0L) sprintf("%s of %s directed run-receptor records met the binary intercept criterion.", pretty_number(n_intercepts), pretty_number(nrow(exchange))) else "No directed run-receptor record met the binary intercept criterion.")
+  if ("intercept_reason" %in% names(exchange)) {
+    outcome_counts <- sort(table(exchange$intercept_reason), decreasing = TRUE); dominant <- tools::toTitleCase(gsub("_", " ", names(outcome_counts)[1])); findings <- c(findings, sprintf("The most common receptor outcome was %s (%s records).", tolower(dominant), pretty_number(outcome_counts[1])))
+    outside <- sum(exchange$intercept_reason == "outside_evaluation_distance", na.rm = TRUE); findings <- c(findings, sprintf("%s of %s records were outside the configured evaluation distance.", pretty_number(outside), pretty_number(nrow(exchange))))
+  }
+  if ("particle_count_cumulative" %in% names(exchange)) {
+    value <- suppressWarnings(as.numeric(exchange$particle_count_cumulative)); below <- sum(is.finite(value) & value > 0 & !(intercept %in% TRUE)); findings <- c(findings, sprintf("%s records had nonzero cumulative particle exposure without meeting the binary criterion.", pretty_number(below)))
+  }
+}
+knitr::asis_output(paste0("\n\n", paste0("- ", findings, collapse = "\n"), "\n\n"))
+```
+
+These are descriptive atmospheric-dispersion diagnostics. They do not establish causal or risk conclusions.
+
+## Technical diagnostics and provenance
+
+Preparation and later execution history are retained separately so retries and post-processing resumes remain transparent.
+
+```{r}
+#| label: tbl-execution-history
+#| tbl-cap: "Durable SLURM-array attempt history. Execution and resume actions, repository commits, attempt counts, elapsed time, and final states are reported separately when shard telemetry is available."
+if (nrow(history)) {
+  display <- select_for_report(history, c(submission_id = "Submission", run_id = "Run", action = "Action", repository_commit = "Repository commit", execution_attempted = "Executed HYSPLIT", hysplit_attempt_count_before = "Attempts before", hysplit_attempt_count_after = "Attempts after", elapsed_seconds = "Elapsed seconds", post_state = "Final state", task_exit_status = "Exit status"))
+  report_table(display, names(display), digits = 1)
+} else asis_paragraph("No durable SLURM-array attempt history is available.")
+```
+
+```{r}
+#| label: tbl-incomplete-runs
+#| tbl-cap: "Incomplete or failed runs requiring review. The table is omitted when every requested run is completed and validated."
+incomplete <- if (nrow(audit)) audit[audit$execution_status != "completed_valid", , drop = FALSE] else data.frame()
+if (nrow(incomplete)) {
+  incomplete <- select_for_report(incomplete, c(run_id = "Run", shard_id = "Shard", execution_status = "Status", attempt_count = "HYSPLIT attempts", error_message = "Diagnostic message"))
+  report_table(incomplete, names(incomplete), digits = 0)
+} else asis_paragraph("No incomplete runs.")
+```
+
+```{r}
+#| label: tbl-meteorology
+#| tbl-cap: "Meteorology inventory and readiness recorded for the prepared run."
+if (nrow(met)) {
+  met_display <- select_for_report(met, c(required_filename = "Required file", required_by_n_runs = "Runs requiring file", exists = "Exists", size_bytes = "Bytes", ready = "Ready"))
+  report_table(met_display, names(met_display), digits = 0)
+} else asis_paragraph("Meteorology inventory is unavailable.")
+```
+
+<details>
+<summary>Normalized configuration</summary>
+
+```{r}
+cat(paste(capture.output(str(cfg, max.level = 3)), collapse = "\n"))
+```
+
+</details>
+
+Manifest coverage: **`r if (coverage_ok) "PASS" else "FAIL"`**. Overall diagnostic: **`r diagnostic`**.
+
+## Key output paths
+
+```{r}
+#| label: tbl-output-paths
+#| tbl-cap: "Key durable artifacts. Absolute paths are retained for Atlas provenance and debugging and intentionally appear only at the end of the report."
+paths <- data.frame(
+  Artifact = c("Run manifest", "Run audit", "Run-status summary", "Meteorology inventory", "Receptor exchange directory", "Report directory"),
+  Path = c(file.path(root, "inputs", "run_manifest.csv"), file.path(root, "combined", "run_audit.csv"), file.path(root, "combined", "run_status_summary.csv"), file.path(root, "meteorology", "meteorology_inventory.csv"), file.path(root, "runs"), file.path(root, "reports")),
+  check.names = FALSE
+)
+report_table(paths, names(paths), digits = 0)
+```
