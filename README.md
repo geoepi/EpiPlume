@@ -23,6 +23,7 @@ The [user-configurable demonstration](demo/user_configurable/README.md) accepts 
 3.  [Dynamic Plume](https://github.com/JMHumphreys/EpiPlume/blob/main/docs/hysplit_plume.md): Simulated 36 hour plume dispersion resulting from massive emission event.   
 4.  [SpatioTemporal Smoothing](https://github.com/JMHumphreys/EpiPlume/blob/main/docs/smooth_plume.md): Build spatiotemporal model from plume output.
 5.  [Poultry SEIR and Shedding](https://github.com/JMHumphreys/EpiPlume/blob/main/docs/poultry_seir.md): SEIR model to estimate virus poultry emissions.
+5.  [Simulate Points](https://github.com/JMHumphreys/EpiPlume/blob/main/docs/simulate_points.md): Simulate spatial locations for midwest.
   
 
 ## Supporting Resources:
