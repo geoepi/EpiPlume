@@ -94,7 +94,7 @@ truth_path <- Sys.getenv(
   unset = "D:/HPAI_Data/HPAI/HPAI/Cleaned Data/locations.csv"
 )
 
-share_dir <- here("local", "simulation_share")
+share_dir <- here("assets", "simulation_share")
 dir.create(share_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Spatial smoothing
@@ -1233,11 +1233,11 @@ final_points_file
 
 </details>
 
-    [1] "D:/Github/EpiPlume/local/simulation_share/simulated_points_four_replicates.csv"
+    [1] "D:/Github/EpiPlume/assets/simulation_share/simulated_points_four_replicates.csv"
 
 ## Shareable Files Summary
 
-The contents of `local/simulation_share/` are sufficient to reproduce
+The contents of `assets/simulation_share/` are sufficient to reproduce
 simulations without the confidential source data:
 
 <details open>

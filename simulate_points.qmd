@@ -52,7 +52,7 @@ truth_path <- Sys.getenv(
   unset = "D:/HPAI_Data/HPAI/HPAI/Cleaned Data/locations.csv"
 )
 
-share_dir <- here("local", "simulation_share")
+share_dir <- here("assets", "simulation_share")
 dir.create(share_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Spatial smoothing
@@ -974,7 +974,7 @@ final_points_file
 ```
 
 ## Shareable Files Summary
-The contents of `local/simulation_share/` are sufficient to reproduce simulations without the confidential source data:
+The contents of `assets/simulation_share/` are sufficient to reproduce simulations without the confidential source data:
 ```{r}
 tibble(
   file = c(
