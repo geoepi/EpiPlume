@@ -38,19 +38,6 @@ Simulate Points
 - <a href="#shareable-files-summary"
   id="toc-shareable-files-summary">Shareable Files Summary</a>
 
-<style type="text/css">
-
-body, td {
-   font-size: 13pt;
-}
-code.r{
-  font-size: 9pt;
-}
-pre {
-  font-size: 11pt
-}
-</style>
-
 ## Overview
 
 This script uses a confidential set of dated point locations to inform a
@@ -82,81 +69,15 @@ location, not a confirmed absence.
 
 ``` r
 library(tidyverse)
-```
-
-</details>
-
-    ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ✔ forcats   1.0.0     ✔ stringr   1.5.1
-    ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
-    ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-    ✔ purrr     1.0.4     
-    ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ✖ dplyr::filter() masks stats::filter()
-    ✖ dplyr::lag()    masks stats::lag()
-    ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(here)
-```
-
-</details>
-
-    here() starts at D:/Github/EpiPlume
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(sf)
-```
-
-</details>
-
-    Linking to GEOS 3.13.1, GDAL 3.10.2, PROJ 9.5.1; sf_use_s2() is TRUE
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(terra)
-```
-
-</details>
-
-    terra 1.8.42
-
-    Attaching package: 'terra'
-
-    The following object is masked from 'package:tidyr':
-
-        extract
-
-<details open>
-<summary>Hide code</summary>
-
-``` r
 library(ggplot2)
 library(ggspatial)
 library(tigris)
 ```
 
 </details>
-
-    Warning: package 'tigris' was built under R version 4.5.3
-
-    To enable caching of data, set `options(tigris_use_cache = TRUE)`
-    in your R script or .Rprofile.
-
-    Attaching package: 'tigris'
-
-    The following object is masked from 'package:terra':
-
-        blocks
 
 ## Configuration
 

@@ -16,21 +16,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{=html}
-<style type="text/css">
-
-body, td {
-   font-size: 13pt;
-}
-code.r{
-  font-size: 9pt;
-}
-pre {
-  font-size: 11pt
-}
-</style>
-```
-
 ## Overview
 
 This script uses a confidential set of dated point locations to inform a generalized spatial simulation. The original locations are never plotted or exported. Spatial information is generalized through coarse-grid rasterization, anisotropic Gaussian smoothing, nonlinear compression, and mixing with a modest uniform spatial component.
@@ -47,7 +32,7 @@ Here, "negative" denotes a simulated background or pseudo-absence location, not 
 
 ## Libraries
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 library(tidyverse)
 library(here)
 library(sf)
